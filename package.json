@@ -10,7 +10,8 @@
     "prisma:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate deploy",
-    "db:seed": "node prisma/seed.js"
+    "db:seed": "node prisma/seed.js",
+    "db:reset-clean": "node prisma/clean-reset-db.js"
   },
   "dependencies": {
     "@nestjs/common": "^12.1.3",

@@ -36,30 +36,44 @@ export class SocietiesService {
   }
 
   async requestPayout(societyId: string, amount: number) {
-    return this.prisma.$transaction(async (tx) => {
-      const society = await tx.society.findUnique({ where: { id: societyId } });
-      if (!society) throw new NotFoundException(`Society #${societyId} not found`);
-      const numAmt = parseFloat(amount as any) || 0;
-      if (numAmt <= 0) throw new BadRequestException('Withdrawal amount must be greater than zero');
-      if (society.balanceEarned < numAmt) {
-        throw new BadRequestException(`Requested amount ₹${numAmt} exceeds earned balance ₹${society.balanceEarned}`);
-      }
+    const numAmt = parseFloat(amount as any) || 0;
+    if (numAmt <= 0) throw new BadRequestException('Withdrawal amount must be greater than zero');
 
-      const payout = await tx.societyPayout.create({
+    return this.prisma.$transaction(async (tx) => {
+      // 1. Atomic conditional decrement:
+      // In PostgreSQL, updateMany with WHERE (balanceEarned >= numAmt) acquires an
+      // exclusive row lock. The update and condition check happen atomically in the database engine.
+      // Any concurrent request is serialized on the row lock and evaluates against the updated balance.
+      const updateResult = await tx.society.updateMany({
+        where: {
+          id: societyId,
+          balanceEarned: { gte: numAmt },
+        },
         data: {
-          id: `WD-${Date.now()}`,
-          societyId,
-          amount: numAmt,
-          status: 'PENDING_APPROVAL',
-          transactionRef: `REQ-${Date.now().toString().slice(-6)}`,
-          paymentMethod: 'NEFT_IMPS',
-          notes: `Partner portal withdrawal request for ₹${numAmt}`,
+          balanceEarned: { decrement: numAmt },
         },
       });
 
-      await tx.society.update({
-        where: { id: societyId },
-        data: { balanceEarned: { decrement: numAmt } },
+      if (updateResult.count === 0) {
+        const current = await tx.society.findUnique({ where: { id: societyId } });
+        if (!current) throw new NotFoundException(`Society #${societyId} not found`);
+        throw new BadRequestException(
+          `Insufficient funds: Requested payout ₹${numAmt} exceeds current available balance ₹${current.balanceEarned}`,
+        );
+      }
+
+      // 2. Create the withdrawal request record with collision-free unique ID
+      const uniqueSuffix = `${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
+      const payout = await tx.societyPayout.create({
+        data: {
+          id: `WD-${uniqueSuffix}`,
+          societyId,
+          amount: numAmt,
+          status: 'PENDING_APPROVAL',
+          transactionRef: `REQ-${uniqueSuffix.slice(-6)}`,
+          paymentMethod: 'NEFT_IMPS',
+          notes: `Partner portal withdrawal request for ₹${numAmt}`,
+        },
       });
 
       return payout;

@@ -45,30 +45,36 @@ let SocietiesService = class SocietiesService {
         };
     }
     async requestPayout(societyId, amount) {
+        const numAmt = parseFloat(amount) || 0;
+        if (numAmt <= 0)
+            throw new common_1.BadRequestException('Withdrawal amount must be greater than zero');
         return this.prisma.$transaction(async (tx) => {
-            const society = await tx.society.findUnique({ where: { id: societyId } });
-            if (!society)
-                throw new common_1.NotFoundException(`Society #${societyId} not found`);
-            const numAmt = parseFloat(amount) || 0;
-            if (numAmt <= 0)
-                throw new common_1.BadRequestException('Withdrawal amount must be greater than zero');
-            if (society.balanceEarned < numAmt) {
-                throw new common_1.BadRequestException(`Requested amount ₹${numAmt} exceeds earned balance ₹${society.balanceEarned}`);
+            const updateResult = await tx.society.updateMany({
+                where: {
+                    id: societyId,
+                    balanceEarned: { gte: numAmt },
+                },
+                data: {
+                    balanceEarned: { decrement: numAmt },
+                },
+            });
+            if (updateResult.count === 0) {
+                const current = await tx.society.findUnique({ where: { id: societyId } });
+                if (!current)
+                    throw new common_1.NotFoundException(`Society #${societyId} not found`);
+                throw new common_1.BadRequestException(`Insufficient funds: Requested payout ₹${numAmt} exceeds current available balance ₹${current.balanceEarned}`);
             }
+            const uniqueSuffix = `${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
             const payout = await tx.societyPayout.create({
                 data: {
-                    id: `WD-${Date.now()}`,
+                    id: `WD-${uniqueSuffix}`,
                     societyId,
                     amount: numAmt,
                     status: 'PENDING_APPROVAL',
-                    transactionRef: `REQ-${Date.now().toString().slice(-6)}`,
+                    transactionRef: `REQ-${uniqueSuffix.slice(-6)}`,
                     paymentMethod: 'NEFT_IMPS',
                     notes: `Partner portal withdrawal request for ₹${numAmt}`,
                 },
-            });
-            await tx.society.update({
-                where: { id: societyId },
-                data: { balanceEarned: { decrement: numAmt } },
             });
             return payout;
         });

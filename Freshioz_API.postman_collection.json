@@ -1,0 +1,634 @@
+{
+  "info": {
+    "_postman_id": "freshioz-enterprise-api-collection-2026",
+    "name": "Freshioz Enterprise REST API",
+    "description": "Complete production API collection for Freshioz Farm-to-Fork Direct Supply Chain Platform (User Web, Admin Operations Desk, Society Partner Portal).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://api.freshioz.com",
+      "type": "string",
+      "description": "Production API base domain or http://localhost:5000 for local development"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string",
+      "description": "JWT Bearer token automatically populated after login"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Health & Diagnostics",
+      "item": [
+        {
+          "name": "API & Database Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "health"]
+            },
+            "description": "Checks system status, server IST time, and live PostgreSQL database connectivity latency."
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Authentication",
+      "item": [
+        {
+          "name": "Staff / Super Admin Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.token) {",
+                  "    pm.collectionVariables.set('token', res.token);",
+                  "    console.log('JWT Token successfully set in collection variables');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@freshioz.com\",\n  \"password\": \"Freshioz@SuperAdmin2026\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Logs in Super Admin, Warehouse Manager, or Staff. Sets the token variable automatically in Postman tests."
+          }
+        },
+        {
+          "name": "Society / Hostel Partner Portal Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.token) {",
+                  "    pm.collectionVariables.set('token', res.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"societyId\": \"FRZ_SOC_101\",\n  \"phone\": \"9876543210\",\n  \"password\": \"Freshioz@Society2026\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/partner-login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "partner-login"]
+            },
+            "description": "Authenticates community representatives (Apartment Presidents/Secretaries/Wardens) for commission ledger and payouts."
+          }
+        },
+        {
+          "name": "Customer Registration",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ramesh Sharma\",\n  \"phone\": \"9876543210\",\n  \"societyId\": \"FRZ_SOC_101\",\n  \"flatNo\": \"Tower 2 - Flat 402\",\n  \"password\": \"SecurePass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Verify Current Token",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Produce Catalog & Pricing",
+      "item": [
+        {
+          "name": "List All Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products?search=&category=",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products"],
+              "query": [
+                { "key": "search", "value": "" },
+                { "key": "category", "value": "" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Product by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/FRZ_PRD_101",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products", "FRZ_PRD_101"]
+            }
+          }
+        },
+        {
+          "name": "Create Produce Item",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+            },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"FRZ_PRD_105\",\n  \"name\": \"Fresh Shimla Apple\",\n  \"kannadaName\": \"ಸೇಬು (Sebu)\",\n  \"categoryId\": \"FRUITS\",\n  \"retailUnit\": \"1 kg\",\n  \"retailPrice\": 180,\n  \"retailMarketPrice\": 220,\n  \"bulkMinQty\": 5,\n  \"bulkDiscountPercent\": 15,\n  \"origin\": \"Shimla Farm Direct\",\n  \"shelfLife\": \"5-7 Days\",\n  \"inStock\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products"]
+            }
+          }
+        },
+        {
+          "name": "Update Produce / Price / Stock",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+            },
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"retailPrice\": 175,\n  \"retailMarketPrice\": 210,\n  \"inStock\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/products/FRZ_PRD_105",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products", "FRZ_PRD_105"]
+            }
+          }
+        },
+        {
+          "name": "Delete Produce Item",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/FRZ_PRD_105",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products", "FRZ_PRD_105"]
+            }
+          }
+        },
+        {
+          "name": "Get Daily APMC Pricing Table",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/pricing",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "pricing"]
+            }
+          }
+        },
+        {
+          "name": "Batch Update Mandi Pricing",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+            },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"updates\": [\n    {\n      \"productId\": \"FRZ_PRD_101\",\n      \"mandiPrice\": 28,\n      \"retailPrice\": 38,\n      \"retailMarketPrice\": 48\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/pricing/batch",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "pricing", "batch"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Orders & Tracking",
+      "item": [
+        {
+          "name": "List Orders (Paginated & Filtered)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders?page=1&limit=20&status=&societyId=",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "orders"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" },
+                { "key": "status", "value": "" },
+                { "key": "societyId", "value": "" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Order By ID",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/FRZ_ORD_TX211",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "orders", "FRZ_ORD_TX211"]
+            }
+          }
+        },
+        {
+          "name": "Public Sanitized Order Tracking",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/FRZ_ORD_TX211/track",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "orders", "FRZ_ORD_TX211", "track"]
+            },
+            "description": "Public unauthenticated tracking milestone endpoint with masked flat number (e.g. ••••02) and sanitized customer privacy."
+          }
+        },
+        {
+          "name": "Create / Place Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"Suresh Kumar\",\n  \"userPhone\": \"9876543210\",\n  \"societyId\": \"FRZ_SOC_101\",\n  \"societyName\": \"Prestige Falcon City\",\n  \"flatNo\": \"Tower 3 - Flat 604\",\n  \"deliveryDate\": \"16/10/2026\",\n  \"deliverySlot\": \"Morning 06:00 AM - 08:30 AM\",\n  \"paymentMethod\": \"UPI\",\n  \"paymentStatus\": \"PAID\",\n  \"items\": [\n    {\n      \"productId\": \"FRZ_PRD_101\",\n      \"name\": \"Fresh Country Tomatoes\",\n      \"unit\": \"1 kg\",\n      \"qty\": 2,\n      \"price\": 40\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "orders"]
+            }
+          }
+        },
+        {
+          "name": "Update Order Status (Fulfillment)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+            },
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"PACKED\",\n  \"paymentStatus\": \"PAID\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/FRZ_ORD_TX211/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "orders", "FRZ_ORD_TX211", "status"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Societies & Partner Payouts",
+      "item": [
+        {
+          "name": "List Approved Societies",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/societies",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "societies"]
+            }
+          }
+        },
+        {
+          "name": "Get Society by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/societies/FRZ_SOC_101",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "societies", "FRZ_SOC_101"]
+            }
+          }
+        },
+        {
+          "name": "Onboard New Society",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+            },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"FRZ_SOC_105\",\n  \"name\": \"Brigade Gateway\",\n  \"type\": \"APARTMENT\",\n  \"address\": \"Rajajinagar, Bengaluru\",\n  \"secretaryName\": \"Sunil Verma\",\n  \"secretaryPhone\": \"9876500001\",\n  \"totalUnits\": 1200,\n  \"commissionValue\": 3.5,\n  \"status\": \"APPROVED\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/societies",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "societies"]
+            }
+          }
+        },
+        {
+          "name": "Request Commission Payout (Atomic)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+            },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 500\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/societies/FRZ_SOC_101/payout-request",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "societies", "FRZ_SOC_101", "payout-request"]
+            },
+            "description": "Atomically requests partner commission withdrawal and decrements society balance in a single database transaction."
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Inbound Society Leads",
+      "item": [
+        {
+          "name": "List Inbound Leads",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/inbound-requests",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "inbound-requests"]
+            }
+          }
+        },
+        {
+          "name": "Submit Society Onboarding Request",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Salarpuria Sattva Greenage\",\n  \"address\": \"Bommanahalli, Hosur Main Road\",\n  \"applicantRole\": \"RESIDENT\",\n  \"contactName\": \"Anita Deshmukh\",\n  \"contactPhone\": \"9845012345\",\n  \"totalFlats\": 850,\n  \"notes\": \"Interested in next-morning farm direct produce delivery\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/inbound-requests",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "inbound-requests"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Warehouses & Inventory",
+      "item": [
+        {
+          "name": "List Regional Warehouses",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/warehouses",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "warehouses"]
+            }
+          }
+        },
+        {
+          "name": "Get Live Warehouse Inventory",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/inventory?warehouseId=FRZ_WH_01",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "inventory"],
+              "query": [
+                { "key": "warehouseId", "value": "FRZ_WH_01" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Adjust Inventory Stock",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+            },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"warehouseId\": \"FRZ_WH_01\",\n  \"productId\": \"FRZ_PRD_101\",\n  \"action\": \"ADD\",\n  \"qty\": 50,\n  \"remarks\": \"APMC Mandi morning fresh intake\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/inventory/adjust",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "inventory", "adjust"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. APMC Mandi Procurement & Vendors",
+      "item": [
+        {
+          "name": "List APMC Vendors",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/vendors",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "vendors"]
+            }
+          }
+        },
+        {
+          "name": "Log Morning Procurement Bill",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+            },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vendorName\": \"Kolar Tomato Traders\",\n  \"mandiLocation\": \"Yeshwanthpur APMC Yard\",\n  \"destinationWarehouseId\": \"FRZ_WH_01\",\n  \"destinationName\": \"Bengaluru North Hub\",\n  \"produceAmount\": 2500,\n  \"transportAmount\": 200,\n  \"totalAmountPaid\": 2700,\n  \"totalWeightKg\": 100,\n  \"items\": [\n    {\n      \"productName\": \"Fresh Country Tomatoes\",\n      \"weightKg\": 100,\n      \"ratePerKg\": 25,\n      \"totalPrice\": 2500\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/procurement",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "procurement"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "9. File Uploads (Produce Photos & Receipts)",
+      "item": [
+        {
+          "name": "Upload Single Photo",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/uploads",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "uploads"]
+            },
+            "description": "Uploads produce images or receipts up to 15MB. Returns public static URL e.g. /uploads/produce-1792040000000.png"
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. Store Synchronizer (Full State)",
+      "item": [
+        {
+          "name": "Get Combined Live Store",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/freshioz-store",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "freshioz-store"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

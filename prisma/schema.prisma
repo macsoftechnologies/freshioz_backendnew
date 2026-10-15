@@ -1,0 +1,366 @@
+// Freshioz Production Database Schema
+// PostgreSQL with Prisma ORM
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ----------------------------------------------------
+// 1. WAREHOUSES & HUBS
+// ----------------------------------------------------
+model Warehouse {
+  id           String   @id
+  uuid         String   @unique @default(uuid())
+  code         String   @unique
+  name         String
+  location     String
+  lat          Float?
+  lng          Float?
+  openTime     String   @default("05:00")
+  cutoffTime   String   @default("21:00")
+  capacityTons Float    @default(40)
+  managerName  String?
+  managerPhone String?
+  status       String   @default("ACTIVE")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  societies   Society[]
+  orders      Order[]
+  inventory   WarehouseInventory[]
+
+  @@map("warehouses")
+}
+
+// ----------------------------------------------------
+// 2. STAFF & ROLE-BASED ACCESS CONTROL
+// ----------------------------------------------------
+model Employee {
+  id                  String   @id
+  uuid                String   @unique @default(uuid())
+  name                String
+  phone               String
+  email               String   @unique
+  password            String
+  roles               String[] // SUPER_ADMIN, SALES_OFFICER, PROCUREMENT_OFFICER, WAREHOUSE_MANAGER, DELIVERY_EXECUTIVE
+  assignedWarehouseId String?  @default("ALL")
+  status              String   @default("ACTIVE")
+  dateJoined          DateTime @default(now())
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  priceUpdates DailyPriceHistory[]
+
+  @@map("employees")
+}
+
+// ----------------------------------------------------
+// 3. MASTER CATALOG & PRODUCE TAXONOMY
+// ----------------------------------------------------
+model Category {
+  id          String   @id
+  name        String
+  slug        String   @unique
+  icon        String   @default("🌱")
+  description String?
+  status      String   @default("ACTIVE")
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products Product[]
+
+  @@map("categories")
+}
+
+model Unit {
+  id          String   @id
+  name        String
+  label       String
+  isBulk      Boolean  @default(false)
+  description String?
+  status      String   @default("ACTIVE")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("units")
+}
+
+model Product {
+  id                  String   @id
+  uuid                String   @unique @default(uuid())
+  name                String
+  kannadaName         String?
+  categoryId          String
+  category            Category @relation(fields: [categoryId], references: [id])
+  retailUnit          String   @default("1 kg")
+  retailPrice         Float    @default(40.0) // Selling price today
+  retailMarketPrice   Float    @default(55.0) // Strikethrough comparison MRP
+  bulkMinQty          Float    @default(0)    // e.g. 5 or 10 kg
+  bulkDiscountPercent Float    @default(0)    // e.g. 10% or 15%
+  origin              String?  @default("APMC Mandi")
+  shelfLife           String?  @default("3-5 Days")
+  desc                String?
+  image               String
+  badge               String?  @default("Harvested Today at Dawn")
+  tags                String[]
+  gstPercent          Float    @default(0.0)
+  status              String   @default("ACTIVE")
+  inStock             Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  orderItems       OrderItem[]
+  priceHistory     DailyPriceHistory[]
+  inventoryEntries WarehouseInventory[]
+
+  @@map("products")
+}
+
+model DailyPriceHistory {
+  id                  String   @id @default(uuid())
+  productId           String
+  product             Product  @relation(fields: [productId], references: [id])
+  retailPrice         Float
+  retailMarketPrice   Float
+  bulkMinQty          Float    @default(0)
+  bulkDiscountPercent Float    @default(0)
+  gstPercent          Float    @default(0)
+  effectiveBulkRate   Float?
+  publishedById       String?
+  publishedBy         Employee? @relation(fields: [publishedById], references: [id])
+  publishedAt         DateTime @default(now())
+
+  @@map("daily_price_history")
+}
+
+// ----------------------------------------------------
+// 4. SOCIETIES & DROP DESKS
+// ----------------------------------------------------
+model Society {
+  id                   String     @id
+  uuid                 String     @unique @default(uuid())
+  name                 String
+  type                 String     @default("APARTMENT") // APARTMENT | HOSTEL | GATED_COMMUNITY
+  address              String
+  imageUrl             String?
+  lat                  Float?
+  lng                  Float?
+  warehouseId          String?
+  warehouse            Warehouse? @relation(fields: [warehouseId], references: [id])
+  secretaryName        String?
+  secretaryPhone       String?
+  totalFloors          Int?       @default(1)
+  totalUnits           Int?       @default(10)
+  deliveryMode         String     @default("SOCIETY_DESK")
+  status               String     @default("APPROVED") // PENDING, APPROVED, REJECTED
+  commissionType       String     @default("PERCENTAGE") // PERCENTAGE | FIXED_PER_ORDER
+  commissionValue      Float      @default(3.5)
+  balanceEarned        Float      @default(0.0)
+  totalOrdersDelivered Int        @default(0)
+  bankName             String?
+  accountHolder        String?
+  accountNumber        String?
+  ifscCode             String?
+  branch               String?
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
+
+  orders   Order[]
+  users    User[]
+  payouts  SocietyPayout[]
+
+  @@map("societies")
+}
+
+// ----------------------------------------------------
+// 5. CUSTOMERS & RESIDENTS
+// ----------------------------------------------------
+model User {
+  id             String   @id
+  uuid           String   @unique @default(uuid())
+  name           String
+  phone          String   @unique
+  email          String?
+  password       String   @default("Freshioz@123")
+  societyId      String?
+  society        Society? @relation(fields: [societyId], references: [id])
+  flatNo         String?
+  status         String   @default("ACTIVE_VERIFIED")
+  registeredAt   DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  orders Order[]
+
+  @@map("users")
+}
+
+// ----------------------------------------------------
+// 6. ORDERS & FULFILLMENT
+// ----------------------------------------------------
+model Order {
+  id                     String      @id
+  uuid                   String      @unique @default(uuid())
+  userId                 String
+  user                   User        @relation(fields: [userId], references: [phone])
+  userName               String
+  userPhone              String
+  societyId              String?
+  society                Society?    @relation(fields: [societyId], references: [id])
+  societyName            String?
+  flatNo                 String?
+  warehouseId            String?
+  warehouse              Warehouse?  @relation(fields: [warehouseId], references: [id])
+  warehouseCode          String?
+  orderType              String      @default("RETAIL")
+  subtotal               Float
+  bulkSavings            Float       @default(0.0)
+  deliveryFee            Float       @default(0.0)
+  gstAmount              Float       @default(0.0)
+  totalAmount            Float
+  deliveryDate           String
+  deliverySlot           String
+  status                 String      @default("CONFIRMED") // CONFIRMED, PACKED, DISPATCHED, DELIVERED, CANCELLED
+  paymentMethod          String      @default("UPI") // UPI | PAY_ON_DELIVERY
+  paymentStatus          String      @default("PAID") // PAID | PENDING_COD | COLLECTED
+  codCollectedAmount     Float?      @default(0.0)
+  codCollectedAt         DateTime?
+  codCollectedBy         String?
+  societyCommissionEarned Float      @default(0.0)
+  deliveredAt            DateTime?
+  orderPlacedAt          DateTime    @default(now())
+  createdAt              DateTime    @default(now())
+  updatedAt              DateTime    @updatedAt
+
+  items OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id                  String   @id @default(uuid())
+  orderId             String
+  order               Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId           String
+  product             Product  @relation(fields: [productId], references: [id])
+  name                String
+  unit                String
+  qty                 Float
+  price               Float    // Standard unit price
+  effectivePrice      Float?   // Unit price after volume bulk discount
+  totalPrice          Float?   // Total price for this line item
+  isBulkApplied       Boolean  @default(false)
+  bulkDiscountPercent Float?   @default(0)
+  bulkSavings         Float?   @default(0)
+
+  @@map("order_items")
+}
+
+// ----------------------------------------------------
+// 7. FINANCIAL PAYOUTS & COMMISSIONS
+// ----------------------------------------------------
+model SocietyPayout {
+  id             String   @id @default(uuid())
+  societyId      String
+  society        Society  @relation(fields: [societyId], references: [id])
+  amount         Float
+  paymentMethod  String   @default("NEFT_IMPS")
+  transactionRef String
+  status         String   @default("COMPLETED")
+  notes          String?
+  authorizedBy   String?
+  createdAt      DateTime @default(now())
+
+  @@map("society_payouts")
+}
+
+// ----------------------------------------------------
+// 8. ONBOARDING LEADS & PROCUREMENT
+// ----------------------------------------------------
+model InboundLead {
+  id             String   @id @default(uuid())
+  uuid           String   @unique @default(uuid())
+  societyName    String
+  contactName    String
+  contactPhone   String
+  contactRole    String?
+  flatCount      Int?
+  clusterZone    String?
+  address        String?
+  status         String   @default("NEW_LEAD") // NEW_LEAD | VERIFIED | ONBOARDED | DROPPED
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("inbound_leads")
+}
+
+model WarehouseInventory {
+  id          String    @id @default(uuid())
+  warehouseId String
+  warehouse   Warehouse @relation(fields: [warehouseId], references: [id])
+  productId   String
+  product     Product   @relation(fields: [productId], references: [id])
+  currentQty  Float     @default(0)
+  reservedQty Float     @default(0)
+  unit        String    @default("kg")
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([warehouseId, productId])
+  @@map("warehouse_inventory")
+}
+
+// ----------------------------------------------------
+// 9. VENDORS & APMC PROCUREMENT BILLS
+// ----------------------------------------------------
+model Vendor {
+  id            String   @id
+  uuid          String   @unique @default(uuid())
+  name          String
+  phone         String
+  category      String   @default("COMMISSION_AGENT")
+  mandiLocation String
+  lat           Float?
+  lng           Float?
+  bankName      String?
+  accountHolder String?
+  accountNumber String?
+  ifscCode      String?
+  upiId         String?
+  status        String   @default("ACTIVE")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  bills ProcurementBill[]
+
+  @@map("vendors")
+}
+
+model ProcurementBill {
+  id                     String   @id
+  uuid                   String   @unique @default(uuid())
+  billNumber             String   @unique
+  vendorId               String?
+  vendor                 Vendor?  @relation(fields: [vendorId], references: [id])
+  vendorName             String
+  mandiLocation          String
+  destinationWarehouseId String
+  destinationName        String
+  paymentMode            String   @default("IMPS_TRANSFER")
+  totalWeightKg          Float    @default(0)
+  produceAmount          Float    @default(0)
+  transportAmount        Float    @default(0)
+  totalAmountPaid        Float    @default(0)
+  receiptPhoto           String?
+  procuredAt             DateTime @default(now())
+  procuredBy             String
+  slot                   String   @default("Morning Fresh Slot")
+  items                  Json     @default("[]")
+  createdAt              DateTime @default(now())
+
+  @@map("procurement_bills")
+}

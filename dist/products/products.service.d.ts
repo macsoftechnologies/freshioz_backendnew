@@ -1,0 +1,168 @@
+import { PrismaService } from '../prisma/prisma.service';
+export declare class ProductsService {
+    private readonly prisma;
+    constructor(prisma: PrismaService);
+    findAll(): Promise<({
+        category: {
+            id: string;
+            name: string;
+            status: string;
+            createdAt: Date;
+            updatedAt: Date;
+            slug: string;
+            icon: string;
+            description: string | null;
+            sortOrder: number;
+        };
+    } & {
+        id: string;
+        uuid: string;
+        name: string;
+        kannadaName: string | null;
+        categoryId: string;
+        retailUnit: string;
+        retailPrice: number;
+        retailMarketPrice: number;
+        bulkMinQty: number;
+        bulkDiscountPercent: number;
+        origin: string | null;
+        shelfLife: string | null;
+        desc: string | null;
+        image: string;
+        badge: string | null;
+        tags: string[];
+        gstPercent: number;
+        status: string;
+        inStock: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+    })[]>;
+    findOne(idOrUuid: string): Promise<{
+        category: {
+            id: string;
+            name: string;
+            status: string;
+            createdAt: Date;
+            updatedAt: Date;
+            slug: string;
+            icon: string;
+            description: string | null;
+            sortOrder: number;
+        };
+    } & {
+        id: string;
+        uuid: string;
+        name: string;
+        kannadaName: string | null;
+        categoryId: string;
+        retailUnit: string;
+        retailPrice: number;
+        retailMarketPrice: number;
+        bulkMinQty: number;
+        bulkDiscountPercent: number;
+        origin: string | null;
+        shelfLife: string | null;
+        desc: string | null;
+        image: string;
+        badge: string | null;
+        tags: string[];
+        gstPercent: number;
+        status: string;
+        inStock: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
+    create(body: any): Promise<{
+        category: {
+            id: string;
+            name: string;
+            status: string;
+            createdAt: Date;
+            updatedAt: Date;
+            slug: string;
+            icon: string;
+            description: string | null;
+            sortOrder: number;
+        };
+    } & {
+        id: string;
+        uuid: string;
+        name: string;
+        kannadaName: string | null;
+        categoryId: string;
+        retailUnit: string;
+        retailPrice: number;
+        retailMarketPrice: number;
+        bulkMinQty: number;
+        bulkDiscountPercent: number;
+        origin: string | null;
+        shelfLife: string | null;
+        desc: string | null;
+        image: string;
+        badge: string | null;
+        tags: string[];
+        gstPercent: number;
+        status: string;
+        inStock: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
+    update(idOrUuid: string, data: any): Promise<{
+        category: {
+            id: string;
+            name: string;
+            status: string;
+            createdAt: Date;
+            updatedAt: Date;
+            slug: string;
+            icon: string;
+            description: string | null;
+            sortOrder: number;
+        };
+    } & {
+        id: string;
+        uuid: string;
+        name: string;
+        kannadaName: string | null;
+        categoryId: string;
+        retailUnit: string;
+        retailPrice: number;
+        retailMarketPrice: number;
+        bulkMinQty: number;
+        bulkDiscountPercent: number;
+        origin: string | null;
+        shelfLife: string | null;
+        desc: string | null;
+        image: string;
+        badge: string | null;
+        tags: string[];
+        gstPercent: number;
+        status: string;
+        inStock: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
+    delete(idOrUuid: string): Promise<{
+        id: string;
+        uuid: string;
+        name: string;
+        kannadaName: string | null;
+        categoryId: string;
+        retailUnit: string;
+        retailPrice: number;
+        retailMarketPrice: number;
+        bulkMinQty: number;
+        bulkDiscountPercent: number;
+        origin: string | null;
+        shelfLife: string | null;
+        desc: string | null;
+        image: string;
+        badge: string | null;
+        tags: string[];
+        gstPercent: number;
+        status: string;
+        inStock: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
+}

@@ -272,20 +272,33 @@ let StoreService = class StoreService {
                         for (const p of data.products) {
                             if (!p.id || !p.name)
                                 continue;
-                            const catId = p.categoryId || p.category || 'VEGETABLES';
-                            const existingCat = await tx.category.findUnique({ where: { id: catId } });
+                            const rawCatId = p.categoryId || p.category || 'VEGETABLES';
+                            const targetSlug = rawCatId.toLowerCase().replace(/[^a-z0-9]/g, '-');
+                            let existingCat = await tx.category.findFirst({
+                                where: {
+                                    OR: [
+                                        { id: rawCatId },
+                                        { slug: targetSlug }
+                                    ]
+                                }
+                            });
                             if (!existingCat) {
-                                await tx.category.upsert({
-                                    where: { id: catId },
-                                    update: {},
-                                    create: {
-                                        id: catId,
-                                        name: catId.replace(/_/g, ' '),
-                                        slug: catId.toLowerCase().replace(/_/g, '-'),
-                                        icon: '🥦',
-                                    },
-                                });
+                                const slugConflict = await tx.category.findUnique({ where: { slug: targetSlug } });
+                                if (slugConflict) {
+                                    existingCat = slugConflict;
+                                }
+                                else {
+                                    existingCat = await tx.category.create({
+                                        data: {
+                                            id: rawCatId,
+                                            name: rawCatId.replace(/_/g, ' '),
+                                            slug: targetSlug,
+                                            icon: '🥦',
+                                        },
+                                    });
+                                }
                             }
+                            const catId = existingCat.id;
                             const unit = p.retailUnit || p.defaultUnit || '1 kg';
                             await tx.product.upsert({
                                 where: { id: p.id },
@@ -590,20 +603,30 @@ let StoreService = class StoreService {
                         for (const c of data.categories) {
                             if (!c.id || !c.name)
                                 continue;
+                            const targetSlug = c.slug || c.id.toLowerCase().replace(/[^a-z0-9]/g, '-');
+                            const existingCat = await tx.category.findFirst({
+                                where: {
+                                    OR: [
+                                        { id: c.id },
+                                        { slug: targetSlug }
+                                    ]
+                                }
+                            });
+                            const targetId = existingCat ? existingCat.id : c.id;
                             await tx.category.upsert({
-                                where: { id: c.id },
+                                where: { id: targetId },
                                 update: {
                                     name: c.name,
-                                    slug: c.slug || c.id.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+                                    slug: targetSlug,
                                     icon: c.icon || '🌱',
                                     description: c.description || null,
                                     status: c.status || 'ACTIVE',
                                     sortOrder: typeof c.sortOrder === 'number' ? c.sortOrder : 0,
                                 },
                                 create: {
-                                    id: c.id,
+                                    id: targetId,
                                     name: c.name,
-                                    slug: c.slug || c.id.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+                                    slug: targetSlug,
                                     icon: c.icon || '🌱',
                                     description: c.description || null,
                                     status: c.status || 'ACTIVE',

@@ -55,7 +55,18 @@ let StoreService = class StoreService {
                         include: { items: true },
                         orderBy: { orderPlacedAt: 'desc' },
                     })
-                    : Promise.resolve([]),
+                    : currentUser?.phone
+                        ? this.prisma.order.findMany({
+                            where: {
+                                OR: [
+                                    { userPhone: currentUser.phone },
+                                    { userId: currentUser.id || currentUser.phone },
+                                ],
+                            },
+                            include: { items: true },
+                            orderBy: { orderPlacedAt: 'desc' },
+                        })
+                        : Promise.resolve([]),
             isStaffOrAdmin
                 ? this.prisma.vendor.findMany({ orderBy: { createdAt: 'desc' } })
                 : Promise.resolve([]),

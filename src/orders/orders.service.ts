@@ -12,8 +12,13 @@ export class OrdersService {
     const where: any = {};
     if (query?.status) where.status = query.status;
     if (query?.societyId) where.societyId = query.societyId;
-    if (query?.phone) where.userPhone = query.phone;
     if (query?.warehouseId && query.warehouseId !== 'ALL') where.warehouseId = query.warehouseId;
+    if (query?.phone) {
+      where.OR = [
+        { userPhone: query.phone },
+        { userId: query.phone },
+      ];
+    }
 
     const orders = await this.prisma.order.findMany({
       where,

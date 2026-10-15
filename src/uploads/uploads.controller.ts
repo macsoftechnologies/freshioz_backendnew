@@ -75,8 +75,10 @@ export class UploadsController {
       throw new BadRequestException('No file provided in the request payload');
     }
 
+    const baseUrl = process.env.BACKEND_PUBLIC_URL || 'https://api.freshioz.com';
     return {
-      url: `/uploads/${file.filename}`,
+      url: `${baseUrl}/uploads/${file.filename}`,
+      relativeUrl: `/uploads/${file.filename}`,
       filename: file.filename,
       originalName: file.originalname,
       mimetype: file.mimetype,
@@ -100,8 +102,10 @@ export class UploadsController {
       throw new BadRequestException('No files provided in the request payload');
     }
 
+    const baseUrl = process.env.BACKEND_PUBLIC_URL || 'https://api.freshioz.com';
     return files.map((file) => ({
-      url: `/uploads/${file.filename}`,
+      url: `${baseUrl}/uploads/${file.filename}`,
+      relativeUrl: `/uploads/${file.filename}`,
       filename: file.filename,
       originalName: file.originalname,
       mimetype: file.mimetype,

@@ -56,8 +56,10 @@ let UploadsController = class UploadsController {
         if (!file) {
             throw new common_1.BadRequestException('No file provided in the request payload');
         }
+        const baseUrl = process.env.BACKEND_PUBLIC_URL || 'https://api.freshioz.com';
         return {
-            url: `/uploads/${file.filename}`,
+            url: `${baseUrl}/uploads/${file.filename}`,
+            relativeUrl: `/uploads/${file.filename}`,
             filename: file.filename,
             originalName: file.originalname,
             mimetype: file.mimetype,
@@ -68,8 +70,10 @@ let UploadsController = class UploadsController {
         if (!files || files.length === 0) {
             throw new common_1.BadRequestException('No files provided in the request payload');
         }
+        const baseUrl = process.env.BACKEND_PUBLIC_URL || 'https://api.freshioz.com';
         return files.map((file) => ({
-            url: `/uploads/${file.filename}`,
+            url: `${baseUrl}/uploads/${file.filename}`,
+            relativeUrl: `/uploads/${file.filename}`,
             filename: file.filename,
             originalName: file.originalname,
             mimetype: file.mimetype,

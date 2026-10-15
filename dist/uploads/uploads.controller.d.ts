@@ -1,6 +1,7 @@
 export declare class UploadsController {
     uploadSingleFile(file: any): {
         url: string;
+        relativeUrl: string;
         filename: any;
         originalName: any;
         mimetype: any;
@@ -8,6 +9,7 @@ export declare class UploadsController {
     };
     uploadMultipleFiles(files: any[]): {
         url: string;
+        relativeUrl: string;
         filename: any;
         originalName: any;
         mimetype: any;

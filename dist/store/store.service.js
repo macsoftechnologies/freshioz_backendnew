@@ -236,23 +236,26 @@ let StoreService = class StoreService {
                     }
                 }
                 if (Array.isArray(data.deletedProductIds) && (isSuperAdmin || isPricingManager || isWarehouseManager)) {
+                    persisted.push('deletedProductIds');
                     for (const delId of data.deletedProductIds) {
                         try {
-                            const existingProd = await tx.product.findUnique({
-                                where: { id: delId },
+                            const existingProd = await tx.product.findFirst({
+                                where: {
+                                    OR: [{ id: delId }, { uuid: delId }],
+                                },
                                 include: { orderItems: true },
                             });
                             if (existingProd) {
                                 if (existingProd.orderItems && existingProd.orderItems.length > 0) {
                                     await tx.product.update({
-                                        where: { id: delId },
+                                        where: { id: existingProd.id },
                                         data: { status: 'ARCHIVED' },
                                     });
                                 }
                                 else {
-                                    await tx.dailyPriceHistory.deleteMany({ where: { productId: delId } });
-                                    await tx.warehouseInventory.deleteMany({ where: { productId: delId } });
-                                    await tx.product.delete({ where: { id: delId } });
+                                    await tx.dailyPriceHistory.deleteMany({ where: { productId: existingProd.id } });
+                                    await tx.warehouseInventory.deleteMany({ where: { productId: existingProd.id } });
+                                    await tx.product.delete({ where: { id: existingProd.id } });
                                 }
                             }
                         }

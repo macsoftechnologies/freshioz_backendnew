@@ -39,7 +39,10 @@ let StoreService = class StoreService {
         const partnerSocietyId = isPartner ? (currentUser.societyId || currentUser.id) : null;
         const [warehouses, products, societies, orders, vendors, procurementBills, inventoryEntries, leads, employees, categories, units, payouts,] = await Promise.all([
             this.prisma.warehouse.findMany({ orderBy: { createdAt: 'desc' } }),
-            this.prisma.product.findMany({ orderBy: { createdAt: 'desc' } }),
+            this.prisma.product.findMany({
+                where: { status: { not: 'ARCHIVED' } },
+                orderBy: { createdAt: 'desc' },
+            }),
             this.prisma.society.findMany({ orderBy: { createdAt: 'desc' } }),
             isStaffOrAdmin
                 ? this.prisma.order.findMany({
@@ -155,9 +158,13 @@ let StoreService = class StoreService {
             createdAt: w.createdAt,
             updatedAt: w.updatedAt,
         }));
+        const formattedProducts = products.map((p) => ({
+            ...p,
+            category: p.categoryId || 'VEGETABLES',
+        }));
         return {
             warehouses: sanitizedWarehouses,
-            products,
+            products: formattedProducts,
             societies: sanitizedSocieties,
             orders: formattedOrders,
             vendors: sanitizedVendors,
@@ -217,21 +224,54 @@ let StoreService = class StoreService {
                         skipped.push('warehouses');
                     }
                 }
+                if (Array.isArray(data.deletedProductIds) && (isSuperAdmin || isPricingManager || isWarehouseManager)) {
+                    for (const delId of data.deletedProductIds) {
+                        try {
+                            const existingProd = await tx.product.findUnique({
+                                where: { id: delId },
+                                include: { orderItems: true },
+                            });
+                            if (existingProd) {
+                                if (existingProd.orderItems && existingProd.orderItems.length > 0) {
+                                    await tx.product.update({
+                                        where: { id: delId },
+                                        data: { status: 'ARCHIVED' },
+                                    });
+                                }
+                                else {
+                                    await tx.dailyPriceHistory.deleteMany({ where: { productId: delId } });
+                                    await tx.warehouseInventory.deleteMany({ where: { productId: delId } });
+                                    await tx.product.delete({ where: { id: delId } });
+                                }
+                            }
+                        }
+                        catch (e) {
+                            console.error(`Error deleting product ${delId}:`, e);
+                        }
+                    }
+                }
                 if (Array.isArray(data.products)) {
                     if (isSuperAdmin || isPricingManager || isWarehouseManager) {
                         persisted.push('products');
                         for (const p of data.products) {
                             if (!p.id || !p.name)
                                 continue;
+                            const catId = p.categoryId || p.category || 'VEGETABLES';
                             await tx.product.upsert({
                                 where: { id: p.id },
                                 update: {
                                     name: p.name,
                                     kannadaName: p.kannadaName || null,
+                                    categoryId: catId,
                                     retailPrice: parseFloat(p.retailPrice) || 40,
                                     retailMarketPrice: parseFloat(p.retailMarketPrice) || 50,
                                     bulkMinQty: parseFloat(p.bulkMinQty) || 0,
                                     bulkDiscountPercent: parseFloat(p.bulkDiscountPercent) || 0,
+                                    origin: p.origin || 'APMC Mandi',
+                                    shelfLife: p.shelfLife || '3-5 Days',
+                                    desc: p.desc || null,
+                                    ...(p.image && { image: p.image }),
+                                    ...(p.badge && { badge: p.badge }),
                                     status: p.status || 'ACTIVE',
                                     inStock: p.inStock !== false,
                                 },
@@ -239,7 +279,7 @@ let StoreService = class StoreService {
                                     id: p.id,
                                     name: p.name,
                                     kannadaName: p.kannadaName || null,
-                                    categoryId: p.categoryId || 'VEGETABLES',
+                                    categoryId: catId,
                                     retailUnit: p.retailUnit || '1 kg',
                                     retailPrice: parseFloat(p.retailPrice) || 40,
                                     retailMarketPrice: parseFloat(p.retailMarketPrice) || 50,
@@ -249,6 +289,7 @@ let StoreService = class StoreService {
                                     shelfLife: p.shelfLife || '3-5 Days',
                                     desc: p.desc || null,
                                     image: p.image || 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=600',
+                                    badge: p.badge || 'Harvested Today at Dawn',
                                     status: p.status || 'ACTIVE',
                                     inStock: p.inStock !== false,
                                 },

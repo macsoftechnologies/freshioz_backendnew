@@ -103,7 +103,7 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    (0, roles_decorator_1.Roles)('SUPER_ADMIN'),
+    (0, roles_decorator_1.Roles)('SUPER_ADMIN', 'WAREHOUSE_MANAGER', 'PRICING_MANAGER'),
     (0, swagger_1.ApiOperation)({ summary: 'Delete master produce item by ID' }),
     (0, swagger_1.ApiResponse)({ status: 200 }),
     (0, common_1.Delete)(':id'),

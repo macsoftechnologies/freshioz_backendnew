@@ -21,14 +21,10 @@ export declare class StoreService {
             managerPhone: string;
         }[];
         products: {
+            category: string;
             id: string;
             uuid: string;
             name: string;
-            status: string;
-            createdAt: Date;
-            updatedAt: Date;
-            desc: string | null;
-            tags: string[];
             kannadaName: string | null;
             categoryId: string;
             retailUnit: string;
@@ -38,10 +34,15 @@ export declare class StoreService {
             bulkDiscountPercent: number;
             origin: string | null;
             shelfLife: string | null;
+            desc: string | null;
             image: string;
             badge: string | null;
+            tags: string[];
             gstPercent: number;
+            status: string;
             inStock: boolean;
+            createdAt: Date;
+            updatedAt: Date;
         }[];
         societies: {
             accountNumber: string;
@@ -50,17 +51,19 @@ export declare class StoreService {
             id: string;
             uuid: string;
             name: string;
+            status: string;
+            createdAt: Date;
+            updatedAt: Date;
             type: string;
-            address: string;
-            imageUrl: string | null;
             lat: number | null;
             lng: number | null;
+            address: string;
+            imageUrl: string | null;
             warehouseId: string | null;
             secretaryName: string | null;
             totalFloors: number | null;
             totalUnits: number | null;
             deliveryMode: string;
-            status: string;
             commissionType: string;
             commissionValue: number;
             balanceEarned: number;
@@ -68,8 +71,6 @@ export declare class StoreService {
             bankName: string | null;
             accountHolder: string | null;
             branch: string | null;
-            createdAt: Date;
-            updatedAt: Date;
         }[];
         orders: any[];
         vendors: any[];
@@ -84,9 +85,9 @@ export declare class StoreService {
             status: string;
             createdAt: Date;
             updatedAt: Date;
-            description: string | null;
             slug: string;
             icon: string;
+            description: string | null;
             sortOrder: number;
         }[];
         units: {

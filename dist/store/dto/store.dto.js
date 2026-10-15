@@ -29,6 +29,11 @@ __decorate([
     (0, swagger_1.ApiPropertyOptional)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Array)
+], UpdateFreshiozStoreDto.prototype, "deletedProductIds", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
 ], UpdateFreshiozStoreDto.prototype, "societies", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)(),

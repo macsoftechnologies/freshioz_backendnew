@@ -112,11 +112,27 @@ export class ProductsService {
       where: {
         OR: [{ id: idOrUuid }, { uuid: idOrUuid }],
       },
+      include: {
+        orderItems: true,
+      },
     });
     if (!existing) throw new NotFoundException('Product not found');
 
-    return this.prisma.product.delete({
-      where: { id: existing.id },
+    // If product has historical orders, soft-delete / archive so customer receipts aren't broken
+    if (existing.orderItems && existing.orderItems.length > 0) {
+      return this.prisma.product.update({
+        where: { id: existing.id },
+        data: { status: 'ARCHIVED' },
+      });
+    }
+
+    // Safely remove child relations in transaction before deleting product
+    return this.prisma.$transaction(async (tx) => {
+      await tx.dailyPriceHistory.deleteMany({ where: { productId: existing.id } });
+      await tx.warehouseInventory.deleteMany({ where: { productId: existing.id } });
+      return tx.product.delete({
+        where: { id: existing.id },
+      });
     });
   }
 }

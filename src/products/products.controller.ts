@@ -59,7 +59,7 @@ export class ProductsController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('SUPER_ADMIN')
+  @Roles('SUPER_ADMIN', 'WAREHOUSE_MANAGER', 'PRICING_MANAGER')
   @ApiOperation({ summary: 'Delete master produce item by ID' })
   @ApiResponse({ status: 200 })
   @Delete(':id')

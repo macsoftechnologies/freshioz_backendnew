@@ -1,6 +1,7 @@
 export declare class UpdateFreshiozStoreDto {
     warehouses?: any[];
     products?: any[];
+    deletedProductIds?: string[];
     societies?: any[];
     orders?: any[];
     vendors?: any[];

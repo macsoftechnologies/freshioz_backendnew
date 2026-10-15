@@ -48,7 +48,10 @@ export class StoreService {
       payouts,
     ] = await Promise.all([
       this.prisma.warehouse.findMany({ orderBy: { createdAt: 'desc' } }),
-      this.prisma.product.findMany({ orderBy: { createdAt: 'desc' } }),
+      this.prisma.product.findMany({
+        where: { status: { not: 'ARCHIVED' } },
+        orderBy: { createdAt: 'desc' },
+      }),
       this.prisma.society.findMany({ orderBy: { createdAt: 'desc' } }),
       isStaffOrAdmin
         ? this.prisma.order.findMany({
@@ -177,9 +180,14 @@ export class StoreService {
       updatedAt: w.updatedAt,
     }));
 
+    const formattedProducts = products.map((p) => ({
+      ...p,
+      category: p.categoryId || 'VEGETABLES',
+    }));
+
     return {
       warehouses: sanitizedWarehouses,
-      products,
+      products: formattedProducts,
       societies: sanitizedSocieties,
       orders: formattedOrders,
       vendors: sanitizedVendors,
@@ -243,46 +251,79 @@ export class StoreService {
         }
 
         // 2. Products (Super Admin, Pricing Manager, or Warehouse Manager)
+        if (Array.isArray(data.deletedProductIds) && (isSuperAdmin || isPricingManager || isWarehouseManager)) {
+          for (const delId of data.deletedProductIds) {
+            try {
+              const existingProd = await tx.product.findUnique({
+                where: { id: delId },
+                include: { orderItems: true },
+              });
+              if (existingProd) {
+                if (existingProd.orderItems && existingProd.orderItems.length > 0) {
+                  await tx.product.update({
+                    where: { id: delId },
+                    data: { status: 'ARCHIVED' },
+                  });
+                } else {
+                  await tx.dailyPriceHistory.deleteMany({ where: { productId: delId } });
+                  await tx.warehouseInventory.deleteMany({ where: { productId: delId } });
+                  await tx.product.delete({ where: { id: delId } });
+                }
+              }
+            } catch (e) {
+              console.error(`Error deleting product ${delId}:`, e);
+            }
+          }
+        }
+
         if (Array.isArray(data.products)) {
           if (isSuperAdmin || isPricingManager || isWarehouseManager) {
             persisted.push('products');
             for (const p of data.products) {
-            if (!p.id || !p.name) continue;
-            await tx.product.upsert({
-              where: { id: p.id },
-              update: {
-                name: p.name,
-                kannadaName: p.kannadaName || null,
-                retailPrice: parseFloat(p.retailPrice) || 40,
-                retailMarketPrice: parseFloat(p.retailMarketPrice) || 50,
-                bulkMinQty: parseFloat(p.bulkMinQty) || 0,
-                bulkDiscountPercent: parseFloat(p.bulkDiscountPercent) || 0,
-                status: p.status || 'ACTIVE',
-                inStock: p.inStock !== false,
-              },
-              create: {
-                id: p.id,
-                name: p.name,
-                kannadaName: p.kannadaName || null,
-                categoryId: p.categoryId || 'VEGETABLES',
-                retailUnit: p.retailUnit || '1 kg',
-                retailPrice: parseFloat(p.retailPrice) || 40,
-                retailMarketPrice: parseFloat(p.retailMarketPrice) || 50,
-                bulkMinQty: parseFloat(p.bulkMinQty) || 0,
-                bulkDiscountPercent: parseFloat(p.bulkDiscountPercent) || 0,
-                origin: p.origin || 'APMC Mandi',
-                shelfLife: p.shelfLife || '3-5 Days',
-                desc: p.desc || null,
-                image: p.image || 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=600',
-                status: p.status || 'ACTIVE',
-                inStock: p.inStock !== false,
-              },
-            });
+              if (!p.id || !p.name) continue;
+              const catId = p.categoryId || p.category || 'VEGETABLES';
+              await tx.product.upsert({
+                where: { id: p.id },
+                update: {
+                  name: p.name,
+                  kannadaName: p.kannadaName || null,
+                  categoryId: catId,
+                  retailPrice: parseFloat(p.retailPrice) || 40,
+                  retailMarketPrice: parseFloat(p.retailMarketPrice) || 50,
+                  bulkMinQty: parseFloat(p.bulkMinQty) || 0,
+                  bulkDiscountPercent: parseFloat(p.bulkDiscountPercent) || 0,
+                  origin: p.origin || 'APMC Mandi',
+                  shelfLife: p.shelfLife || '3-5 Days',
+                  desc: p.desc || null,
+                  ...(p.image && { image: p.image }),
+                  ...(p.badge && { badge: p.badge }),
+                  status: p.status || 'ACTIVE',
+                  inStock: p.inStock !== false,
+                },
+                create: {
+                  id: p.id,
+                  name: p.name,
+                  kannadaName: p.kannadaName || null,
+                  categoryId: catId,
+                  retailUnit: p.retailUnit || '1 kg',
+                  retailPrice: parseFloat(p.retailPrice) || 40,
+                  retailMarketPrice: parseFloat(p.retailMarketPrice) || 50,
+                  bulkMinQty: parseFloat(p.bulkMinQty) || 0,
+                  bulkDiscountPercent: parseFloat(p.bulkDiscountPercent) || 0,
+                  origin: p.origin || 'APMC Mandi',
+                  shelfLife: p.shelfLife || '3-5 Days',
+                  desc: p.desc || null,
+                  image: p.image || 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=600',
+                  badge: p.badge || 'Harvested Today at Dawn',
+                  status: p.status || 'ACTIVE',
+                  inStock: p.inStock !== false,
+                },
+              });
+            }
+          } else {
+            skipped.push('products');
           }
-        } else {
-          skipped.push('products');
         }
-      }
 
       // 3. Societies (Super Admin or Sales Officer)
       if (Array.isArray(data.societies)) {

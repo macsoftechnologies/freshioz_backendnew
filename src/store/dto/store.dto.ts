@@ -12,6 +12,10 @@ export class UpdateFreshiozStoreDto {
 
   @ApiPropertyOptional()
   @IsOptional()
+  deletedProductIds?: string[];
+
+  @ApiPropertyOptional()
+  @IsOptional()
   societies?: any[];
 
   @ApiPropertyOptional()

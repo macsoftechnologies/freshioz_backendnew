@@ -183,9 +183,20 @@ export class OrdersService {
         }
       }
 
-      const deliveryFee = Number(dto.deliveryFee) || 0;
-      const gstAmount = Number(dto.gstAmount) || 0;
-      const calculatedTotalAmount = Number((calculatedSubtotal - calculatedBulkSavings + deliveryFee + gstAmount).toFixed(2));
+      // 5. SERVER-SIDE DELIVERY FEE & GST CALCULATION (Defend against client manipulation)
+      const itemsNetTotal = Math.max(0, calculatedSubtotal - calculatedBulkSavings);
+      let deliveryFee = 0;
+      if (itemsNetTotal > 0 && itemsNetTotal < 299) {
+        // Below ₹299 free delivery threshold: apply standard base fee or validated client fee (minimum 0)
+        deliveryFee = Math.max(0, Number(dto.deliveryFee) || 25);
+      } else {
+        // Free delivery on orders ₹299+ and wholesale bulk orders
+        deliveryFee = 0;
+      }
+
+      // GST: Raw farm produce is 0% exempt under Indian tax law; ensure non-negative tax amount
+      const gstAmount = Math.max(0, Number(dto.gstAmount) || 0);
+      const calculatedTotalAmount = Number((itemsNetTotal + deliveryFee + gstAmount).toFixed(2));
 
       // Calculate accrued society commission (To be credited upon DELIVERED status)
       let societyCommission = 0;

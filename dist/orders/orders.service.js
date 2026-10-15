@@ -165,9 +165,16 @@ let OrdersService = class OrdersService {
                     }
                 }
             }
-            const deliveryFee = Number(dto.deliveryFee) || 0;
-            const gstAmount = Number(dto.gstAmount) || 0;
-            const calculatedTotalAmount = Number((calculatedSubtotal - calculatedBulkSavings + deliveryFee + gstAmount).toFixed(2));
+            const itemsNetTotal = Math.max(0, calculatedSubtotal - calculatedBulkSavings);
+            let deliveryFee = 0;
+            if (itemsNetTotal > 0 && itemsNetTotal < 299) {
+                deliveryFee = Math.max(0, Number(dto.deliveryFee) || 25);
+            }
+            else {
+                deliveryFee = 0;
+            }
+            const gstAmount = Math.max(0, Number(dto.gstAmount) || 0);
+            const calculatedTotalAmount = Number((itemsNetTotal + deliveryFee + gstAmount).toFixed(2));
             let societyCommission = 0;
             if (society) {
                 if (society.commissionType === 'PERCENTAGE') {

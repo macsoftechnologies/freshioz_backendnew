@@ -103,6 +103,112 @@ export declare class SocietiesService {
         authorizedBy: string | null;
         societyId: string;
     }>;
+    listPayouts(query?: {
+        societyId?: string;
+        status?: string;
+    }): Promise<({
+        society: {
+            id: string;
+            name: string;
+            secretaryName: string;
+            secretaryPhone: string;
+            balanceEarned: number;
+            bankName: string;
+            accountHolder: string;
+            accountNumber: string;
+            ifscCode: string;
+        };
+    } & {
+        id: string;
+        status: string;
+        createdAt: Date;
+        amount: number;
+        paymentMethod: string;
+        transactionRef: string;
+        notes: string | null;
+        authorizedBy: string | null;
+        societyId: string;
+    })[]>;
+    approvePayout(payoutId: string, adminUser: any, bankUtr?: string): Promise<{
+        society: {
+            id: string;
+            uuid: string;
+            name: string;
+            type: string;
+            address: string;
+            imageUrl: string | null;
+            lat: number | null;
+            lng: number | null;
+            warehouseId: string | null;
+            secretaryName: string | null;
+            secretaryPhone: string | null;
+            totalFloors: number | null;
+            totalUnits: number | null;
+            deliveryMode: string;
+            status: string;
+            commissionType: string;
+            commissionValue: number;
+            balanceEarned: number;
+            totalOrdersDelivered: number;
+            bankName: string | null;
+            accountHolder: string | null;
+            accountNumber: string | null;
+            ifscCode: string | null;
+            branch: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+        };
+    } & {
+        id: string;
+        status: string;
+        createdAt: Date;
+        amount: number;
+        paymentMethod: string;
+        transactionRef: string;
+        notes: string | null;
+        authorizedBy: string | null;
+        societyId: string;
+    }>;
+    rejectPayout(payoutId: string, adminUser: any, reason?: string): Promise<{
+        society: {
+            id: string;
+            uuid: string;
+            name: string;
+            type: string;
+            address: string;
+            imageUrl: string | null;
+            lat: number | null;
+            lng: number | null;
+            warehouseId: string | null;
+            secretaryName: string | null;
+            secretaryPhone: string | null;
+            totalFloors: number | null;
+            totalUnits: number | null;
+            deliveryMode: string;
+            status: string;
+            commissionType: string;
+            commissionValue: number;
+            balanceEarned: number;
+            totalOrdersDelivered: number;
+            bankName: string | null;
+            accountHolder: string | null;
+            accountNumber: string | null;
+            ifscCode: string | null;
+            branch: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+        };
+    } & {
+        id: string;
+        status: string;
+        createdAt: Date;
+        amount: number;
+        paymentMethod: string;
+        transactionRef: string;
+        notes: string | null;
+        authorizedBy: string | null;
+        societyId: string;
+    }>;
     create(body: any): Promise<{
         warehouse: {
             id: string;

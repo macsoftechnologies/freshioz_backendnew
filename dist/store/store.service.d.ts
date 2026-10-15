@@ -20,30 +20,7 @@ export declare class StoreService {
             status: string;
             managerPhone: string;
         }[];
-        products: {
-            category: string;
-            id: string;
-            uuid: string;
-            name: string;
-            status: string;
-            createdAt: Date;
-            updatedAt: Date;
-            desc: string | null;
-            kannadaName: string | null;
-            categoryId: string;
-            retailUnit: string;
-            retailPrice: number;
-            retailMarketPrice: number;
-            bulkMinQty: number;
-            bulkDiscountPercent: number;
-            origin: string | null;
-            shelfLife: string | null;
-            image: string;
-            badge: string | null;
-            tags: string[];
-            gstPercent: number;
-            inStock: boolean;
-        }[];
+        products: any[];
         societies: {
             accountNumber: string;
             ifscCode: string;

@@ -41,6 +41,7 @@ let StoreService = class StoreService {
             this.prisma.warehouse.findMany({ orderBy: { createdAt: 'desc' } }),
             this.prisma.product.findMany({
                 where: { status: { not: 'ARCHIVED' } },
+                include: { category: true },
                 orderBy: { createdAt: 'desc' },
             }),
             this.prisma.society.findMany({ orderBy: { createdAt: 'desc' } }),
@@ -171,7 +172,8 @@ let StoreService = class StoreService {
         }));
         const formattedProducts = products.map((p) => ({
             ...p,
-            category: p.categoryId || 'VEGETABLES',
+            category: p.category?.name || p.categoryId || 'VEGETABLES',
+            categoryId: p.categoryId,
         }));
         return {
             warehouses: sanitizedWarehouses,

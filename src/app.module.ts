@@ -14,6 +14,8 @@ import { OrdersModule } from './orders/orders.module';
 import { HealthModule } from './health/health.module';
 import { StoreModule } from './store/store.module';
 import { UploadsModule } from './uploads/uploads.module';
+import { CategoriesModule } from './categories/categories.module';
+import { UnitsModule } from './units/units.module';
 
 @Module({
   imports: [
@@ -21,6 +23,8 @@ import { UploadsModule } from './uploads/uploads.module';
     AuthModule,
     WarehousesModule,
     EmployeesModule,
+    CategoriesModule,
+    UnitsModule,
     ProductsModule,
     PricingModule,
     SocietiesModule,

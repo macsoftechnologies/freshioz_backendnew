@@ -95,6 +95,9 @@ let OrdersController = class OrdersController {
     updateStatus(id, dto) {
         return this.ordersService.updateStatus(id, dto);
     }
+    cancelOrder(req, id, body) {
+        return this.ordersService.cancelOrder(id, req.user, body?.reason);
+    }
 };
 exports.OrdersController = OrdersController;
 __decorate([
@@ -162,6 +165,19 @@ __decorate([
     __metadata("design:paramtypes", [String, update_order_dto_1.UpdateOrderStatusDto]),
     __metadata("design:returntype", void 0)
 ], OrdersController.prototype, "updateStatus", null);
+__decorate([
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Post)(':id/cancel'),
+    (0, swagger_1.ApiOperation)({ summary: 'Cancel order (Customer authorized for pending orders; Staff authorized)' }),
+    (0, swagger_1.ApiResponse)({ status: 200, type: order_schema_1.OrderResponseDto }),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('id')),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, Object]),
+    __metadata("design:returntype", void 0)
+], OrdersController.prototype, "cancelOrder", null);
 exports.OrdersController = OrdersController = __decorate([
     (0, swagger_1.ApiTags)('Orders'),
     (0, common_1.Controller)('orders'),

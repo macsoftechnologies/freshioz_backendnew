@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order.dto';
@@ -282,6 +282,63 @@ export class OrdersService {
       const updated = await tx.order.update({
         where: { id: existing.id },
         data: updateData,
+        include: { items: true, society: true },
+      });
+
+      return {
+        ...updated,
+        orderPlacedAtFormatted: toISTFullString(updated.orderPlacedAt),
+        createdAtFormatted: toISTFullString(updated.createdAt),
+      };
+    });
+  }
+
+  async cancelOrder(idOrUuid: string, user: any, reason?: string) {
+    return this.prisma.$transaction(async (tx) => {
+      const existing = await tx.order.findFirst({
+        where: {
+          OR: [{ id: idOrUuid }, { uuid: idOrUuid }],
+        },
+        include: { society: true },
+      });
+
+      if (!existing) {
+        throw new NotFoundException(`Order #${idOrUuid} not found`);
+      }
+
+      // Check customer authorization
+      const isCustomer = user?.type === 'CUSTOMER';
+      if (isCustomer && existing.userPhone !== user.phone && existing.userId !== user.id) {
+        throw new ForbiddenException('Access denied. You can only cancel your own orders.');
+      }
+
+      // Check allowed statuses for cancellation
+      if (existing.status === 'CANCELLED') {
+        throw new BadRequestException('Order is already cancelled.');
+      }
+      if (existing.status === 'DELIVERED') {
+        throw new BadRequestException('Delivered orders cannot be cancelled.');
+      }
+      if (isCustomer && existing.status === 'DISPATCHED') {
+        throw new BadRequestException('Order is out for delivery with our rider and cannot be cancelled online.');
+      }
+
+      // If it was previously marked DELIVERED and staff cancels, reverse society commission
+      if (existing.status === 'DELIVERED' && existing.societyId && existing.societyCommissionEarned > 0) {
+        await tx.society.update({
+          where: { id: existing.societyId },
+          data: {
+            balanceEarned: { decrement: existing.societyCommissionEarned },
+            totalOrdersDelivered: { decrement: 1 },
+          },
+        });
+      }
+
+      const updated = await tx.order.update({
+        where: { id: existing.id },
+        data: {
+          status: 'CANCELLED',
+        },
         include: { items: true, society: true },
       });
 

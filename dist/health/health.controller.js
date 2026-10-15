@@ -19,6 +19,33 @@ let HealthController = class HealthController {
     constructor(prisma) {
         this.prisma = prisma;
     }
+    liveness() {
+        return {
+            status: 'UP',
+            uptimeSeconds: Math.floor(process.uptime()),
+            timestampIST: (0, date_utils_1.toISTFullString)(new Date()),
+        };
+    }
+    async readiness() {
+        const start = Date.now();
+        try {
+            await this.prisma.$queryRaw `SELECT 1`;
+            return {
+                status: 'READY',
+                database: 'connected',
+                latencyMs: Date.now() - start,
+                timestampIST: (0, date_utils_1.toISTFullString)(new Date()),
+            };
+        }
+        catch (e) {
+            throw new common_1.ServiceUnavailableException({
+                status: 'NOT_READY',
+                database: 'disconnected',
+                error: 'Database connection check failed',
+                timestampIST: (0, date_utils_1.toISTFullString)(new Date()),
+            });
+        }
+    }
     async check() {
         let dbStatus = 'connected';
         let latencyMs = 0;
@@ -40,10 +67,10 @@ let HealthController = class HealthController {
             tableCounts = { categories, units, warehouses, products, societies, orders, users, employees };
         }
         catch (e) {
-            dbStatus = `disconnected: ${e.message}`;
+            dbStatus = 'disconnected';
         }
         return {
-            status: 'ok',
+            status: dbStatus === 'connected' ? 'ok' : 'degraded',
             service: 'Freshioz Enterprise NestJS API',
             serverTimeIST: (0, date_utils_1.toISTFullString)(new Date()),
             database: dbStatus,
@@ -54,15 +81,32 @@ let HealthController = class HealthController {
 };
 exports.HealthController = HealthController;
 __decorate([
+    (0, common_1.Get)('live'),
+    (0, swagger_1.ApiOperation)({ summary: 'Process liveness probe (Container / PM2 heartbeat)' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'API application process is alive and responding' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], HealthController.prototype, "liveness", null);
+__decorate([
+    (0, common_1.Get)('ready'),
+    (0, swagger_1.ApiOperation)({ summary: 'Readiness probe (Verifies PostgreSQL database connectivity)' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Database is connected and ready to serve traffic' }),
+    (0, swagger_1.ApiResponse)({ status: 503, description: 'Database connection failed' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], HealthController.prototype, "readiness", null);
+__decorate([
     (0, common_1.Get)(),
-    (0, swagger_1.ApiOperation)({ summary: 'System health check & database liveness' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Comprehensive system health and entity counts' }),
     (0, swagger_1.ApiResponse)({ status: 200, type: health_schema_1.HealthResponseDto }),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], HealthController.prototype, "check", null);
 exports.HealthController = HealthController = __decorate([
-    (0, swagger_1.ApiTags)('Health'),
+    (0, swagger_1.ApiTags)('Health & Monitoring'),
     (0, common_1.Controller)('health'),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService])
 ], HealthController);

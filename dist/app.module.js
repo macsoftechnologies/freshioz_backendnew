@@ -23,6 +23,8 @@ const orders_module_1 = require("./orders/orders.module");
 const health_module_1 = require("./health/health.module");
 const store_module_1 = require("./store/store.module");
 const uploads_module_1 = require("./uploads/uploads.module");
+const categories_module_1 = require("./categories/categories.module");
+const units_module_1 = require("./units/units.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -33,6 +35,8 @@ exports.AppModule = AppModule = __decorate([
             auth_module_1.AuthModule,
             warehouses_module_1.WarehousesModule,
             employees_module_1.EmployeesModule,
+            categories_module_1.CategoriesModule,
+            units_module_1.UnitsModule,
             products_module_1.ProductsModule,
             pricing_module_1.PricingModule,
             societies_module_1.SocietiesModule,

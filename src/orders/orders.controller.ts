@@ -134,4 +134,13 @@ export class OrdersController {
   updateStatus(@Param('id') id: string, @Body() dto: UpdateOrderStatusDto) {
     return this.ordersService.updateStatus(id, dto);
   }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/cancel')
+  @ApiOperation({ summary: 'Cancel order (Customer authorized for pending orders; Staff authorized)' })
+  @ApiResponse({ status: 200, type: OrderResponseDto })
+  cancelOrder(@Req() req: any, @Param('id') id: string, @Body() body?: { reason?: string }) {
+    return this.ordersService.cancelOrder(id, req.user, body?.reason);
+  }
 }

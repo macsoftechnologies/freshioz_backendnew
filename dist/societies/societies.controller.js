@@ -29,6 +29,20 @@ let SocietiesController = class SocietiesController {
     async findAll() {
         return this.societiesService.findAll();
     }
+    async listPayouts(req, societyId, status) {
+        const user = req.user;
+        if (user?.type === 'PARTNER' || user?.roles?.includes('SOCIETY_PARTNER')) {
+            const partnerSocId = user.societyId || user.id;
+            return this.societiesService.listPayouts({ societyId: partnerSocId, status });
+        }
+        return this.societiesService.listPayouts({ societyId, status });
+    }
+    async approvePayout(req, id, body) {
+        return this.societiesService.approvePayout(id, req.user, body?.transactionRef);
+    }
+    async rejectPayout(req, id, body) {
+        return this.societiesService.rejectPayout(id, req.user, body?.reason);
+    }
     async findOne(id) {
         return this.societiesService.findOne(id);
     }
@@ -58,6 +72,46 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], SocietiesController.prototype, "findAll", null);
+__decorate([
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, swagger_1.ApiOperation)({ summary: 'List society commission payout records (Admin all, Partner own society)' }),
+    (0, swagger_1.ApiQuery)({ name: 'societyId', required: false }),
+    (0, swagger_1.ApiQuery)({ name: 'status', required: false }),
+    (0, common_1.Get)('payouts'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Query)('societyId')),
+    __param(2, (0, common_1.Query)('status')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, String]),
+    __metadata("design:returntype", Promise)
+], SocietiesController.prototype, "listPayouts", null);
+__decorate([
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('SUPER_ADMIN'),
+    (0, swagger_1.ApiOperation)({ summary: 'Approve society commission payout with UTR transaction ref (Super Admin only)' }),
+    (0, common_1.Post)('payouts/:id/approve'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('id')),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, Object]),
+    __metadata("design:returntype", Promise)
+], SocietiesController.prototype, "approvePayout", null);
+__decorate([
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('SUPER_ADMIN'),
+    (0, swagger_1.ApiOperation)({ summary: 'Reject payout request and refund balance back to society (Super Admin only)' }),
+    (0, common_1.Post)('payouts/:id/reject'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('id')),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, Object]),
+    __metadata("design:returntype", Promise)
+], SocietiesController.prototype, "rejectPayout", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Get single onboarded community by ID' }),
     (0, swagger_1.ApiResponse)({ status: 200, type: society_schema_1.SocietySchema }),

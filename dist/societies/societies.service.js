@@ -79,6 +79,92 @@ let SocietiesService = class SocietiesService {
             return payout;
         });
     }
+    async listPayouts(query) {
+        const where = {};
+        if (query?.societyId)
+            where.societyId = query.societyId;
+        if (query?.status)
+            where.status = query.status;
+        return this.prisma.societyPayout.findMany({
+            where,
+            include: {
+                society: {
+                    select: {
+                        id: true,
+                        name: true,
+                        secretaryName: true,
+                        secretaryPhone: true,
+                        bankName: true,
+                        accountHolder: true,
+                        accountNumber: true,
+                        ifscCode: true,
+                        balanceEarned: true,
+                    },
+                },
+            },
+            orderBy: { createdAt: 'desc' },
+        });
+    }
+    async approvePayout(payoutId, adminUser, bankUtr) {
+        const payout = await this.prisma.societyPayout.findUnique({
+            where: { id: payoutId },
+        });
+        if (!payout) {
+            throw new common_1.NotFoundException(`Payout #${payoutId} not found`);
+        }
+        if (payout.status === 'COMPLETED') {
+            throw new common_1.BadRequestException('Payout is already completed.');
+        }
+        if (payout.status === 'REJECTED') {
+            throw new common_1.BadRequestException('Cannot approve a rejected payout.');
+        }
+        const authorizedBy = adminUser?.name || adminUser?.email || adminUser?.id || 'SUPER_ADMIN';
+        return this.prisma.societyPayout.update({
+            where: { id: payoutId },
+            data: {
+                status: 'COMPLETED',
+                authorizedBy,
+                ...(bankUtr && { transactionRef: bankUtr.trim() }),
+            },
+            include: {
+                society: true,
+            },
+        });
+    }
+    async rejectPayout(payoutId, adminUser, reason) {
+        return this.prisma.$transaction(async (tx) => {
+            const payout = await tx.societyPayout.findUnique({
+                where: { id: payoutId },
+            });
+            if (!payout) {
+                throw new common_1.NotFoundException(`Payout #${payoutId} not found`);
+            }
+            if (payout.status === 'REJECTED') {
+                throw new common_1.BadRequestException('Payout is already marked as rejected.');
+            }
+            if (payout.status === 'COMPLETED') {
+                throw new common_1.BadRequestException('Cannot reject a completed payout.');
+            }
+            const authorizedBy = adminUser?.name || adminUser?.email || adminUser?.id || 'SUPER_ADMIN';
+            await tx.society.update({
+                where: { id: payout.societyId },
+                data: {
+                    balanceEarned: { increment: payout.amount },
+                },
+            });
+            return tx.societyPayout.update({
+                where: { id: payoutId },
+                data: {
+                    status: 'REJECTED',
+                    authorizedBy,
+                    notes: reason ? `Rejected: ${reason}` : 'Rejected by administrator',
+                },
+                include: {
+                    society: true,
+                },
+            });
+        });
+    }
     async create(body) {
         const { id, name, type, address, imageUrl, lat, lng, warehouseId, secretaryName, secretaryPhone, totalFloors, totalUnits, deliveryMode, status, commissionType, commissionValue, bankName, accountHolder, accountNumber, ifscCode, } = body;
         const existing = await this.prisma.society.findFirst({

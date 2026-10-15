@@ -2,10 +2,10 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsString, IsNotEmpty, IsOptional, IsNumber, IsArray } from 'class-validator';
 
 export class UpdateProductDto {
-  @ApiProperty({ example: 'FRZ_PRD_101' })
-  @IsNotEmpty()
+  @ApiPropertyOptional({ example: 'FRZ_PRD_101' })
+  @IsOptional()
   @IsString()
-  id!: string;
+  id?: string;
 
   @ApiPropertyOptional({ example: 'Country Tomatoes (Nati Tomato)' })
   @IsOptional()
@@ -22,10 +22,20 @@ export class UpdateProductDto {
   @IsString()
   categoryId?: string;
 
+  @ApiPropertyOptional({ example: 'VEGETABLES' })
+  @IsOptional()
+  @IsString()
+  category?: string;
+
   @ApiPropertyOptional({ example: '1 kg' })
   @IsOptional()
   @IsString()
   retailUnit?: string;
+
+  @ApiPropertyOptional({ example: '1 kg' })
+  @IsOptional()
+  @IsString()
+  defaultUnit?: string;
 
   @ApiPropertyOptional({ example: 34 })
   @IsOptional()

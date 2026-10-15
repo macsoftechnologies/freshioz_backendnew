@@ -72,13 +72,30 @@ let ProductsService = class ProductsService {
         });
         if (!existing)
             throw new common_1.NotFoundException('Product not found');
+        const catId = data.categoryId || data.category;
+        if (catId) {
+            const existingCat = await this.prisma.category.findUnique({ where: { id: catId } });
+            if (!existingCat) {
+                await this.prisma.category.upsert({
+                    where: { id: catId },
+                    update: {},
+                    create: {
+                        id: catId,
+                        name: catId.replace(/_/g, ' '),
+                        slug: catId.toLowerCase().replace(/_/g, '-'),
+                        icon: '🥦',
+                    },
+                });
+            }
+        }
+        const unit = data.retailUnit || data.defaultUnit;
         return this.prisma.product.update({
             where: { id: existing.id },
             data: {
                 ...(data.name && { name: data.name }),
                 ...(data.kannadaName !== undefined && { kannadaName: data.kannadaName }),
-                ...(data.categoryId && { categoryId: data.categoryId }),
-                ...(data.retailUnit && { retailUnit: data.retailUnit }),
+                ...(catId && { categoryId: catId }),
+                ...(unit && { retailUnit: unit }),
                 ...(data.retailPrice !== undefined && { retailPrice: parseFloat(data.retailPrice) }),
                 ...(data.retailMarketPrice !== undefined && { retailMarketPrice: parseFloat(data.retailMarketPrice) }),
                 ...(data.bulkMinQty !== undefined && { bulkMinQty: parseFloat(data.bulkMinQty) }),

@@ -16,8 +16,8 @@ class UpdateProductDto {
 }
 exports.UpdateProductDto = UpdateProductDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 'FRZ_PRD_101' }),
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, swagger_1.ApiPropertyOptional)({ example: 'FRZ_PRD_101' }),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateProductDto.prototype, "id", void 0);
@@ -40,11 +40,23 @@ __decorate([
     __metadata("design:type", String)
 ], UpdateProductDto.prototype, "categoryId", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'VEGETABLES' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateProductDto.prototype, "category", void 0);
+__decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: '1 kg' }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateProductDto.prototype, "retailUnit", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: '1 kg' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateProductDto.prototype, "defaultUnit", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: 34 }),
     (0, class_validator_1.IsOptional)(),

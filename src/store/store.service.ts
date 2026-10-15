@@ -293,12 +293,27 @@ export class StoreService {
             for (const p of data.products) {
               if (!p.id || !p.name) continue;
               const catId = p.categoryId || p.category || 'VEGETABLES';
+              const existingCat = await tx.category.findUnique({ where: { id: catId } });
+              if (!existingCat) {
+                await tx.category.upsert({
+                  where: { id: catId },
+                  update: {},
+                  create: {
+                    id: catId,
+                    name: catId.replace(/_/g, ' '),
+                    slug: catId.toLowerCase().replace(/_/g, '-'),
+                    icon: '🥦',
+                  },
+                });
+              }
+              const unit = p.retailUnit || p.defaultUnit || '1 kg';
               await tx.product.upsert({
                 where: { id: p.id },
                 update: {
                   name: p.name,
                   kannadaName: p.kannadaName || null,
                   categoryId: catId,
+                  retailUnit: unit,
                   retailPrice: parseFloat(p.retailPrice) || 40,
                   retailMarketPrice: parseFloat(p.retailMarketPrice) || 50,
                   bulkMinQty: parseFloat(p.bulkMinQty) || 0,
@@ -308,6 +323,8 @@ export class StoreService {
                   desc: p.desc || null,
                   ...(p.image && { image: p.image }),
                   ...(p.badge && { badge: p.badge }),
+                  tags: Array.isArray(p.tags) ? p.tags : [],
+                  gstPercent: parseFloat(p.gstPercent) || 0,
                   status: p.status || 'ACTIVE',
                   inStock: p.inStock !== false,
                 },
@@ -316,7 +333,7 @@ export class StoreService {
                   name: p.name,
                   kannadaName: p.kannadaName || null,
                   categoryId: catId,
-                  retailUnit: p.retailUnit || '1 kg',
+                  retailUnit: unit,
                   retailPrice: parseFloat(p.retailPrice) || 40,
                   retailMarketPrice: parseFloat(p.retailMarketPrice) || 50,
                   bulkMinQty: parseFloat(p.bulkMinQty) || 0,
@@ -326,6 +343,8 @@ export class StoreService {
                   desc: p.desc || null,
                   image: p.image || 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=600',
                   badge: p.badge || 'Harvested Today at Dawn',
+                  tags: Array.isArray(p.tags) ? p.tags : [],
+                  gstPercent: parseFloat(p.gstPercent) || 0,
                   status: p.status || 'ACTIVE',
                   inStock: p.inStock !== false,
                 },

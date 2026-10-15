@@ -1,9 +1,11 @@
 export declare class UpdateProductDto {
-    id: string;
+    id?: string;
     name?: string;
     kannadaName?: string;
     categoryId?: string;
+    category?: string;
     retailUnit?: string;
+    defaultUnit?: string;
     retailPrice?: number;
     retailMarketPrice?: number;
     bulkMinQty?: number;

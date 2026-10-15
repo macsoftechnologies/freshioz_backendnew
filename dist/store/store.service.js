@@ -698,8 +698,8 @@ let StoreService = class StoreService {
                         skipped.push('warehouseInventory');
                     }
                 }
-                if (!isSuperAdmin && skipped.length > 0) {
-                    throw new common_1.ForbiddenException(`Access denied: Your account role (${roles.join(', ') || 'STAFF'}) does not have write permission for collection(s): ${skipped.join(', ')}. All modifications were aborted to prevent data desynchronization.`);
+                if (!isSuperAdmin && persisted.length === 0 && skipped.length > 0) {
+                    throw new common_1.ForbiddenException(`Access denied: Your account role (${roles.join(', ') || 'STAFF'}) does not have write permission for collection(s): ${skipped.join(', ')}.`);
                 }
             }, {
                 timeout: 30000,

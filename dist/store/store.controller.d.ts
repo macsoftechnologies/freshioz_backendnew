@@ -28,6 +28,10 @@ export declare class StoreController {
             id: string;
             uuid: string;
             name: string;
+            status: string;
+            createdAt: Date;
+            updatedAt: Date;
+            desc: string | null;
             kannadaName: string | null;
             categoryId: string;
             retailUnit: string;
@@ -37,15 +41,11 @@ export declare class StoreController {
             bulkDiscountPercent: number;
             origin: string | null;
             shelfLife: string | null;
-            desc: string | null;
             image: string;
             badge: string | null;
             tags: string[];
             gstPercent: number;
-            status: string;
             inStock: boolean;
-            createdAt: Date;
-            updatedAt: Date;
         }[];
         societies: {
             accountNumber: string;
@@ -54,12 +54,12 @@ export declare class StoreController {
             id: string;
             uuid: string;
             name: string;
+            lat: number | null;
+            lng: number | null;
             status: string;
             createdAt: Date;
             updatedAt: Date;
             type: string;
-            lat: number | null;
-            lng: number | null;
             address: string;
             imageUrl: string | null;
             warehouseId: string | null;

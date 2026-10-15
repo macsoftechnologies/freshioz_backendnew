@@ -722,11 +722,10 @@ export class StoreService {
         }
       }
 
-      // If a non-Super Admin attempted to save collections they are not authorized for,
-      // abort the transaction completely to prevent partial data corruption:
-      if (!isSuperAdmin && skipped.length > 0) {
+      // Only abort if user had NO authorized collections persisted at all:
+      if (!isSuperAdmin && persisted.length === 0 && skipped.length > 0) {
         throw new ForbiddenException(
-          `Access denied: Your account role (${roles.join(', ') || 'STAFF'}) does not have write permission for collection(s): ${skipped.join(', ')}. All modifications were aborted to prevent data desynchronization.`,
+          `Access denied: Your account role (${roles.join(', ') || 'STAFF'}) does not have write permission for collection(s): ${skipped.join(', ')}.`,
         );
       }
     }, {

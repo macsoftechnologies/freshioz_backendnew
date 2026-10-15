@@ -25,20 +25,41 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🧹 Starting Freshioz Database Clean Reset...');
 
-  // 1. Delete dependent transactional records first (foreign-key safe)
-  console.log('Clearing transactional, order, and relation tables...');
-  await prisma.orderItem.deleteMany({});
-  await prisma.dailyPriceHistory.deleteMany({});
-  await prisma.warehouseInventory.deleteMany({});
-  await prisma.order.deleteMany({});
-  await prisma.societyPayout.deleteMany({});
-  await prisma.inboundLead.deleteMany({});
-  await prisma.procurementBill.deleteMany({});
-  await prisma.user.deleteMany({});
-  await prisma.product.deleteMany({});
-  await prisma.society.deleteMany({});
-  await prisma.vendor.deleteMany({});
-  await prisma.warehouse.deleteMany({});
+  // 1. Delete dependent transactional records first (PostgreSQL foreign-key safe via CASCADE)
+  console.log('Clearing transactional, order, and relation tables via CASCADE...');
+  try {
+    await prisma.$executeRawUnsafe(`
+      TRUNCATE TABLE 
+        "order_items", 
+        "orders", 
+        "warehouse_inventory", 
+        "daily_price_history", 
+        "society_payouts", 
+        "inbound_leads", 
+        "procurement_bills", 
+        "users", 
+        "products", 
+        "societies", 
+        "vendors", 
+        "warehouses" 
+      CASCADE;
+    `);
+    console.log('✅ Tables cleared cleanly via TRUNCATE CASCADE.');
+  } catch (rawErr) {
+    console.warn('Raw TRUNCATE note (falling back to sequential deletes):', rawErr.message);
+    await prisma.orderItem.deleteMany({});
+    await prisma.dailyPriceHistory.deleteMany({});
+    await prisma.warehouseInventory.deleteMany({});
+    await prisma.order.deleteMany({});
+    await prisma.societyPayout.deleteMany({});
+    await prisma.inboundLead.deleteMany({});
+    await prisma.procurementBill.deleteMany({});
+    await prisma.user.deleteMany({});
+    await prisma.product.deleteMany({});
+    await prisma.society.deleteMany({});
+    await prisma.vendor.deleteMany({});
+    await prisma.warehouse.deleteMany({});
+  }
 
   // 2. Clear non-superadmin employees (preserve Super Admin)
   await prisma.employee.deleteMany({

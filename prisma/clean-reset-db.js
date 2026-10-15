@@ -1,3 +1,22 @@
+const fs = require('fs');
+const path = require('path');
+
+// Ensure .env is loaded into process.env before PrismaClient initializes
+if (!process.env.DATABASE_URL) {
+  const envPath = path.resolve(__dirname, '../.env');
+  if (fs.existsSync(envPath)) {
+    const envFile = fs.readFileSync(envPath, 'utf8');
+    envFile.split(/\r?\n/).forEach((line) => {
+      const match = line.match(/^\s*([\w.-]+)\s*=\s*(.*)?\s*$/);
+      if (match && !process.env[match[1]]) {
+        let val = match[2] || '';
+        val = val.trim().replace(/^['"]|['"]$/g, '');
+        process.env[match[1]] = val;
+      }
+    });
+  }
+}
+
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
 

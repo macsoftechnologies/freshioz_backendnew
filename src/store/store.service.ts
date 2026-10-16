@@ -223,7 +223,7 @@ export class StoreService {
     const isSuperAdmin = roles.includes('SUPER_ADMIN');
     const isWarehouseManager = isSuperAdmin || roles.includes('WAREHOUSE_MANAGER');
     const isPricingManager = isSuperAdmin || roles.includes('PRICING_MANAGER');
-    const isProcurementOfficer = isSuperAdmin || roles.includes('PROCUREMENT_OFFICER');
+    const isProcurementOfficer = isSuperAdmin || roles.includes('PROCUREMENT_OFFICER') || roles.includes('WAREHOUSE_MANAGER');
     const isSalesOfficer = isSuperAdmin || roles.includes('SALES_OFFICER');
     const isFulfillmentStaff = isSuperAdmin || isWarehouseManager || roles.some((r: string) => ['WAREHOUSE_STAFF', 'DELIVERY_EXECUTIVE'].includes(r));
 

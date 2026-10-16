@@ -34,7 +34,7 @@ export class ProcurementController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('SUPER_ADMIN', 'PROCUREMENT_OFFICER')
+  @Roles('SUPER_ADMIN', 'PROCUREMENT_OFFICER', 'WAREHOUSE_MANAGER')
   @Post()
   @ApiOperation({ summary: 'Create a new APMC procurement bill' })
   @ApiResponse({ status: 201, type: ProcurementBillResponseDto })

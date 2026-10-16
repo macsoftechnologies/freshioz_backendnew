@@ -33,6 +33,8 @@ export declare class StoreController {
             name: string;
             lat: number | null;
             lng: number | null;
+            bankName: string | null;
+            accountHolder: string | null;
             status: string;
             createdAt: Date;
             updatedAt: Date;
@@ -48,8 +50,6 @@ export declare class StoreController {
             commissionValue: number;
             balanceEarned: number;
             totalOrdersDelivered: number;
-            bankName: string | null;
-            accountHolder: string | null;
             branch: string | null;
         }[];
         orders: any[];
@@ -65,9 +65,9 @@ export declare class StoreController {
             status: string;
             createdAt: Date;
             updatedAt: Date;
+            description: string | null;
             slug: string;
             icon: string;
-            description: string | null;
             sortOrder: number;
         }[];
         units: {

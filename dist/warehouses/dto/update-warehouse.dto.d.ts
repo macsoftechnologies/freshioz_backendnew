@@ -1,5 +1,5 @@
 export declare class UpdateWarehouseDto {
-    id: string;
+    id?: string;
     name?: string;
     location?: string;
     lat?: number;

@@ -69,7 +69,7 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    (0, roles_decorator_1.Roles)('SUPER_ADMIN', 'PROCUREMENT_OFFICER'),
+    (0, roles_decorator_1.Roles)('SUPER_ADMIN', 'PROCUREMENT_OFFICER', 'WAREHOUSE_MANAGER'),
     (0, swagger_1.ApiOperation)({ summary: 'Create new Mandi vendor with GPS map coordinates & bank settlement info' }),
     (0, swagger_1.ApiResponse)({ status: 201, type: vendor_schema_1.VendorSchema }),
     (0, common_1.Post)(),
@@ -81,7 +81,7 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    (0, roles_decorator_1.Roles)('SUPER_ADMIN', 'PROCUREMENT_OFFICER'),
+    (0, roles_decorator_1.Roles)('SUPER_ADMIN', 'PROCUREMENT_OFFICER', 'WAREHOUSE_MANAGER'),
     (0, swagger_1.ApiOperation)({ summary: 'Update vendor details or coordinates by param ID' }),
     (0, swagger_1.ApiResponse)({ status: 200, type: vendor_schema_1.VendorSchema }),
     (0, common_1.Put)(':id'),
@@ -94,7 +94,7 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    (0, roles_decorator_1.Roles)('SUPER_ADMIN', 'PROCUREMENT_OFFICER'),
+    (0, roles_decorator_1.Roles)('SUPER_ADMIN', 'PROCUREMENT_OFFICER', 'WAREHOUSE_MANAGER'),
     (0, swagger_1.ApiOperation)({ summary: 'Update vendor details or coordinates' }),
     (0, swagger_1.ApiResponse)({ status: 200, type: vendor_schema_1.VendorSchema }),
     (0, common_1.Put)(),

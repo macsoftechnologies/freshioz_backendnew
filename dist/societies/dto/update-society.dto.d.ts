@@ -1,5 +1,5 @@
 export declare class UpdateSocietyDto {
-    id: string;
+    id?: string;
     name?: string;
     type?: string;
     address?: string;

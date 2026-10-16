@@ -35,7 +35,7 @@ export class VendorsController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('SUPER_ADMIN', 'PROCUREMENT_OFFICER')
+  @Roles('SUPER_ADMIN', 'PROCUREMENT_OFFICER', 'WAREHOUSE_MANAGER')
   @ApiOperation({ summary: 'Create new Mandi vendor with GPS map coordinates & bank settlement info' })
   @ApiResponse({ status: 201, type: VendorSchema })
   @Post()
@@ -45,7 +45,7 @@ export class VendorsController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('SUPER_ADMIN', 'PROCUREMENT_OFFICER')
+  @Roles('SUPER_ADMIN', 'PROCUREMENT_OFFICER', 'WAREHOUSE_MANAGER')
   @ApiOperation({ summary: 'Update vendor details or coordinates by param ID' })
   @ApiResponse({ status: 200, type: VendorSchema })
   @Put(':id')
@@ -55,7 +55,7 @@ export class VendorsController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('SUPER_ADMIN', 'PROCUREMENT_OFFICER')
+  @Roles('SUPER_ADMIN', 'PROCUREMENT_OFFICER', 'WAREHOUSE_MANAGER')
   @ApiOperation({ summary: 'Update vendor details or coordinates' })
   @ApiResponse({ status: 200, type: VendorSchema })
   @Put()

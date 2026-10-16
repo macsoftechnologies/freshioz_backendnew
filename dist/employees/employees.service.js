@@ -33,7 +33,7 @@ let EmployeesService = class EmployeesService {
     async findAll() {
         return this.prisma.employee.findMany({
             select: EMPLOYEE_SELECT_FIELDS,
-            orderBy: { createdAt: 'asc' },
+            orderBy: { createdAt: 'desc' },
         });
     }
     async findOne(idOrUuid) {

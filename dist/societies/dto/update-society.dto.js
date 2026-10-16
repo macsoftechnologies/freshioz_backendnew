@@ -16,8 +16,8 @@ class UpdateSocietyDto {
 }
 exports.UpdateSocietyDto = UpdateSocietyDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 'FRZ_SOC_01' }),
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, swagger_1.ApiPropertyOptional)({ example: 'FRZ_SOC_01' }),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateSocietyDto.prototype, "id", void 0);

@@ -1,5 +1,5 @@
 export declare class UpdateVendorDto {
-    id: string;
+    id?: string;
     name?: string;
     phone?: string;
     category?: string;

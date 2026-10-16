@@ -70,6 +70,12 @@ __decorate([
     __metadata("design:type", String)
 ], UpdateVendorDto.prototype, "accountHolder", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'Manjunath Gowda' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateVendorDto.prototype, "contactPerson", void 0);
+__decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: '30112233445' }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
@@ -87,6 +93,11 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateVendorDto.prototype, "upiId", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Object)
+], UpdateVendorDto.prototype, "bankDetails", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: 'ACTIVE' }),
     (0, class_validator_1.IsOptional)(),

@@ -44,6 +44,19 @@ export class ProcurementService {
       const billNumber = dto.billNumber || `APMC-${Date.now().toString().slice(-6)}`;
       const billId = `PB_${Date.now()}`;
 
+      const computedWeight = dto.totalWeightKg !== undefined
+        ? Number(dto.totalWeightKg)
+        : (dto.items || []).reduce((sum, it) => sum + (Number(it.qty) || 0), 0);
+
+      const computedProduceAmount = dto.produceAmount !== undefined
+        ? Number(dto.produceAmount)
+        : (dto.items || []).reduce((sum, it) => sum + ((Number(it.qty) || 0) * (Number(it.rate) || 0)), 0);
+
+      const computedTransport = Number(dto.transportAmount) || 0;
+      const computedTotalPaid = dto.totalAmountPaid !== undefined
+        ? Number(dto.totalAmountPaid)
+        : (dto.totalAmount !== undefined ? Number(dto.totalAmount) : (computedProduceAmount + computedTransport));
+
       const created = await tx.procurementBill.create({
         data: {
           id: billId,
@@ -54,10 +67,10 @@ export class ProcurementService {
           destinationWarehouseId: dto.destinationWarehouseId,
           destinationName: dto.destinationName,
           paymentMode: dto.paymentMode || 'IMPS_TRANSFER',
-          totalWeightKg: dto.totalWeightKg,
-          produceAmount: dto.produceAmount,
-          transportAmount: dto.transportAmount || 0,
-          totalAmountPaid: dto.totalAmountPaid,
+          totalWeightKg: computedWeight,
+          produceAmount: computedProduceAmount,
+          transportAmount: computedTransport,
+          totalAmountPaid: computedTotalPaid,
           receiptPhoto: dto.receiptPhoto || null,
           procuredBy: dto.procuredBy || 'Admin Procurement Desk',
           slot: dto.slot || 'Morning Fresh Slot',

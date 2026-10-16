@@ -13,10 +13,11 @@ export declare class CreateProcurementBillDto {
     destinationWarehouseId: string;
     destinationName: string;
     paymentMode?: string;
-    totalWeightKg: number;
-    produceAmount: number;
+    totalWeightKg?: number;
+    produceAmount?: number;
     transportAmount?: number;
-    totalAmountPaid: number;
+    totalAmountPaid?: number;
+    totalAmount?: number;
     receiptPhoto?: string;
     procuredBy?: string;
     slot?: string;

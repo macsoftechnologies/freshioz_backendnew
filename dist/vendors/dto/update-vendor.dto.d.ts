@@ -8,8 +8,10 @@ export declare class UpdateVendorDto {
     lng?: number;
     bankName?: string;
     accountHolder?: string;
+    contactPerson?: string;
     accountNumber?: string;
     ifscCode?: string;
     upiId?: string;
+    bankDetails?: any;
     status?: string;
 }

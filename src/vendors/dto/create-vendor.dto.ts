@@ -47,6 +47,11 @@ export class CreateVendorDto {
   @IsString()
   accountHolder?: string;
 
+  @ApiPropertyOptional({ example: 'Manjunath Gowda' })
+  @IsOptional()
+  @IsString()
+  contactPerson?: string;
+
   @ApiPropertyOptional({ example: '30112233445' })
   @IsOptional()
   @IsString()
@@ -61,6 +66,10 @@ export class CreateVendorDto {
   @IsOptional()
   @IsString()
   upiId?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  bankDetails?: any;
 
   @ApiPropertyOptional({ example: 'ACTIVE', default: 'ACTIVE' })
   @IsOptional()

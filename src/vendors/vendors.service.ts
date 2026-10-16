@@ -13,6 +13,14 @@ export class VendorsService {
 
     return vendors.map(v => ({
       ...v,
+      contactPerson: v.accountHolder || null,
+      bankDetails: {
+        bankName: v.bankName || null,
+        accountHolder: v.accountHolder || null,
+        accountNumber: v.accountNumber || null,
+        ifscCode: v.ifscCode || null,
+        upiId: v.upiId || null,
+      },
       formattedCreatedAt: formatDateIST(v.createdAt),
       formattedTime: formatTimeIST(v.createdAt),
     }));
@@ -27,13 +35,26 @@ export class VendorsService {
     if (!vendor) throw new NotFoundException(`Vendor #${idOrUuid} not found`);
     return {
       ...vendor,
+      contactPerson: vendor.accountHolder || null,
+      bankDetails: {
+        bankName: vendor.bankName || null,
+        accountHolder: vendor.accountHolder || null,
+        accountNumber: vendor.accountNumber || null,
+        ifscCode: vendor.ifscCode || null,
+        upiId: vendor.upiId || null,
+      },
       formattedCreatedAt: formatDateIST(vendor.createdAt),
       formattedTime: formatTimeIST(vendor.createdAt),
     };
   }
 
   async create(body: any) {
-    const { id, name, phone, category, mandiLocation, lat, lng, bankName, accountHolder, accountNumber, ifscCode, upiId, status } = body;
+    const { id, name, phone, category, mandiLocation, lat, lng, status } = body;
+    const bankName = body.bankName || body.bankDetails?.bankName || null;
+    const accountHolder = body.accountHolder || body.contactPerson || body.bankDetails?.accountHolder || null;
+    const accountNumber = body.accountNumber || body.bankDetails?.accountNumber || null;
+    const ifscCode = body.ifscCode || body.bankDetails?.ifscCode || null;
+    const upiId = body.upiId || body.bankDetails?.upiId || null;
 
     // Check duplicate vendor phone
     const cleanPhone = phone ? phone.trim() : '';
@@ -66,6 +87,14 @@ export class VendorsService {
 
     return {
       ...newVendor,
+      contactPerson: newVendor.accountHolder || null,
+      bankDetails: {
+        bankName: newVendor.bankName || null,
+        accountHolder: newVendor.accountHolder || null,
+        accountNumber: newVendor.accountNumber || null,
+        ifscCode: newVendor.ifscCode || null,
+        upiId: newVendor.upiId || null,
+      },
       formattedCreatedAt: formatDateIST(newVendor.createdAt),
       formattedTime: formatTimeIST(newVendor.createdAt),
     };
@@ -79,6 +108,12 @@ export class VendorsService {
     });
     if (!existing) throw new NotFoundException('Vendor not found');
 
+    const resolvedBankName = data.bankName !== undefined ? data.bankName : data.bankDetails?.bankName;
+    const resolvedAccountHolder = data.accountHolder !== undefined ? data.accountHolder : (data.contactPerson !== undefined ? data.contactPerson : data.bankDetails?.accountHolder);
+    const resolvedAccountNumber = data.accountNumber !== undefined ? data.accountNumber : data.bankDetails?.accountNumber;
+    const resolvedIfscCode = data.ifscCode !== undefined ? data.ifscCode : data.bankDetails?.ifscCode;
+    const resolvedUpiId = data.upiId !== undefined ? data.upiId : data.bankDetails?.upiId;
+
     const updated = await this.prisma.vendor.update({
       where: { id: existing.id },
       data: {
@@ -88,17 +123,25 @@ export class VendorsService {
         ...(data.mandiLocation && { mandiLocation: data.mandiLocation }),
         ...(data.lat !== undefined && { lat: parseFloat(data.lat) }),
         ...(data.lng !== undefined && { lng: parseFloat(data.lng) }),
-        ...(data.bankName !== undefined && { bankName: data.bankName }),
-        ...(data.accountHolder !== undefined && { accountHolder: data.accountHolder }),
-        ...(data.accountNumber !== undefined && { accountNumber: data.accountNumber }),
-        ...(data.ifscCode !== undefined && { ifscCode: data.ifscCode }),
-        ...(data.upiId !== undefined && { upiId: data.upiId }),
+        ...(resolvedBankName !== undefined && { bankName: resolvedBankName }),
+        ...(resolvedAccountHolder !== undefined && { accountHolder: resolvedAccountHolder }),
+        ...(resolvedAccountNumber !== undefined && { accountNumber: resolvedAccountNumber }),
+        ...(resolvedIfscCode !== undefined && { ifscCode: resolvedIfscCode }),
+        ...(resolvedUpiId !== undefined && { upiId: resolvedUpiId }),
         ...(data.status && { status: data.status }),
       },
     });
 
     return {
       ...updated,
+      contactPerson: updated.accountHolder || null,
+      bankDetails: {
+        bankName: updated.bankName || null,
+        accountHolder: updated.accountHolder || null,
+        accountNumber: updated.accountNumber || null,
+        ifscCode: updated.ifscCode || null,
+        upiId: updated.upiId || null,
+      },
       formattedCreatedAt: formatDateIST(updated.createdAt),
       formattedTime: formatTimeIST(updated.createdAt),
     };

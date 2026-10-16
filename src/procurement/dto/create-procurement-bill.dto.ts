@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsString, IsNotEmpty, IsOptional, IsNumber, IsArray } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class ProcurementItemDto {
   @ApiProperty({ example: 'Country Tomatoes (Nati Tomato)' })
@@ -8,10 +9,12 @@ export class ProcurementItemDto {
   name!: string;
 
   @ApiProperty({ example: 25 })
+  @Type(() => Number)
   @IsNumber()
   qty!: number;
 
   @ApiProperty({ example: 28 })
+  @Type(() => Number)
   @IsNumber()
   rate!: number;
 
@@ -22,6 +25,7 @@ export class ProcurementItemDto {
 
   @ApiPropertyOptional({ example: 700 })
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   total?: number;
 }
@@ -62,22 +66,35 @@ export class CreateProcurementBillDto {
   @IsString()
   paymentMode?: string;
 
-  @ApiProperty({ example: 50 })
+  @ApiPropertyOptional({ example: 50 })
+  @IsOptional()
+  @Type(() => Number)
   @IsNumber()
-  totalWeightKg!: number;
+  totalWeightKg?: number;
 
-  @ApiProperty({ example: 1500 })
+  @ApiPropertyOptional({ example: 1500 })
+  @IsOptional()
+  @Type(() => Number)
   @IsNumber()
-  produceAmount!: number;
+  produceAmount?: number;
 
   @ApiPropertyOptional({ example: 250, default: 0 })
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   transportAmount?: number;
 
-  @ApiProperty({ example: 1750 })
+  @ApiPropertyOptional({ example: 1750 })
+  @IsOptional()
+  @Type(() => Number)
   @IsNumber()
-  totalAmountPaid!: number;
+  totalAmountPaid?: number;
+
+  @ApiPropertyOptional({ example: 1750 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  totalAmount?: number;
 
   @ApiPropertyOptional({ example: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=400' })
   @IsOptional()

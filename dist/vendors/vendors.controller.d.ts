@@ -5,6 +5,14 @@ export declare class VendorsController {
     private readonly vendorsService;
     constructor(vendorsService: VendorsService);
     findAll(): Promise<{
+        contactPerson: string;
+        bankDetails: {
+            bankName: string;
+            accountHolder: string;
+            accountNumber: string;
+            ifscCode: string;
+            upiId: string;
+        };
         formattedCreatedAt: string;
         formattedTime: string;
         id: string;
@@ -25,6 +33,14 @@ export declare class VendorsController {
         updatedAt: Date;
     }[]>;
     findOne(id: string): Promise<{
+        contactPerson: string;
+        bankDetails: {
+            bankName: string;
+            accountHolder: string;
+            accountNumber: string;
+            ifscCode: string;
+            upiId: string;
+        };
         formattedCreatedAt: string;
         formattedTime: string;
         id: string;
@@ -45,6 +61,14 @@ export declare class VendorsController {
         updatedAt: Date;
     }>;
     create(body: CreateVendorDto): Promise<{
+        contactPerson: string;
+        bankDetails: {
+            bankName: string;
+            accountHolder: string;
+            accountNumber: string;
+            ifscCode: string;
+            upiId: string;
+        };
         formattedCreatedAt: string;
         formattedTime: string;
         id: string;
@@ -65,6 +89,14 @@ export declare class VendorsController {
         updatedAt: Date;
     }>;
     updateWithParam(id: string, body: UpdateVendorDto): Promise<{
+        contactPerson: string;
+        bankDetails: {
+            bankName: string;
+            accountHolder: string;
+            accountNumber: string;
+            ifscCode: string;
+            upiId: string;
+        };
         formattedCreatedAt: string;
         formattedTime: string;
         id: string;
@@ -85,6 +117,14 @@ export declare class VendorsController {
         updatedAt: Date;
     }>;
     update(body: UpdateVendorDto): Promise<{
+        contactPerson: string;
+        bankDetails: {
+            bankName: string;
+            accountHolder: string;
+            accountNumber: string;
+            ifscCode: string;
+            upiId: string;
+        };
         formattedCreatedAt: string;
         formattedTime: string;
         id: string;

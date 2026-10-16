@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateProcurementBillDto = exports.ProcurementItemDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
+const class_transformer_1 = require("class-transformer");
 class ProcurementItemDto {
 }
 exports.ProcurementItemDto = ProcurementItemDto;
@@ -23,11 +24,13 @@ __decorate([
 ], ProcurementItemDto.prototype, "name", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 25 }),
+    (0, class_transformer_1.Type)(() => Number),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], ProcurementItemDto.prototype, "qty", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 28 }),
+    (0, class_transformer_1.Type)(() => Number),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], ProcurementItemDto.prototype, "rate", void 0);
@@ -40,6 +43,7 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: 700 }),
     (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], ProcurementItemDto.prototype, "total", void 0);
@@ -89,26 +93,40 @@ __decorate([
     __metadata("design:type", String)
 ], CreateProcurementBillDto.prototype, "paymentMode", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 50 }),
+    (0, swagger_1.ApiPropertyOptional)({ example: 50 }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], CreateProcurementBillDto.prototype, "totalWeightKg", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 1500 }),
+    (0, swagger_1.ApiPropertyOptional)({ example: 1500 }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], CreateProcurementBillDto.prototype, "produceAmount", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: 250, default: 0 }),
     (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], CreateProcurementBillDto.prototype, "transportAmount", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 1750 }),
+    (0, swagger_1.ApiPropertyOptional)({ example: 1750 }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], CreateProcurementBillDto.prototype, "totalAmountPaid", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 1750 }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], CreateProcurementBillDto.prototype, "totalAmount", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=400' }),
     (0, class_validator_1.IsOptional)(),

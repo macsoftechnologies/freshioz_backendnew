@@ -29,6 +29,7 @@ export declare class ProcurementController {
         uuid: string;
         mandiLocation: string;
         createdAt: Date;
+        items: import("@prisma/client/runtime/library").JsonValue;
         billNumber: string;
         vendorId: string | null;
         vendorName: string;
@@ -43,7 +44,6 @@ export declare class ProcurementController {
         procuredAt: Date;
         procuredBy: string;
         slot: string;
-        items: import("@prisma/client/runtime/library").JsonValue;
     }[]>;
     findOne(id: string): Promise<{
         procuredAtFormatted: string;
@@ -71,6 +71,7 @@ export declare class ProcurementController {
         uuid: string;
         mandiLocation: string;
         createdAt: Date;
+        items: import("@prisma/client/runtime/library").JsonValue;
         billNumber: string;
         vendorId: string | null;
         vendorName: string;
@@ -85,7 +86,6 @@ export declare class ProcurementController {
         procuredAt: Date;
         procuredBy: string;
         slot: string;
-        items: import("@prisma/client/runtime/library").JsonValue;
     }>;
     create(dto: CreateProcurementBillDto): Promise<{
         procuredAtFormatted: string;
@@ -94,6 +94,7 @@ export declare class ProcurementController {
         uuid: string;
         mandiLocation: string;
         createdAt: Date;
+        items: import("@prisma/client/runtime/library").JsonValue;
         billNumber: string;
         vendorId: string | null;
         vendorName: string;
@@ -108,6 +109,5 @@ export declare class ProcurementController {
         procuredAt: Date;
         procuredBy: string;
         slot: string;
-        items: import("@prisma/client/runtime/library").JsonValue;
     }>;
 }

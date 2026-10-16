@@ -47,6 +47,11 @@ export class UpdateVendorDto {
   @IsString()
   accountHolder?: string;
 
+  @ApiPropertyOptional({ example: 'Manjunath Gowda' })
+  @IsOptional()
+  @IsString()
+  contactPerson?: string;
+
   @ApiPropertyOptional({ example: '30112233445' })
   @IsOptional()
   @IsString()
@@ -61,6 +66,10 @@ export class UpdateVendorDto {
   @IsOptional()
   @IsString()
   upiId?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  bankDetails?: any;
 
   @ApiPropertyOptional({ example: 'ACTIVE' })
   @IsOptional()

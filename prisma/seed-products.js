@@ -298,7 +298,7 @@ const PRODUCTS = [
     origin: 'Ananthapur Orchards',
     shelfLife: '4-6 Days',
     desc: 'Fragrant guava with a delightful blush pink interior and crunchy, mildly sweet flesh.',
-    image: 'https://images.unsplash.com/photo-1536511135899-7c87c2bf2ff5?w=600',
+    image: 'https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?w=600',
     badge: 'Pink Flesh',
     tags: ['Vitamin C Rich', 'Digestive Health'],
     gstPercent: 0.0,

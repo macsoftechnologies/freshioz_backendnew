@@ -319,7 +319,7 @@ const PRODUCTS = [
     origin: 'Ananthapur Orchards',
     shelfLife: '4-6 Days',
     desc: 'Fragrant guava with a delightful blush pink interior and crunchy, mildly sweet flesh.',
-    image: 'https://images.unsplash.com/photo-1536511135899-7c87c2bf2ff5?w=600',
+    image: 'https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?w=600',
     badge: 'Pink Flesh',
     tags: ['Vitamin C Rich', 'Digestive Health'],
     gstPercent: 0.0,
@@ -570,9 +570,148 @@ async function main() {
       create: item
     });
   }
-  console.log(`   ✓ All ${PRODUCTS.length} produce items active with zero regional strings and clean APMC Mandi pricing`);
+  // 6. Seed Primary Regional Warehouses (Agri-Logistics Hubs)
+  console.log('6. Seeding Primary Regional Agri-Logistics Hubs (Warehouses)...');
+  const warehouses = [
+    {
+      id: 'WH_BLR_SOUTH',
+      code: 'WH-01',
+      name: 'Freshioz Regional Hub South (HSR & Kudlu Gate)',
+      location: 'Kudlu Gate, Bengaluru South',
+      lat: 12.8893,
+      lng: 77.6394,
+      openTime: '05:00',
+      cutoffTime: '21:00',
+      capacityTons: 50.0,
+      managerName: 'Ramesh Kumar',
+      managerPhone: '9845012345',
+      status: 'ACTIVE'
+    },
+    {
+      id: 'WH_BLR_EAST',
+      code: 'WH-02',
+      name: 'Freshioz Regional Hub East (Whitefield & Kadugodi)',
+      location: 'Kadugodi Industrial Area, Whitefield',
+      lat: 12.9982,
+      lng: 77.7609,
+      openTime: '05:00',
+      cutoffTime: '21:00',
+      capacityTons: 60.0,
+      managerName: 'Suresh Babu',
+      managerPhone: '9845067890',
+      status: 'ACTIVE'
+    }
+  ];
 
-  console.log('\n🎉 Database reset & seed completed successfully! Only Produce, Units, Categories and Super Admin are retained.');
+  for (const wh of warehouses) {
+    await prisma.warehouse.upsert({
+      where: { id: wh.id },
+      update: wh,
+      create: wh
+    });
+  }
+  console.log('   ✓ Warehouses ready: WH-01 (South Bengaluru), WH-02 (East Bengaluru)');
+
+  // 7. Seed Grounded Societies & Gated Communities Pre-Linked to Warehouses
+  console.log('7. Seeding Active Apartment Communities & Societies...');
+  const societies = [
+    {
+      id: 'SOC_707',
+      name: 'Apartment-707',
+      type: 'APARTMENT',
+      address: '707, 24th Main, HSR Sector 2, Bengaluru',
+      lat: 12.9121,
+      lng: 77.6446,
+      warehouseId: 'WH_BLR_SOUTH',
+      secretaryName: 'Society Manager',
+      secretaryPhone: '9988776655',
+      totalFloors: 14,
+      totalUnits: 120,
+      deliveryMode: 'SOCIETY_DESK',
+      status: 'APPROVED',
+      commissionType: 'PERCENTAGE',
+      commissionValue: 3.5
+    },
+    {
+      id: 'SOC_GREEN_GLEN',
+      name: 'Green Glen Residency',
+      type: 'GATED_COMMUNITY',
+      address: 'Green Glen Layout, Bellandur, Bengaluru',
+      lat: 12.9299,
+      lng: 77.6748,
+      warehouseId: 'WH_BLR_SOUTH',
+      secretaryName: 'Operations Desk',
+      secretaryPhone: '9988776656',
+      totalFloors: 18,
+      totalUnits: 240,
+      deliveryMode: 'SOCIETY_DESK',
+      status: 'APPROVED',
+      commissionType: 'PERCENTAGE',
+      commissionValue: 3.5
+    },
+    {
+      id: 'SOC_PRESTIGE_LAKESIDE',
+      name: 'Prestige Lakeside Habitat',
+      type: 'GATED_COMMUNITY',
+      address: 'Varthur Main Road, Gunjur, Whitefield, Bengaluru',
+      lat: 12.9515,
+      lng: 77.7423,
+      warehouseId: 'WH_BLR_EAST',
+      secretaryName: 'Estate Office',
+      secretaryPhone: '9988776657',
+      totalFloors: 24,
+      totalUnits: 800,
+      deliveryMode: 'SOCIETY_DESK',
+      status: 'APPROVED',
+      commissionType: 'PERCENTAGE',
+      commissionValue: 3.5
+    }
+  ];
+
+  for (const soc of societies) {
+    await prisma.society.upsert({
+      where: { id: soc.id },
+      update: soc,
+      create: soc
+    });
+  }
+  console.log('   ✓ Societies ready: Apartment-707, Green Glen Residency, Prestige Lakeside Habitat');
+
+  // 8. Seed Verified Mandi Vendors
+  console.log('8. Seeding APMC Mandi Commission Vendors...');
+  const vendors = [
+    {
+      id: 'VND_MANDI_01',
+      name: 'Kolar APMC Tomato Mandi Yard',
+      phone: '9880011223',
+      category: 'COMMISSION_AGENT',
+      mandiLocation: 'Kolar APMC Mandi, Yard #14',
+      lat: 13.1367,
+      lng: 78.1347,
+      status: 'ACTIVE'
+    },
+    {
+      id: 'VND_MANDI_02',
+      name: 'Malur Greens Agri Farmers Cooperative',
+      phone: '9880044556',
+      category: 'FARMER_FPO',
+      mandiLocation: 'Malur Mandi Yard, Bengaluru Rural',
+      lat: 13.0041,
+      lng: 77.9404,
+      status: 'ACTIVE'
+    }
+  ];
+
+  for (const vnd of vendors) {
+    await prisma.vendor.upsert({
+      where: { id: vnd.id },
+      update: vnd,
+      create: vnd
+    });
+  }
+  console.log('   ✓ Vendors ready: Kolar APMC Mandi, Malur Greens Cooperative');
+
+  console.log('\n🎉 Industry Standard Database seed completed successfully! Warehouses, Societies, Vendors, Categories, Units, Products & Super Admin are active.');
 }
 
 main()

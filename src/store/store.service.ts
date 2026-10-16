@@ -230,7 +230,10 @@ export class StoreService {
     const skipped: string[] = [];
 
     try {
-      await this.prisma.$transaction(async (tx) => {
+      await retryTransactionOnDeadlock(() => {
+        persisted.length = 0;
+        skipped.length = 0;
+        return this.prisma.$transaction(async (tx) => {
         // 1. Warehouses (Super Admin or Warehouse Manager)
         if (Array.isArray(data.warehouses)) {
           if (isSuperAdmin || isWarehouseManager) {
@@ -556,31 +559,45 @@ export class StoreService {
       }
 
       // 7. Employees (Strictly Super Admin Only)
-      if (Array.isArray(data.employees)) {
+      if (Array.isArray(data.employees) && data.employees.length > 0) {
         if (isSuperAdmin) {
           persisted.push('employees');
           for (const e of data.employees) {
             if (!e.id || !e.email || !e.name) continue;
-            await tx.employee.upsert({
-              where: { id: e.id },
-              update: {
-                name: e.name,
-                phone: e.phone || '9999999999',
-                roles: e.roles || [e.role || 'SUPER_ADMIN'],
-                assignedWarehouseId: e.assignedWarehouseId || 'ALL',
-                status: e.status || 'ACTIVE',
-              },
-              create: {
-                id: e.id,
-                name: e.name,
-                phone: e.phone || '9999999999',
-                email: e.email.toLowerCase().trim(),
-                password: e.password || '$2b$10$EpRnTzVlqHNP0.fUbXUwSOyuiXe/QLSUG6x8ec5PkWNeqmPjUhyau',
-                roles: e.roles || [e.role || 'SUPER_ADMIN'],
-                assignedWarehouseId: e.assignedWarehouseId || 'ALL',
-                status: e.status || 'ACTIVE',
-              },
-            });
+            try {
+              const targetEmail = e.email.toLowerCase().trim();
+              const existingEmp = await tx.employee.findFirst({
+                where: { OR: [{ id: e.id }, { email: targetEmail }] },
+                select: { id: true, phone: true, roles: true, assignedWarehouseId: true, status: true },
+              });
+              if (existingEmp) {
+                await tx.employee.update({
+                  where: { id: existingEmp.id },
+                  data: {
+                    name: e.name,
+                    phone: e.phone || existingEmp.phone,
+                    roles: e.roles || existingEmp.roles,
+                    assignedWarehouseId: e.assignedWarehouseId || existingEmp.assignedWarehouseId,
+                    status: e.status || existingEmp.status,
+                  },
+                });
+              } else {
+                await tx.employee.create({
+                  data: {
+                    id: e.id,
+                    name: e.name,
+                    phone: e.phone || '9999999999',
+                    email: targetEmail,
+                    password: e.password || '$2b$10$EpRnTzVlqHNP0.fUbXUwSOyuiXe/QLSUG6x8ec5PkWNeqmPjUhyau',
+                    roles: e.roles || [e.role || 'SUPER_ADMIN'],
+                    assignedWarehouseId: e.assignedWarehouseId || 'ALL',
+                    status: e.status || 'ACTIVE',
+                  },
+                });
+              }
+            } catch (empErr: any) {
+              console.warn(`[Store Sync] Skipping employee sync item ${e.id}: ${empErr?.message || empErr}`);
+            }
           }
         } else {
           skipped.push('employees');
@@ -787,8 +804,9 @@ export class StoreService {
         );
       }
     }, {
-        timeout: 30000,
-        maxWait: 5000,
+      timeout: 30000,
+      maxWait: 5000,
+    });
       });
     } catch (err: any) {
       if (err instanceof ForbiddenException) throw err;
@@ -802,5 +820,23 @@ export class StoreService {
       skipped,
       syncedAtIST: toISTFullString(new Date()),
     };
+  }
+}
+
+function isRetryableTransactionConflict(error: any): boolean {
+  const errorCode = error?.code || error?.meta?.code || error?.cause?.code;
+  return errorCode === 'P2034' || errorCode === '40P01' || /\b40P01\b/.test(error?.message || '');
+}
+
+async function retryTransactionOnDeadlock<T>(operation: () => Promise<T>): Promise<T> {
+  for (let attempt = 1; ; attempt += 1) {
+    try {
+      return await operation();
+    } catch (error) {
+      if (!isRetryableTransactionConflict(error) || attempt >= 3) {
+        throw error;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 100 * attempt));
+    }
   }
 }

@@ -6,7 +6,7 @@ const PRODUCTS = [
   {
     id: 'PRD_VEG_TOMATO_DESI',
     name: 'Desi Country Tomato (Nati Tomato)',
-    kannadaName: 'ನಾಟಿ ಟೊಮೆಟೊ (నాటి టొమేటో)',
+    kannadaName: null,
     categoryId: 'VEGETABLES',
     retailUnit: '1 kg',
     retailPrice: 32.0,
@@ -26,7 +26,7 @@ const PRODUCTS = [
   {
     id: 'PRD_VEG_TOMATO_HYBRID',
     name: 'Hybrid Cooking Tomato (Firm Grade-A)',
-    kannadaName: 'ಹೈಬ್ರಿಡ್ ಟೊಮೆಟೊ (హైబ్రిడ్ టొమేటో)',
+    kannadaName: null,
     categoryId: 'VEGETABLES',
     retailUnit: '1 kg',
     retailPrice: 28.0,
@@ -46,7 +46,7 @@ const PRODUCTS = [
   {
     id: 'PRD_VEG_ONION_NASHIK',
     name: 'Fresh Red Onion (Nashik Quality)',
-    kannadaName: 'ನಾಶಿಕ್ ಕೆಂಪು ಈರುಳ್ಳಿ (ఎర్ర ఉల్లిపాయ)',
+    kannadaName: null,
     categoryId: 'VEGETABLES',
     retailUnit: '1 kg',
     retailPrice: 38.0,
@@ -66,7 +66,7 @@ const PRODUCTS = [
   {
     id: 'PRD_VEG_POTATO_JYOTI',
     name: 'New Crop Jyoti Potato (Mud-Free)',
-    kannadaName: 'ಜ್ಯೋತಿ ಆಲೂಗಡ್ಡೆ (బంగాళాదుంప)',
+    kannadaName: null,
     categoryId: 'VEGETABLES',
     retailUnit: '1 kg',
     retailPrice: 30.0,
@@ -86,7 +86,7 @@ const PRODUCTS = [
   {
     id: 'PRD_VEG_CAPSICUM_GREEN',
     name: 'Crisp Green Capsicum (Bell Pepper)',
-    kannadaName: 'ಹಸಿರು ಕ್ಯಾಪ್ಸಿಕಂ (బెంగళూరు మిరప)',
+    kannadaName: null,
     categoryId: 'VEGETABLES',
     retailUnit: '500 g',
     retailPrice: 34.0,
@@ -106,7 +106,7 @@ const PRODUCTS = [
   {
     id: 'PRD_VEG_BHINDI_OKRA',
     name: "Tender Green Lady's Finger (Bhindi / Okra)",
-    kannadaName: 'ಎಳೆ ಬೆಂಡೆಕಾಯಿ (లేత బెండకాయ)',
+    kannadaName: null,
     categoryId: 'VEGETABLES',
     retailUnit: '500 g',
     retailPrice: 26.0,
@@ -126,7 +126,7 @@ const PRODUCTS = [
   {
     id: 'PRD_VEG_CARROT_OOTY',
     name: 'Ooty Tender Carrot (English Orange)',
-    kannadaName: 'ಊಟಿ ಕ್ಯಾರೆಟ್ (ఊటీ క్యారెట్)',
+    kannadaName: null,
     categoryId: 'VEGETABLES',
     retailUnit: '500 g',
     retailPrice: 36.0,
@@ -146,7 +146,7 @@ const PRODUCTS = [
   {
     id: 'PRD_VEG_CAULIFLOWER_WHOLE',
     name: 'Farm Cauliflower (Tight White Curd)',
-    kannadaName: 'ಹೂಕೋಸು (కాలీఫ్లవర్)',
+    kannadaName: null,
     categoryId: 'VEGETABLES',
     retailUnit: '1 pc',
     retailPrice: 35.0,
@@ -166,7 +166,7 @@ const PRODUCTS = [
   {
     id: 'PRD_VEG_BOTTLE_GOURD',
     name: 'Tender Bottle Gourd (Sorakaya / Lauki)',
-    kannadaName: 'ಸೋರೆಕಾಯಿ (సొరకాయ / ఆనపకాయ)',
+    kannadaName: null,
     categoryId: 'VEGETABLES',
     retailUnit: '1 pc',
     retailPrice: 28.0,
@@ -186,7 +186,7 @@ const PRODUCTS = [
   {
     id: 'PRD_VEG_GREEN_PEAS',
     name: 'Fresh Green Peas (Ooty Sweet Matar)',
-    kannadaName: 'ಸಿಹಿ ಹಸಿರು ಬಟಾಣಿ (పచ్చి బఠానీ)',
+    kannadaName: null,
     categoryId: 'VEGETABLES',
     retailUnit: '500 g',
     retailPrice: 48.0,
@@ -208,7 +208,7 @@ const PRODUCTS = [
   {
     id: 'PRD_FRT_BANANA_ROBUSTA',
     name: 'Robusta Golden Banana (Premium Table Grade)',
-    kannadaName: 'ಪಚ್ಚ ಬಾಳೆಹಣ್ಣು (రోబస్టా అరటి పండు)',
+    kannadaName: null,
     categoryId: 'FRUITS',
     retailUnit: '1 kg',
     retailPrice: 38.0,
@@ -228,7 +228,7 @@ const PRODUCTS = [
   {
     id: 'PRD_FRT_APPLE_SHIMLA',
     name: 'Royal Delicious Shimla Apple',
-    kannadaName: 'ಶಿಮ್ಲಾ ಸೇಬು (రాయల్ షిమ్లా ఆపిల్)',
+    kannadaName: null,
     categoryId: 'FRUITS',
     retailUnit: '1 kg',
     retailPrice: 145.0,
@@ -248,7 +248,7 @@ const PRODUCTS = [
   {
     id: 'PRD_FRT_ORANGE_NAGPUR',
     name: 'Nagpur Sweet Orange (Mosambi / Mandarin)',
-    kannadaName: 'ನಾಗಪುರ ಕಿತ್ತಳೆ (నాగ్‌పూర్ బత్తాయి)',
+    kannadaName: null,
     categoryId: 'FRUITS',
     retailUnit: '1 kg',
     retailPrice: 58.0,
@@ -268,7 +268,7 @@ const PRODUCTS = [
   {
     id: 'PRD_FRT_POMEGRANATE_RUBY',
     name: 'Ruby Red Pomegranate (Bhagawa Anaar)',
-    kannadaName: 'ದಾಳಿಂಬೆ (భగవా దానిమ్మ)',
+    kannadaName: null,
     categoryId: 'FRUITS',
     retailUnit: '1 kg',
     retailPrice: 148.0,
@@ -288,7 +288,7 @@ const PRODUCTS = [
   {
     id: 'PRD_FRT_GUAVA_PINK',
     name: 'Taiwan Pink Guava (Seeded & Crisp)',
-    kannadaName: 'ಗುಲಾಬಿ ಸೀಬೆಹಣ್ಣು (పింక్ జామకాయ)',
+    kannadaName: null,
     categoryId: 'FRUITS',
     retailUnit: '1 kg',
     retailPrice: 65.0,
@@ -308,7 +308,7 @@ const PRODUCTS = [
   {
     id: 'PRD_FRT_PAPAYA_RED_LADY',
     name: 'Sweet Papaya (Honey Drop / Red Lady)',
-    kannadaName: 'ರೆಡ್ ಲೇಡಿ ಪಪ್ಪಾಯಿ (మధుర బొప్పాయి)',
+    kannadaName: null,
     categoryId: 'FRUITS',
     retailUnit: '1 pc',
     retailPrice: 45.0,
@@ -328,7 +328,7 @@ const PRODUCTS = [
   {
     id: 'PRD_FRT_GRAPES_GREEN',
     name: 'Kashmir Seedless Green Grapes (Sonaka)',
-    kannadaName: 'ಬೀಜವಿಲ್ಲದ ದ್ರಾಕ್ಷಿ (విత్తనాలు లేని ద్రాక్ష)',
+    kannadaName: null,
     categoryId: 'FRUITS',
     retailUnit: '500 g',
     retailPrice: 68.0,
@@ -348,7 +348,7 @@ const PRODUCTS = [
   {
     id: 'PRD_FRT_PINEAPPLE_QUEEN',
     name: 'Queen Pineapple (Whole Golden Sweet)',
-    kannadaName: 'ಅನಾನಸ್ (తీపి అనాస పండు)',
+    kannadaName: null,
     categoryId: 'FRUITS',
     retailUnit: '1 pc',
     retailPrice: 52.0,
@@ -368,7 +368,7 @@ const PRODUCTS = [
   {
     id: 'PRD_FRT_TENDER_COCONUT',
     name: 'Pollachi Tender Coconut (Elaneer / Kobbari)',
-    kannadaName: 'ಪೊಲ್ಲಾಚಿ ಎಳನೀರು (లేత కొబ్బరి బొండం)',
+    kannadaName: null,
     categoryId: 'FRUITS',
     retailUnit: '1 pc',
     retailPrice: 46.0,
@@ -388,7 +388,7 @@ const PRODUCTS = [
   {
     id: 'PRD_FRT_WATERMELON_KIRAN',
     name: 'Sweet Striped Watermelon (Kiran Quality)',
-    kannadaName: 'ಕಲ್ಲಂಗಡಿ (తీపి పుచ్చకాయ)',
+    kannadaName: null,
     categoryId: 'FRUITS',
     retailUnit: '1 pc',
     retailPrice: 68.0,
@@ -429,7 +429,7 @@ async function seed() {
       where: { id: item.id },
       update: {
         name: item.name,
-        kannadaName: item.kannadaName,
+        kannadaName: null,
         categoryId: item.categoryId,
         retailUnit: item.retailUnit,
         retailPrice: item.retailPrice,

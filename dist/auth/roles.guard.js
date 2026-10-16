@@ -35,6 +35,9 @@ let RolesGuard = class RolesGuard {
         if (user.roles?.includes('SUPER_ADMIN')) {
             return true;
         }
+        if (user.roles?.includes('WAREHOUSE_MANAGER') && requiredRoles.includes('PROCUREMENT_OFFICER')) {
+            return true;
+        }
         const hasRole = requiredRoles.some((role) => user.roles?.includes(role));
         if (!hasRole) {
             throw new common_1.ForbiddenException(`Access denied. Requires one of the following roles: [${requiredRoles.join(', ')}]`);

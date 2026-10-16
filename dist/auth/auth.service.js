@@ -40,13 +40,17 @@ let AuthService = class AuthService {
                 }
                 const isValid = await this.comparePassword(password, employee.password);
                 if (isValid) {
+                    const employeeRoles = Array.isArray(employee.roles) ? [...employee.roles] : [];
+                    if (employeeRoles.includes('WAREHOUSE_MANAGER') && !employeeRoles.includes('PROCUREMENT_OFFICER')) {
+                        employeeRoles.push('PROCUREMENT_OFFICER');
+                    }
                     const userPayload = {
                         id: employee.id,
                         uuid: employee.uuid,
                         name: employee.name,
                         email: employee.email,
                         phone: employee.phone,
-                        roles: employee.roles,
+                        roles: employeeRoles,
                         assignedWarehouseId: employee.assignedWarehouseId,
                         type: 'EMPLOYEE',
                     };

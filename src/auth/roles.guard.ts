@@ -30,6 +30,11 @@ export class RolesGuard implements CanActivate {
       return true;
     }
 
+    // Warehouse & Procurement Manager has full procurement officer privileges
+    if (user.roles?.includes('WAREHOUSE_MANAGER') && requiredRoles.includes('PROCUREMENT_OFFICER')) {
+      return true;
+    }
+
     const hasRole = requiredRoles.some((role) => user.roles?.includes(role));
     if (!hasRole) {
       throw new ForbiddenException(

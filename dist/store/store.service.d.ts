@@ -30,8 +30,6 @@ export declare class StoreService {
             name: string;
             lat: number | null;
             lng: number | null;
-            bankName: string | null;
-            accountHolder: string | null;
             status: string;
             createdAt: Date;
             updatedAt: Date;
@@ -47,6 +45,8 @@ export declare class StoreService {
             commissionValue: number;
             balanceEarned: number;
             totalOrdersDelivered: number;
+            bankName: string | null;
+            accountHolder: string | null;
             branch: string | null;
         }[];
         orders: any[];
@@ -62,9 +62,9 @@ export declare class StoreService {
             status: string;
             createdAt: Date;
             updatedAt: Date;
-            description: string | null;
             slug: string;
             icon: string;
+            description: string | null;
             sortOrder: number;
         }[];
         units: {

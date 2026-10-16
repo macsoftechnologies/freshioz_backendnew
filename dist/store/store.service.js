@@ -358,6 +358,14 @@ let StoreService = class StoreService {
                             for (const s of data.societies) {
                                 if (!s.id || !s.name)
                                     continue;
+                                let validWarehouseId = null;
+                                if (s.warehouseId) {
+                                    const wh = await tx.warehouse.findFirst({
+                                        where: { OR: [{ id: s.warehouseId }, { uuid: s.warehouseId }] },
+                                    });
+                                    if (wh)
+                                        validWarehouseId = wh.id;
+                                }
                                 await tx.society.upsert({
                                     where: { id: s.id },
                                     update: {
@@ -366,7 +374,7 @@ let StoreService = class StoreService {
                                         status: s.status || 'APPROVED',
                                         commissionType: s.commissionType || 'PERCENTAGE',
                                         commissionValue: parseFloat(s.commissionValue) || 3.5,
-                                        ...(s.warehouseId !== undefined && { warehouseId: s.warehouseId }),
+                                        warehouseId: validWarehouseId,
                                     },
                                     create: {
                                         id: s.id,
@@ -375,7 +383,7 @@ let StoreService = class StoreService {
                                         status: s.status || 'APPROVED',
                                         commissionType: s.commissionType || 'PERCENTAGE',
                                         commissionValue: parseFloat(s.commissionValue) || 3.5,
-                                        warehouseId: s.warehouseId || null,
+                                        warehouseId: validWarehouseId,
                                         secretaryName: s.secretaryName || s.primaryContact || null,
                                         secretaryPhone: s.secretaryPhone || s.phone || null,
                                     },
@@ -436,39 +444,53 @@ let StoreService = class StoreService {
                             for (const b of data.procurementLogs) {
                                 if (!b.id || !b.destinationWarehouseId)
                                     continue;
-                                await tx.procurementBill.upsert({
-                                    where: { id: b.id },
-                                    update: {
-                                        vendorName: b.vendorName || 'Mandi Commission Agent',
-                                        mandiLocation: b.mandiLocation || 'Kolar APMC Mandi',
-                                        destinationName: b.destinationName || 'Bengaluru Hub',
-                                        paymentMode: b.paymentMode || 'IMPS_TRANSFER',
-                                        totalWeightKg: parseFloat(b.totalWeightKg) || 0,
-                                        produceAmount: parseFloat(b.produceAmount) || 0,
-                                        transportAmount: parseFloat(b.transportAmount) || 0,
-                                        totalAmountPaid: parseFloat(b.totalAmountPaid) || 0,
-                                        procuredBy: b.procuredBy || 'Procurement Officer',
-                                        slot: b.slot || 'Morning Fresh Slot',
-                                        items: b.items || [],
-                                    },
-                                    create: {
-                                        id: b.id,
-                                        billNumber: b.billNumber || b.id,
-                                        vendorId: b.vendorId || null,
-                                        vendorName: b.vendorName || 'Mandi Commission Agent',
-                                        mandiLocation: b.mandiLocation || 'Kolar APMC Mandi',
-                                        destinationWarehouseId: b.destinationWarehouseId,
-                                        destinationName: b.destinationName || 'Bengaluru Hub',
-                                        paymentMode: b.paymentMode || 'IMPS_TRANSFER',
-                                        totalWeightKg: parseFloat(b.totalWeightKg) || 0,
-                                        produceAmount: parseFloat(b.produceAmount) || 0,
-                                        transportAmount: parseFloat(b.transportAmount) || 0,
-                                        totalAmountPaid: parseFloat(b.totalAmountPaid) || 0,
-                                        procuredBy: b.procuredBy || 'Procurement Officer',
-                                        slot: b.slot || 'Morning Fresh Slot',
-                                        items: b.items || [],
-                                    },
-                                });
+                                try {
+                                    let validVendorId = null;
+                                    if (b.vendorId) {
+                                        const ven = await tx.vendor.findFirst({
+                                            where: { OR: [{ id: b.vendorId }, { uuid: b.vendorId }] },
+                                        });
+                                        if (ven)
+                                            validVendorId = ven.id;
+                                    }
+                                    await tx.procurementBill.upsert({
+                                        where: { id: b.id },
+                                        update: {
+                                            vendorId: validVendorId,
+                                            vendorName: b.vendorName || 'Mandi Commission Agent',
+                                            mandiLocation: b.mandiLocation || 'Kolar APMC Mandi',
+                                            destinationName: b.destinationName || 'Bengaluru Hub',
+                                            paymentMode: b.paymentMode || 'IMPS_TRANSFER',
+                                            totalWeightKg: parseFloat(b.totalWeightKg) || 0,
+                                            produceAmount: parseFloat(b.produceAmount) || 0,
+                                            transportAmount: parseFloat(b.transportAmount) || 0,
+                                            totalAmountPaid: parseFloat(b.totalAmountPaid) || 0,
+                                            procuredBy: b.procuredBy || 'Procurement Officer',
+                                            slot: b.slot || 'Morning Fresh Slot',
+                                            items: b.items || [],
+                                        },
+                                        create: {
+                                            id: b.id,
+                                            billNumber: b.billNumber || b.id,
+                                            vendorId: validVendorId,
+                                            vendorName: b.vendorName || 'Mandi Commission Agent',
+                                            mandiLocation: b.mandiLocation || 'Kolar APMC Mandi',
+                                            destinationWarehouseId: b.destinationWarehouseId,
+                                            destinationName: b.destinationName || 'Bengaluru Hub',
+                                            paymentMode: b.paymentMode || 'IMPS_TRANSFER',
+                                            totalWeightKg: parseFloat(b.totalWeightKg) || 0,
+                                            produceAmount: parseFloat(b.produceAmount) || 0,
+                                            transportAmount: parseFloat(b.transportAmount) || 0,
+                                            totalAmountPaid: parseFloat(b.totalAmountPaid) || 0,
+                                            procuredBy: b.procuredBy || 'Procurement Officer',
+                                            slot: b.slot || 'Morning Fresh Slot',
+                                            items: b.items || [],
+                                        },
+                                    });
+                                }
+                                catch (procErr) {
+                                    console.warn(`[Store Sync] Skipping procurement bill ${b.id}:`, procErr?.message || procErr);
+                                }
                             }
                         }
                         else {
@@ -481,52 +503,74 @@ let StoreService = class StoreService {
                             for (const o of data.orders) {
                                 if (!o.id || !o.userPhone)
                                     continue;
-                                await tx.user.upsert({
-                                    where: { phone: o.userPhone },
-                                    update: {
-                                        name: o.userName || 'Customer',
-                                    },
-                                    create: {
-                                        id: `USR_${o.userPhone}`,
-                                        phone: o.userPhone,
-                                        name: o.userName || 'Customer',
-                                        societyId: o.societyId || null,
-                                        flatNo: o.flatNo || null,
-                                    },
-                                });
-                                await tx.order.upsert({
-                                    where: { id: o.id },
-                                    update: {
-                                        status: o.status || 'CONFIRMED',
-                                        paymentStatus: o.paymentStatus || 'PAID',
-                                        ...(o.status === 'DELIVERED' && { deliveredAt: new Date() }),
-                                        ...(o.codCollectedAmount !== undefined && { codCollectedAmount: parseFloat(o.codCollectedAmount) }),
-                                        ...(o.codCollectedBy && { codCollectedBy: o.codCollectedBy }),
-                                    },
-                                    create: {
-                                        id: o.id,
-                                        userId: o.userPhone,
-                                        userName: o.userName || 'Customer',
-                                        userPhone: o.userPhone,
-                                        societyId: o.societyId || null,
-                                        societyName: o.societyName || 'Direct Resident Delivery',
-                                        flatNo: o.flatNo || null,
-                                        warehouseId: o.warehouseId || null,
-                                        warehouseCode: o.warehouseCode || null,
-                                        orderType: o.orderType || 'RETAIL',
-                                        subtotal: parseFloat(o.subtotal) || 0,
-                                        bulkSavings: parseFloat(o.bulkSavings) || 0,
-                                        deliveryFee: parseFloat(o.deliveryFee) || 0,
-                                        gstAmount: parseFloat(o.gstAmount) || 0,
-                                        totalAmount: parseFloat(o.totalAmount) || 0,
-                                        deliveryDate: o.deliveryDate || '16/10/2026',
-                                        deliverySlot: o.deliverySlot || 'Morning 06:00 AM - 08:30 AM',
-                                        status: o.status || 'CONFIRMED',
-                                        paymentMethod: o.paymentMethod || 'UPI',
-                                        paymentStatus: o.paymentStatus || 'PAID',
-                                        societyCommissionEarned: parseFloat(o.societyCommissionEarned) || 0,
-                                    },
-                                });
+                                try {
+                                    let validSocietyId = null;
+                                    if (o.societyId) {
+                                        const soc = await tx.society.findFirst({
+                                            where: { OR: [{ id: o.societyId }, { uuid: o.societyId }] },
+                                        });
+                                        if (soc)
+                                            validSocietyId = soc.id;
+                                    }
+                                    let validWarehouseId = null;
+                                    if (o.warehouseId) {
+                                        const wh = await tx.warehouse.findFirst({
+                                            where: { OR: [{ id: o.warehouseId }, { uuid: o.warehouseId }] },
+                                        });
+                                        if (wh)
+                                            validWarehouseId = wh.id;
+                                    }
+                                    await tx.user.upsert({
+                                        where: { phone: o.userPhone },
+                                        update: {
+                                            name: o.userName || 'Customer',
+                                            ...(validSocietyId ? { societyId: validSocietyId } : {}),
+                                        },
+                                        create: {
+                                            id: `USR_${o.userPhone}`,
+                                            phone: o.userPhone,
+                                            name: o.userName || 'Customer',
+                                            societyId: validSocietyId,
+                                            flatNo: o.flatNo || null,
+                                        },
+                                    });
+                                    await tx.order.upsert({
+                                        where: { id: o.id },
+                                        update: {
+                                            status: o.status || 'CONFIRMED',
+                                            paymentStatus: o.paymentStatus || 'PAID',
+                                            ...(o.status === 'DELIVERED' && { deliveredAt: new Date() }),
+                                            ...(o.codCollectedAmount !== undefined && { codCollectedAmount: parseFloat(o.codCollectedAmount) }),
+                                            ...(o.codCollectedBy && { codCollectedBy: o.codCollectedBy }),
+                                        },
+                                        create: {
+                                            id: o.id,
+                                            userId: o.userPhone,
+                                            userName: o.userName || 'Customer',
+                                            userPhone: o.userPhone,
+                                            societyId: validSocietyId,
+                                            societyName: o.societyName || 'Direct Resident Delivery',
+                                            flatNo: o.flatNo || null,
+                                            warehouseId: validWarehouseId,
+                                            warehouseCode: o.warehouseCode || null,
+                                            orderType: o.orderType || 'RETAIL',
+                                            subtotal: parseFloat(o.subtotal) || 0,
+                                            bulkSavings: parseFloat(o.bulkSavings) || 0,
+                                            deliveryFee: parseFloat(o.deliveryFee) || 0,
+                                            gstAmount: parseFloat(o.gstAmount) || 0,
+                                            totalAmount: parseFloat(o.totalAmount) || 0,
+                                            deliveryDate: o.deliveryDate || '16/10/2026',
+                                            deliverySlot: o.deliverySlot || 'Morning 06:00 AM - 08:30 AM',
+                                            status: o.status || 'CONFIRMED',
+                                            paymentMethod: o.paymentMethod || 'UPI',
+                                            paymentStatus: o.paymentStatus || 'PAID',
+                                            societyCommissionEarned: parseFloat(o.societyCommissionEarned) || 0,
+                                        },
+                                    });
+                                }
+                                catch (ordErr) {
+                                    console.warn(`[Store Sync] Skipping order sync for ${o.id}:`, ordErr?.message || ordErr);
+                                }
                             }
                         }
                         else {

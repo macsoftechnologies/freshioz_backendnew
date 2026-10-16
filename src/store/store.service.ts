@@ -195,7 +195,8 @@ export class StoreService {
     const formattedProducts = products.map((p: any) => ({
       ...p,
       category: p.category?.name || p.categoryId || 'VEGETABLES',
-      categoryId: p.categoryId,
+      categoryId: p.categoryId || p.category?.id || 'VEGETABLES',
+      categoryName: p.category?.name || 'Vegetables',
     }));
 
     return {

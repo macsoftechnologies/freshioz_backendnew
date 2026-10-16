@@ -2,10 +2,10 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsString, IsNotEmpty, IsOptional, IsNumber } from 'class-validator';
 
 export class UpdateWarehouseDto {
-  @ApiProperty({ example: 'FRZ_WH_01' })
-  @IsNotEmpty()
+  @ApiPropertyOptional({ example: 'FRZ_WH_01' })
+  @IsOptional()
   @IsString()
-  id!: string;
+  id?: string;
 
   @ApiPropertyOptional({ example: 'Bengaluru North Hub (Hebbal)' })
   @IsOptional()

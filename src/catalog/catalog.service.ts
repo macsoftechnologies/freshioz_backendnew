@@ -9,16 +9,28 @@ import { DELIVERY_CONFIG } from './delivery.constants';
  */
 function parseTargetDeliveryDateRange(dateStr?: string) {
   if (dateStr) {
-    let d: Date;
+    let year: number, month: number, day: number;
     if (dateStr.includes('/')) {
-      const [day, month, year] = dateStr.split('/').map(Number);
-      d = new Date(year, month - 1, day);
+      const [d, m, y] = dateStr.split('/').map(Number);
+      day = d;
+      month = m;
+      year = y;
+    } else if (dateStr.includes('-')) {
+      const parts = dateStr.split('-').map(Number);
+      if (parts[0] > 1000) {
+        [year, month, day] = parts;
+      } else {
+        [day, month, year] = parts;
+      }
     } else {
-      d = new Date(dateStr);
+      const parsed = new Date(dateStr);
+      year = parsed.getFullYear();
+      month = parsed.getMonth() + 1;
+      day = parsed.getDate();
     }
-    if (isNaN(d.getTime())) d = new Date();
-    const start = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0);
-    const end = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
+    const start = new Date(year, month - 1, day, 0, 0, 0, 0);
+    const end = new Date(year, month - 1, day, 23, 59, 59, 999);
+    const d = new Date(year, month - 1, day);
     return { start, end, dateObj: d };
   }
 

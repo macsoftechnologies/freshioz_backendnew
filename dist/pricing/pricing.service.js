@@ -129,7 +129,7 @@ let PricingService = class PricingService {
                 const bq = parseFloat(p.bulkMinQty) || 0;
                 const bd = parseFloat(p.bulkDiscountPercent) || 0;
                 const gst = parseFloat(p.gstPercent) || 0;
-                if (isToday) {
+                if (publishDate >= todayStart) {
                     await tx.product.update({
                         where: { id: prodId },
                         data: {

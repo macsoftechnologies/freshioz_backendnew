@@ -134,8 +134,8 @@ export class PricingService {
         const bd = parseFloat(p.bulkDiscountPercent) || 0;
         const gst = parseFloat(p.gstPercent) || 0;
 
-        // If publishing for today, update active product catalog immediately
-        if (isToday) {
+        // If publishing for current or upcoming run, update active product catalog baseline immediately
+        if (publishDate >= todayStart) {
           await tx.product.update({
             where: { id: prodId },
             data: {

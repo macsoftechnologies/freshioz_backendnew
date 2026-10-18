@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "ts-node src/main.ts",
     "start": "ts-node src/main.ts",
-    "build": "tsc",
+    "build": "prisma generate && tsc",
     "start:prod": "node dist/main",
     "prisma:generate": "prisma generate",
     "db:push": "prisma db push",

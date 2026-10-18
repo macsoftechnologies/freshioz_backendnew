@@ -30,6 +30,7 @@ export declare class CatalogController {
             status: string;
             desc: string;
             name: string;
+            tags: string[];
             kannadaName: string;
             categoryId: string;
             retailUnit: string;
@@ -37,7 +38,6 @@ export declare class CatalogController {
             shelfLife: string;
             image: string;
             badge: string;
-            tags: string[];
             inStock: boolean;
         }[];
         societies: {

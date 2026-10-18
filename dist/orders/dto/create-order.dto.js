@@ -181,6 +181,18 @@ __decorate([
     __metadata("design:type", String)
 ], CreateOrderDto.prototype, "paymentStatus", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'REWARD-8821-1234' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateOrderDto.prototype, "discountCode", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 50 }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], CreateOrderDto.prototype, "discountAmount", void 0);
+__decorate([
     (0, swagger_1.ApiProperty)({ type: [CreateOrderItemDto] }),
     (0, class_validator_1.IsArray)(),
     (0, class_validator_1.ValidateNested)({ each: true }),

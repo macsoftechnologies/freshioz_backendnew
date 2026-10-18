@@ -1,0 +1,122 @@
+import { ReviewsService, CreateReviewDto, UpdateReviewDto } from './reviews.service';
+export declare class ReviewsController {
+    private readonly reviewsService;
+    constructor(reviewsService: ReviewsService);
+    createReview(req: any, body: CreateReviewDto): Promise<{
+        id: string;
+        uuid: string;
+        type: string;
+        rating: number;
+        comment: string | null;
+        userId: string;
+        userName: string;
+        userPhone: string;
+        productName: string | null;
+        status: string;
+        flagged: boolean;
+        moderatedById: string | null;
+        moderatedAt: Date | null;
+        createdAt: Date;
+        updatedAt: Date;
+        orderId: string | null;
+        productId: string | null;
+    }>;
+    updateReview(req: any, id: string, body: UpdateReviewDto): Promise<{
+        id: string;
+        uuid: string;
+        type: string;
+        rating: number;
+        comment: string | null;
+        userId: string;
+        userName: string;
+        userPhone: string;
+        productName: string | null;
+        status: string;
+        flagged: boolean;
+        moderatedById: string | null;
+        moderatedAt: Date | null;
+        createdAt: Date;
+        updatedAt: Date;
+        orderId: string | null;
+        productId: string | null;
+    }>;
+    getMyReviews(req: any): Promise<{
+        id: string;
+        uuid: string;
+        type: string;
+        rating: number;
+        comment: string | null;
+        userId: string;
+        userName: string;
+        userPhone: string;
+        productName: string | null;
+        status: string;
+        flagged: boolean;
+        moderatedById: string | null;
+        moderatedAt: Date | null;
+        createdAt: Date;
+        updatedAt: Date;
+        orderId: string | null;
+        productId: string | null;
+    }[]>;
+    getProductReviews(productId: string): Promise<{
+        productId: string;
+        averageRating: number;
+        totalReviews: number;
+        reviews: {
+            id: string;
+            rating: number;
+            comment: string;
+            userName: string;
+            createdAt: Date;
+        }[];
+    }>;
+    getWebsiteReviews(): Promise<{
+        id: string;
+        rating: number;
+        comment: string;
+        userName: string;
+        createdAt: Date;
+    }[]>;
+    getAdminReviews(type?: string, status?: string, flagged?: string): Promise<{
+        id: string;
+        uuid: string;
+        type: string;
+        rating: number;
+        comment: string | null;
+        userId: string;
+        userName: string;
+        userPhone: string;
+        productName: string | null;
+        status: string;
+        flagged: boolean;
+        moderatedById: string | null;
+        moderatedAt: Date | null;
+        createdAt: Date;
+        updatedAt: Date;
+        orderId: string | null;
+        productId: string | null;
+    }[]>;
+    moderateReview(req: any, id: string, body: {
+        status: 'APPROVED' | 'HIDDEN';
+        flagged?: boolean;
+    }): Promise<{
+        id: string;
+        uuid: string;
+        type: string;
+        rating: number;
+        comment: string | null;
+        userId: string;
+        userName: string;
+        userPhone: string;
+        productName: string | null;
+        status: string;
+        flagged: boolean;
+        moderatedById: string | null;
+        moderatedAt: Date | null;
+        createdAt: Date;
+        updatedAt: Date;
+        orderId: string | null;
+        productId: string | null;
+    }>;
+}

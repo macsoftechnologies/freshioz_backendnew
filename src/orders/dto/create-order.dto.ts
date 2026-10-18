@@ -139,6 +139,16 @@ export class CreateOrderDto {
   @IsString()
   paymentStatus?: string;
 
+  @ApiPropertyOptional({ example: 'REWARD-8821-1234' })
+  @IsOptional()
+  @IsString()
+  discountCode?: string;
+
+  @ApiPropertyOptional({ example: 50 })
+  @IsOptional()
+  @IsNumber()
+  discountAmount?: number;
+
   @ApiProperty({ type: [CreateOrderItemDto] })
   @IsArray()
   @ValidateNested({ each: true })

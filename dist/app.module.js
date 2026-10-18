@@ -26,6 +26,8 @@ const uploads_module_1 = require("./uploads/uploads.module");
 const categories_module_1 = require("./categories/categories.module");
 const units_module_1 = require("./units/units.module");
 const catalog_module_1 = require("./catalog/catalog.module");
+const reviews_module_1 = require("./reviews/reviews.module");
+const customer_discounts_module_1 = require("./customer-discounts/customer-discounts.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -50,6 +52,8 @@ exports.AppModule = AppModule = __decorate([
             store_module_1.StoreModule,
             uploads_module_1.UploadsModule,
             catalog_module_1.CatalogModule,
+            reviews_module_1.ReviewsModule,
+            customer_discounts_module_1.CustomerDiscountsModule,
         ],
     })
 ], AppModule);

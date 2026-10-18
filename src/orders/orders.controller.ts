@@ -43,8 +43,11 @@ export class OrdersController {
       const partnerSocId = user.societyId || user.id;
       return this.ordersService.findAll({ status, societyId: partnerSocId, phone, warehouseId });
     }
-    // 3. For internal staff/admin, allow any filter
-    return this.ordersService.findAll({ status, societyId, phone, warehouseId });
+    // 3. For internal staff: if user has an assigned warehouse and is not Super Admin, scope by warehouseId
+    const isSuperAdmin = user?.roles?.includes('SUPER_ADMIN') || user?.role === 'SUPER_ADMIN';
+    const effectiveWarehouseId = (!isSuperAdmin && user?.warehouseId) ? user.warehouseId : warehouseId;
+
+    return this.ordersService.findAll({ status, societyId, phone, warehouseId: effectiveWarehouseId });
   }
 
   @ApiBearerAuth()
@@ -64,6 +67,12 @@ export class OrdersController {
     // Society Partner can only view orders for their society
     if (user?.type === 'PARTNER' && user?.societyId && order.societyId !== user.societyId) {
       throw new ForbiddenException('Access denied. You can only view orders from your assigned society.');
+    }
+
+    // Warehouse staff can only view orders assigned to their warehouse
+    const isSuperAdmin = user?.roles?.includes('SUPER_ADMIN') || user?.role === 'SUPER_ADMIN';
+    if (!isSuperAdmin && user?.warehouseId && order.warehouseId && order.warehouseId !== user.warehouseId) {
+      throw new ForbiddenException('Access denied. This order is assigned to another warehouse hub.');
     }
 
     return order;

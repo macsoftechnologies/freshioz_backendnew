@@ -23,6 +23,7 @@ export declare class ProductsService {
         desc: string | null;
         name: string;
         bulkDiscountPercent: number;
+        tags: string[];
         kannadaName: string | null;
         categoryId: string;
         retailUnit: string;
@@ -33,7 +34,6 @@ export declare class ProductsService {
         shelfLife: string | null;
         image: string;
         badge: string | null;
-        tags: string[];
         gstPercent: number;
         inStock: boolean;
     })[]>;
@@ -58,6 +58,7 @@ export declare class ProductsService {
         desc: string | null;
         name: string;
         bulkDiscountPercent: number;
+        tags: string[];
         kannadaName: string | null;
         categoryId: string;
         retailUnit: string;
@@ -68,7 +69,6 @@ export declare class ProductsService {
         shelfLife: string | null;
         image: string;
         badge: string | null;
-        tags: string[];
         gstPercent: number;
         inStock: boolean;
     }>;
@@ -93,6 +93,7 @@ export declare class ProductsService {
         desc: string | null;
         name: string;
         bulkDiscountPercent: number;
+        tags: string[];
         kannadaName: string | null;
         categoryId: string;
         retailUnit: string;
@@ -103,7 +104,6 @@ export declare class ProductsService {
         shelfLife: string | null;
         image: string;
         badge: string | null;
-        tags: string[];
         gstPercent: number;
         inStock: boolean;
     }>;
@@ -128,6 +128,7 @@ export declare class ProductsService {
         desc: string | null;
         name: string;
         bulkDiscountPercent: number;
+        tags: string[];
         kannadaName: string | null;
         categoryId: string;
         retailUnit: string;
@@ -138,7 +139,6 @@ export declare class ProductsService {
         shelfLife: string | null;
         image: string;
         badge: string | null;
-        tags: string[];
         gstPercent: number;
         inStock: boolean;
     }>;
@@ -151,6 +151,7 @@ export declare class ProductsService {
         desc: string | null;
         name: string;
         bulkDiscountPercent: number;
+        tags: string[];
         kannadaName: string | null;
         categoryId: string;
         retailUnit: string;
@@ -161,7 +162,6 @@ export declare class ProductsService {
         shelfLife: string | null;
         image: string;
         badge: string | null;
-        tags: string[];
         gstPercent: number;
         inStock: boolean;
     }>;

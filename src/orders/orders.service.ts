@@ -225,7 +225,55 @@ export class OrdersService {
 
       // GST: Raw farm produce is 0% exempt under Indian tax law; ensure non-negative tax amount
       const gstAmount = Math.max(0, Number(dto.gstAmount) || 0);
-      const calculatedTotalAmount = Number((itemsNetTotal + deliveryFee + gstAmount).toFixed(2));
+
+      // 5.1 SERVER-SIDE CUSTOMER REWARD DISCOUNT VERIFICATION
+      let appliedDiscountAmount = 0;
+      let matchedDiscount: any = null;
+
+      if (dto.discountCode) {
+        matchedDiscount = await tx.customerDiscount.findUnique({
+          where: { code: dto.discountCode.trim().toUpperCase() },
+        });
+
+        if (!matchedDiscount) {
+          throw new BadRequestException('Invalid reward discount code.');
+        }
+
+        const customerPhone = user?.phone || dto.userPhone;
+        const customerId = user?.id;
+
+        if (matchedDiscount.userId !== customerPhone && matchedDiscount.userId !== customerId) {
+          throw new ForbiddenException('This reward discount belongs to another customer account.');
+        }
+
+        if (matchedDiscount.status === 'REVOKED') {
+          throw new BadRequestException('This discount code has been revoked.');
+        }
+
+        if (matchedDiscount.status === 'REDEEMED' || matchedDiscount.usedCount >= matchedDiscount.maxUses) {
+          throw new BadRequestException('This discount code has already been redeemed.');
+        }
+
+        if (new Date(matchedDiscount.expiresAt).getTime() <= Date.now()) {
+          throw new BadRequestException('This reward discount has expired.');
+        }
+
+        if (matchedDiscount.minOrderAmount > 0 && itemsNetTotal < matchedDiscount.minOrderAmount) {
+          throw new BadRequestException(
+            `Minimum order amount of ₹${matchedDiscount.minOrderAmount} required for this reward.`,
+          );
+        }
+
+        if (matchedDiscount.discountType === 'PERCENTAGE') {
+          appliedDiscountAmount = Number(((itemsNetTotal * matchedDiscount.discountValue) / 100).toFixed(2));
+        } else {
+          appliedDiscountAmount = Math.min(itemsNetTotal, matchedDiscount.discountValue);
+        }
+      }
+
+      const calculatedTotalAmount = Number(
+        Math.max(0, itemsNetTotal + deliveryFee + gstAmount - appliedDiscountAmount).toFixed(2)
+      );
 
       // Calculate accrued society commission (To be credited upon DELIVERED status)
       let societyCommission = 0;
@@ -277,6 +325,19 @@ export class OrdersService {
           warehouse: true,
         },
       });
+
+      // 6. Record discount redemption if applied
+      if (matchedDiscount) {
+        await tx.customerDiscount.update({
+          where: { id: matchedDiscount.id },
+          data: {
+            usedCount: matchedDiscount.usedCount + 1,
+            status: matchedDiscount.usedCount + 1 >= matchedDiscount.maxUses ? 'REDEEMED' : 'ACTIVE',
+            redeemedAt: new Date(),
+            orderId: created.id,
+          },
+        });
+      }
 
       return {
         ...created,
@@ -343,7 +404,7 @@ export class OrdersService {
         where: {
           OR: [{ id: idOrUuid }, { uuid: idOrUuid }],
         },
-        include: { society: true },
+        include: { items: true, society: true },
       });
 
       if (!existing) {
@@ -356,15 +417,41 @@ export class OrdersService {
         throw new ForbiddenException('Access denied. You can only cancel your own orders.');
       }
 
-      // Check allowed statuses for cancellation
+      // Check allowed statuses for cancellation - Delivered orders can NEVER be cancelled
       if (existing.status === 'CANCELLED') {
         throw new BadRequestException('Order is already cancelled.');
       }
       if (existing.status === 'DELIVERED') {
         throw new BadRequestException('Delivered orders cannot be cancelled.');
       }
-      if (isCustomer && existing.status === 'DISPATCHED') {
-        throw new BadRequestException('Order is out for delivery with our rider and cannot be cancelled online.');
+
+      // Restore reserved warehouse stock
+      if (existing.warehouseId && Array.isArray(existing.items)) {
+        for (const item of existing.items) {
+          if (!item.productId) continue;
+          const inv = await tx.warehouseInventory.findUnique({
+            where: {
+              warehouseId_productId: {
+                warehouseId: existing.warehouseId,
+                productId: item.productId,
+              },
+            },
+          });
+          if (inv) {
+            await tx.warehouseInventory.update({
+              where: {
+                warehouseId_productId: {
+                  warehouseId: existing.warehouseId,
+                  productId: item.productId,
+                },
+              },
+              data: {
+                currentQty: inv.currentQty + item.qty,
+                reservedQty: Math.max(0, inv.reservedQty - item.qty),
+              },
+            });
+          }
+        }
       }
 
       // If it was previously marked DELIVERED and staff cancels, reverse society commission

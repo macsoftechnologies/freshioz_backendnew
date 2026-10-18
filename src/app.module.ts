@@ -17,6 +17,8 @@ import { UploadsModule } from './uploads/uploads.module';
 import { CategoriesModule } from './categories/categories.module';
 import { UnitsModule } from './units/units.module';
 import { CatalogModule } from './catalog/catalog.module';
+import { ReviewsModule } from './reviews/reviews.module';
+import { CustomerDiscountsModule } from './customer-discounts/customer-discounts.module';
 
 @Module({
   imports: [
@@ -38,6 +40,8 @@ import { CatalogModule } from './catalog/catalog.module';
     StoreModule,
     UploadsModule,
     CatalogModule,
+    ReviewsModule,
+    CustomerDiscountsModule,
   ],
 })
 export class AppModule {}

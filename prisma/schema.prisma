@@ -118,6 +118,7 @@ model Product {
   orderItems       OrderItem[]
   priceHistory     DailyPriceHistory[]
   inventoryEntries WarehouseInventory[]
+  reviews          Review[]
 
   @@map("products")
 }
@@ -239,7 +240,8 @@ model Order {
   createdAt              DateTime    @default(now())
   updatedAt              DateTime    @updatedAt
 
-  items OrderItem[]
+  items   OrderItem[]
+  reviews Review[]
 
   @@map("orders")
 }
@@ -365,4 +367,60 @@ model ProcurementBill {
   createdAt              DateTime @default(now())
 
   @@map("procurement_bills")
+}
+
+// ----------------------------------------------------
+// 10. REVIEWS & FEEDBACK
+// ----------------------------------------------------
+model Review {
+  id            String    @id @default(uuid())
+  uuid          String    @unique @default(uuid())
+  type          String    // PRODUCT | DELIVERY | WEBSITE
+  rating        Int       // 1 - 5
+  comment       String?
+  userId        String
+  userName      String
+  userPhone     String
+  orderId       String?
+  order         Order?    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId     String?
+  product       Product?  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productName   String?
+  status        String    @default("PENDING") // PENDING | APPROVED | HIDDEN
+  flagged       Boolean   @default(false)
+  moderatedById String?
+  moderatedAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("reviews")
+}
+
+// ----------------------------------------------------
+// 11. CUSTOMER ACCOUNT REWARD DISCOUNTS
+// ----------------------------------------------------
+model CustomerDiscount {
+  id             String    @id @default(uuid())
+  uuid           String    @unique @default(uuid())
+  code           String    @unique
+  userId         String    // customer phone/id
+  userName       String?
+  discountType   String    // FIXED | PERCENTAGE
+  discountValue  Float     // e.g. 50 (rupees) or 15 (percent)
+  minOrderAmount Float     @default(0.0)
+  maxUses        Int       @default(1)
+  usedCount      Int       @default(0)
+  expiresAt      DateTime
+  status         String    @default("ACTIVE") // ACTIVE | REDEEMED | EXPIRED | REVOKED
+  issuedById     String?
+  issuedByName   String?
+  issueReason    String?
+  revokedAt      DateTime?
+  revokedById    String?
+  redeemedAt     DateTime?
+  orderId        String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@map("customer_discounts")
 }

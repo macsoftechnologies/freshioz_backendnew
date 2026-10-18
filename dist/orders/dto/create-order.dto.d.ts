@@ -28,5 +28,7 @@ export declare class CreateOrderDto {
     deliverySlot: string;
     paymentMethod?: string;
     paymentStatus?: string;
+    discountCode?: string;
+    discountAmount?: number;
     items: CreateOrderItemDto[];
 }

@@ -202,7 +202,40 @@ let OrdersService = class OrdersService {
                 deliveryFee = 0;
             }
             const gstAmount = Math.max(0, Number(dto.gstAmount) || 0);
-            const calculatedTotalAmount = Number((itemsNetTotal + deliveryFee + gstAmount).toFixed(2));
+            let appliedDiscountAmount = 0;
+            let matchedDiscount = null;
+            if (dto.discountCode) {
+                matchedDiscount = await tx.customerDiscount.findUnique({
+                    where: { code: dto.discountCode.trim().toUpperCase() },
+                });
+                if (!matchedDiscount) {
+                    throw new common_1.BadRequestException('Invalid reward discount code.');
+                }
+                const customerPhone = user?.phone || dto.userPhone;
+                const customerId = user?.id;
+                if (matchedDiscount.userId !== customerPhone && matchedDiscount.userId !== customerId) {
+                    throw new common_1.ForbiddenException('This reward discount belongs to another customer account.');
+                }
+                if (matchedDiscount.status === 'REVOKED') {
+                    throw new common_1.BadRequestException('This discount code has been revoked.');
+                }
+                if (matchedDiscount.status === 'REDEEMED' || matchedDiscount.usedCount >= matchedDiscount.maxUses) {
+                    throw new common_1.BadRequestException('This discount code has already been redeemed.');
+                }
+                if (new Date(matchedDiscount.expiresAt).getTime() <= Date.now()) {
+                    throw new common_1.BadRequestException('This reward discount has expired.');
+                }
+                if (matchedDiscount.minOrderAmount > 0 && itemsNetTotal < matchedDiscount.minOrderAmount) {
+                    throw new common_1.BadRequestException(`Minimum order amount of ₹${matchedDiscount.minOrderAmount} required for this reward.`);
+                }
+                if (matchedDiscount.discountType === 'PERCENTAGE') {
+                    appliedDiscountAmount = Number(((itemsNetTotal * matchedDiscount.discountValue) / 100).toFixed(2));
+                }
+                else {
+                    appliedDiscountAmount = Math.min(itemsNetTotal, matchedDiscount.discountValue);
+                }
+            }
+            const calculatedTotalAmount = Number(Math.max(0, itemsNetTotal + deliveryFee + gstAmount - appliedDiscountAmount).toFixed(2));
             let societyCommission = 0;
             if (society) {
                 if (society.commissionType === 'PERCENTAGE') {
@@ -246,6 +279,17 @@ let OrdersService = class OrdersService {
                     warehouse: true,
                 },
             });
+            if (matchedDiscount) {
+                await tx.customerDiscount.update({
+                    where: { id: matchedDiscount.id },
+                    data: {
+                        usedCount: matchedDiscount.usedCount + 1,
+                        status: matchedDiscount.usedCount + 1 >= matchedDiscount.maxUses ? 'REDEEMED' : 'ACTIVE',
+                        redeemedAt: new Date(),
+                        orderId: created.id,
+                    },
+                });
+            }
             return {
                 ...created,
                 orderPlacedAtFormatted: (0, date_utils_1.toISTFullString)(created.orderPlacedAt),
@@ -305,7 +349,7 @@ let OrdersService = class OrdersService {
                 where: {
                     OR: [{ id: idOrUuid }, { uuid: idOrUuid }],
                 },
-                include: { society: true },
+                include: { items: true, society: true },
             });
             if (!existing) {
                 throw new common_1.NotFoundException(`Order #${idOrUuid} not found`);
@@ -320,8 +364,33 @@ let OrdersService = class OrdersService {
             if (existing.status === 'DELIVERED') {
                 throw new common_1.BadRequestException('Delivered orders cannot be cancelled.');
             }
-            if (isCustomer && existing.status === 'DISPATCHED') {
-                throw new common_1.BadRequestException('Order is out for delivery with our rider and cannot be cancelled online.');
+            if (existing.warehouseId && Array.isArray(existing.items)) {
+                for (const item of existing.items) {
+                    if (!item.productId)
+                        continue;
+                    const inv = await tx.warehouseInventory.findUnique({
+                        where: {
+                            warehouseId_productId: {
+                                warehouseId: existing.warehouseId,
+                                productId: item.productId,
+                            },
+                        },
+                    });
+                    if (inv) {
+                        await tx.warehouseInventory.update({
+                            where: {
+                                warehouseId_productId: {
+                                    warehouseId: existing.warehouseId,
+                                    productId: item.productId,
+                                },
+                            },
+                            data: {
+                                currentQty: inv.currentQty + item.qty,
+                                reservedQty: Math.max(0, inv.reservedQty - item.qty),
+                            },
+                        });
+                    }
+                }
             }
             if (existing.status === 'DELIVERED' && existing.societyId && existing.societyCommissionEarned > 0) {
                 await tx.society.update({

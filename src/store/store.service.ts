@@ -54,18 +54,9 @@ export class StoreService {
         orderBy: { createdAt: 'desc' },
       }),
       this.prisma.society.findMany({ orderBy: { createdAt: 'desc' } }),
-      isStaffOrAdmin
-        ? this.prisma.order.findMany({
-            include: { items: true },
-            orderBy: { orderPlacedAt: 'desc' },
-          })
-        : isPartner && partnerSocietyId
-        ? this.prisma.order.findMany({
-            where: { societyId: partnerSocietyId },
-            include: { items: true },
-            orderBy: { orderPlacedAt: 'desc' },
-          })
-        : currentUser?.phone
+      // Never expose global orders, employees, vendors, leads, or procurement through /freshioz-store
+      // Admin desks use dedicated RBAC-guarded REST endpoints (/api/employees, /api/orders, /api/procurement)
+      currentUser?.phone
         ? this.prisma.order.findMany({
             where: {
               OR: [
@@ -77,40 +68,14 @@ export class StoreService {
             orderBy: { orderPlacedAt: 'desc' },
           })
         : Promise.resolve([]),
-      isStaffOrAdmin
-        ? this.prisma.vendor.findMany({ orderBy: { createdAt: 'desc' } })
-        : Promise.resolve([]),
-      isStaffOrAdmin
-        ? this.prisma.procurementBill.findMany({ orderBy: { createdAt: 'desc' } })
-        : Promise.resolve([]),
-      isStaffOrAdmin
-        ? this.prisma.warehouseInventory.findMany({
-            include: { product: true, warehouse: true },
-          })
-        : Promise.resolve([]),
-      isStaffOrAdmin
-        ? this.prisma.inboundLead.findMany({ orderBy: { createdAt: 'desc' } })
-        : Promise.resolve([]),
-      isStaffOrAdmin
-        ? this.prisma.employee.findMany({
-            select: EMPLOYEE_PUBLIC_FIELDS,
-            orderBy: { dateJoined: 'desc' },
-          })
-        : Promise.resolve([]),
+      Promise.resolve([]), // vendors (secured to /api/vendors)
+      Promise.resolve([]), // procurementBills (secured to /api/procurement)
+      Promise.resolve([]), // inventoryEntries (secured to /api/inventory)
+      Promise.resolve([]), // leads (secured to /api/inbound-requests)
+      Promise.resolve([]), // employees (secured to /api/employees with Super Admin guard)
       this.prisma.category.findMany({ orderBy: { sortOrder: 'asc' } }),
       this.prisma.unit.findMany({ orderBy: { createdAt: 'asc' } }),
-      isStaffOrAdmin
-        ? this.prisma.societyPayout.findMany({
-            include: { society: true },
-            orderBy: { createdAt: 'desc' },
-          })
-        : isPartner && partnerSocietyId
-        ? this.prisma.societyPayout.findMany({
-            where: { societyId: partnerSocietyId },
-            include: { society: true },
-            orderBy: { createdAt: 'desc' },
-          })
-        : Promise.resolve([]),
+      Promise.resolve([]), // payouts (secured to /api/societies/payouts)
     ]);
 
     // Format orders for UI

@@ -45,63 +45,26 @@ let StoreService = class StoreService {
                 orderBy: { createdAt: 'desc' },
             }),
             this.prisma.society.findMany({ orderBy: { createdAt: 'desc' } }),
-            isStaffOrAdmin
+            currentUser?.phone
                 ? this.prisma.order.findMany({
+                    where: {
+                        OR: [
+                            { userPhone: currentUser.phone },
+                            { userId: currentUser.id || currentUser.phone },
+                        ],
+                    },
                     include: { items: true },
                     orderBy: { orderPlacedAt: 'desc' },
                 })
-                : isPartner && partnerSocietyId
-                    ? this.prisma.order.findMany({
-                        where: { societyId: partnerSocietyId },
-                        include: { items: true },
-                        orderBy: { orderPlacedAt: 'desc' },
-                    })
-                    : currentUser?.phone
-                        ? this.prisma.order.findMany({
-                            where: {
-                                OR: [
-                                    { userPhone: currentUser.phone },
-                                    { userId: currentUser.id || currentUser.phone },
-                                ],
-                            },
-                            include: { items: true },
-                            orderBy: { orderPlacedAt: 'desc' },
-                        })
-                        : Promise.resolve([]),
-            isStaffOrAdmin
-                ? this.prisma.vendor.findMany({ orderBy: { createdAt: 'desc' } })
                 : Promise.resolve([]),
-            isStaffOrAdmin
-                ? this.prisma.procurementBill.findMany({ orderBy: { createdAt: 'desc' } })
-                : Promise.resolve([]),
-            isStaffOrAdmin
-                ? this.prisma.warehouseInventory.findMany({
-                    include: { product: true, warehouse: true },
-                })
-                : Promise.resolve([]),
-            isStaffOrAdmin
-                ? this.prisma.inboundLead.findMany({ orderBy: { createdAt: 'desc' } })
-                : Promise.resolve([]),
-            isStaffOrAdmin
-                ? this.prisma.employee.findMany({
-                    select: EMPLOYEE_PUBLIC_FIELDS,
-                    orderBy: { dateJoined: 'desc' },
-                })
-                : Promise.resolve([]),
+            Promise.resolve([]),
+            Promise.resolve([]),
+            Promise.resolve([]),
+            Promise.resolve([]),
+            Promise.resolve([]),
             this.prisma.category.findMany({ orderBy: { sortOrder: 'asc' } }),
             this.prisma.unit.findMany({ orderBy: { createdAt: 'asc' } }),
-            isStaffOrAdmin
-                ? this.prisma.societyPayout.findMany({
-                    include: { society: true },
-                    orderBy: { createdAt: 'desc' },
-                })
-                : isPartner && partnerSocietyId
-                    ? this.prisma.societyPayout.findMany({
-                        where: { societyId: partnerSocietyId },
-                        include: { society: true },
-                        orderBy: { createdAt: 'desc' },
-                    })
-                    : Promise.resolve([]),
+            Promise.resolve([]),
         ]);
         const formattedOrders = orders.map((o) => ({
             ...o,

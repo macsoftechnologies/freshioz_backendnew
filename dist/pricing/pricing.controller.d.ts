@@ -8,14 +8,26 @@ export declare class PricingController {
         timestampIST: string;
         entries: {
             id: string;
+            productId: string;
             name: string;
+            kannadaName: string;
+            categoryId: string;
             retailUnit: string;
-            retailPrice: number;
-            retailMarketPrice: number;
-            bulkMinQty: number;
-            bulkDiscountPercent: number;
+            retailPrice: any;
+            retailMarketPrice: any;
+            bulkMinQty: any;
+            bulkDiscountPercent: any;
             origin: string;
-            gstPercent: number;
+            shelfLife: string;
+            desc: string;
+            image: string;
+            badge: string;
+            tags: string[];
+            gstPercent: any;
+            status: string;
+            inStock: boolean;
+            hasCustomDailyPrice: boolean;
+            dailyPriceDate: string;
         }[];
     }>;
     batchPublishBatch(body: any): Promise<{

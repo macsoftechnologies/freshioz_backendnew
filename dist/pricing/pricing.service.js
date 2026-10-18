@@ -13,62 +13,137 @@ exports.PricingService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const date_utils_1 = require("../common/date-utils");
+function parseDateRange(dateStr) {
+    if (!dateStr) {
+        const now = new Date();
+        const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+        const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+        return { start, end };
+    }
+    let d;
+    if (dateStr.includes('/')) {
+        const [day, month, year] = dateStr.split('/').map(Number);
+        d = new Date(year, month - 1, day);
+    }
+    else {
+        d = new Date(dateStr);
+    }
+    if (isNaN(d.getTime())) {
+        d = new Date();
+    }
+    const start = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0);
+    const end = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
+    return { start, end };
+}
 let PricingService = class PricingService {
     constructor(prisma) {
         this.prisma = prisma;
     }
     async getPricesByDate(date) {
         const formattedDate = date || (0, date_utils_1.toISTDateString)(new Date());
+        const { start, end } = parseDateRange(date);
         const products = await this.prisma.product.findMany({
-            select: {
-                id: true,
-                name: true,
-                retailUnit: true,
-                retailPrice: true,
-                retailMarketPrice: true,
-                bulkMinQty: true,
-                bulkDiscountPercent: true,
-                origin: true,
-                gstPercent: true,
-            },
             orderBy: { id: 'asc' },
+        });
+        const historyEntries = await this.prisma.dailyPriceHistory.findMany({
+            where: {
+                publishedAt: {
+                    gte: start,
+                    lte: end,
+                },
+            },
+            orderBy: { publishedAt: 'desc' },
+        });
+        const historyMap = new Map();
+        for (const h of historyEntries) {
+            if (!historyMap.has(h.productId)) {
+                historyMap.set(h.productId, h);
+            }
+        }
+        const merged = products.map((p) => {
+            const h = historyMap.get(p.id);
+            return {
+                id: p.id,
+                productId: p.id,
+                name: p.name,
+                kannadaName: p.kannadaName,
+                categoryId: p.categoryId,
+                retailUnit: p.retailUnit,
+                retailPrice: h ? h.retailPrice : p.retailPrice,
+                retailMarketPrice: h ? h.retailMarketPrice : p.retailMarketPrice,
+                bulkMinQty: h ? h.bulkMinQty : p.bulkMinQty,
+                bulkDiscountPercent: h ? h.bulkDiscountPercent : p.bulkDiscountPercent,
+                origin: p.origin,
+                shelfLife: p.shelfLife,
+                desc: p.desc,
+                image: p.image,
+                badge: p.badge,
+                tags: p.tags,
+                gstPercent: h ? h.gstPercent : p.gstPercent,
+                status: p.status,
+                inStock: p.inStock,
+                hasCustomDailyPrice: Boolean(h),
+                dailyPriceDate: formattedDate,
+            };
         });
         return {
             date: formattedDate,
-            dateIST: formattedDate,
+            dateIST: (0, date_utils_1.toISTDateString)(start),
             timestampIST: (0, date_utils_1.toISTFullString)(new Date()),
-            entries: products,
+            entries: merged,
         };
     }
     async batchPublishPrices(body) {
-        const rawPrices = body.prices || body.items;
+        const rawPrices = body.prices || body.items || body.products;
         if (!Array.isArray(rawPrices) || rawPrices.length === 0) {
             throw new common_1.BadRequestException('prices or items array is required');
         }
-        const publishDate = new Date();
+        let publishDate = new Date();
+        if (body.date) {
+            let parsed;
+            if (body.date.includes('/')) {
+                const [day, month, year] = body.date.split('/').map(Number);
+                parsed = new Date(year, month - 1, day, 12, 0, 0);
+            }
+            else {
+                parsed = new Date(body.date);
+                parsed.setHours(12, 0, 0, 0);
+            }
+            if (!isNaN(parsed.getTime())) {
+                publishDate = parsed;
+            }
+        }
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+        const todayEnd = new Date();
+        todayEnd.setHours(23, 59, 59, 999);
+        const isToday = publishDate >= todayStart && publishDate <= todayEnd;
         const results = await this.prisma.$transaction(async (tx) => {
             const records = [];
             for (const p of rawPrices) {
-                if (!p.productId)
+                const prodId = p.productId || p.id;
+                if (!prodId)
                     continue;
                 const rp = parseFloat(p.retailPrice) || 40.0;
                 const rmp = parseFloat(p.retailMarketPrice) || Math.round(rp * 1.3);
                 const bq = parseFloat(p.bulkMinQty) || 0;
                 const bd = parseFloat(p.bulkDiscountPercent) || 0;
                 const gst = parseFloat(p.gstPercent) || 0;
-                await tx.product.update({
-                    where: { id: p.productId },
-                    data: {
-                        retailPrice: rp,
-                        retailMarketPrice: rmp,
-                        bulkMinQty: bq,
-                        bulkDiscountPercent: bd,
-                        gstPercent: gst,
-                    },
-                });
+                if (isToday) {
+                    await tx.product.update({
+                        where: { id: prodId },
+                        data: {
+                            retailPrice: rp,
+                            retailMarketPrice: rmp,
+                            bulkMinQty: bq,
+                            bulkDiscountPercent: bd,
+                            gstPercent: gst,
+                        },
+                    });
+                }
                 const hist = await tx.dailyPriceHistory.create({
                     data: {
-                        productId: p.productId,
+                        productId: prodId,
                         retailPrice: rp,
                         retailMarketPrice: rmp,
                         bulkMinQty: bq,

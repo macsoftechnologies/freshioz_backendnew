@@ -86,7 +86,6 @@ export class CatalogService {
       this.prisma.dailyPriceHistory.findMany({
         where: {
           publishedAt: {
-            gte: start,
             lte: end,
           },
         },

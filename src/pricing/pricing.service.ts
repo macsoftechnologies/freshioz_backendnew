@@ -37,18 +37,18 @@ export class PricingService {
       orderBy: { id: 'asc' },
     });
 
-    // 2. Find daily price history entries for this specific date range
+    // 2. Find daily price history entries published ON or BEFORE this target date
+    // This strictly guarantees that changes to today's or future rates NEVER leak into past dates
     const historyEntries = await this.prisma.dailyPriceHistory.findMany({
       where: {
         publishedAt: {
-          gte: start,
           lte: end,
         },
       },
       orderBy: { publishedAt: 'desc' },
     });
 
-    // Map latest history entry per product for this specific date
+    // Map latest history entry per product effective as of this target date
     const historyMap = new Map<string, any>();
     for (const h of historyEntries) {
       if (!historyMap.has(h.productId)) {
@@ -56,7 +56,24 @@ export class PricingService {
       }
     }
 
-    // Merge history pricing with product details so each date gets its own pricing
+    // For any products without history on or before this date, find the earliest known historical record
+    // so past date archives remain isolated from current / today's live edits
+    const unmappedProductIds = products.filter((p) => !historyMap.has(p.id)).map((p) => p.id);
+    if (unmappedProductIds.length > 0) {
+      const earliestEntries = await this.prisma.dailyPriceHistory.findMany({
+        where: {
+          productId: { in: unmappedProductIds },
+        },
+        orderBy: { publishedAt: 'asc' },
+      });
+      for (const e of earliestEntries) {
+        if (!historyMap.has(e.productId)) {
+          historyMap.set(e.productId, e);
+        }
+      }
+    }
+
+    // Merge history pricing with product details so each date gets its own independent pricing snapshot
     const merged = products.map((p) => {
       const h = historyMap.get(p.id);
       return {

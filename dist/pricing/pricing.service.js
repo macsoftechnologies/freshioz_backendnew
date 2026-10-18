@@ -48,7 +48,6 @@ let PricingService = class PricingService {
         const historyEntries = await this.prisma.dailyPriceHistory.findMany({
             where: {
                 publishedAt: {
-                    gte: start,
                     lte: end,
                 },
             },
@@ -58,6 +57,20 @@ let PricingService = class PricingService {
         for (const h of historyEntries) {
             if (!historyMap.has(h.productId)) {
                 historyMap.set(h.productId, h);
+            }
+        }
+        const unmappedProductIds = products.filter((p) => !historyMap.has(p.id)).map((p) => p.id);
+        if (unmappedProductIds.length > 0) {
+            const earliestEntries = await this.prisma.dailyPriceHistory.findMany({
+                where: {
+                    productId: { in: unmappedProductIds },
+                },
+                orderBy: { publishedAt: 'asc' },
+            });
+            for (const e of earliestEntries) {
+                if (!historyMap.has(e.productId)) {
+                    historyMap.set(e.productId, e);
+                }
             }
         }
         const merged = products.map((p) => {

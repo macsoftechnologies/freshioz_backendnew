@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, Req, GoneException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtService } from '@nestjs/jwt';
 import { StoreService } from './store.service';
@@ -39,6 +39,12 @@ export class StoreController {
   @Post()
   @ApiOperation({ summary: 'Sync unified store update (Restricted to Internal Staff Employees)' })
   saveStore(@Req() req: any, @Body() dto: UpdateFreshiozStoreDto) {
+    const blocked = process.env.STORE_BLOCKED_COLLECTIONS;
+    if (blocked === '*' || process.env.DISABLE_STORE_SYNC === 'true') {
+      throw new GoneException(
+        'POST /freshioz-store has been permanently disabled. Clients must use dedicated REST endpoints (/orders, /inventory, /procurement, etc.) managed via React Query.',
+      );
+    }
     return this.storeService.saveStore(dto, req.user);
   }
 }

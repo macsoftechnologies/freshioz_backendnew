@@ -42,6 +42,10 @@ let StoreController = class StoreController {
         return this.storeService.getCombinedStore(currentUser);
     }
     saveStore(req, dto) {
+        const blocked = process.env.STORE_BLOCKED_COLLECTIONS;
+        if (blocked === '*' || process.env.DISABLE_STORE_SYNC === 'true') {
+            throw new common_1.GoneException('POST /freshioz-store has been permanently disabled. Clients must use dedicated REST endpoints (/orders, /inventory, /procurement, etc.) managed via React Query.');
+        }
         return this.storeService.saveStore(dto, req.user);
     }
 };

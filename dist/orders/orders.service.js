@@ -110,15 +110,43 @@ let OrdersService = class OrdersService {
                 if (!product) {
                     throw new common_1.BadRequestException(`Product '${item.name || item.productId}' is currently unavailable in the catalog.`);
                 }
-                const unitPrice = product ? product.retailPrice : (Number(item.price) || 0);
+                let unitPrice = product ? product.retailPrice : (Number(item.price) || 0);
+                let bulkMinQty = product ? product.bulkMinQty : 0;
+                let bulkDiscountPercent = product ? product.bulkDiscountPercent : 0;
+                if (product && dto.deliveryDate) {
+                    let d;
+                    if (dto.deliveryDate.includes('/')) {
+                        const [day, month, year] = dto.deliveryDate.split('/').map(Number);
+                        d = new Date(year, month - 1, day);
+                    }
+                    else {
+                        d = new Date(dto.deliveryDate);
+                    }
+                    if (!isNaN(d.getTime())) {
+                        const start = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0);
+                        const end = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
+                        const hist = await tx.dailyPriceHistory.findFirst({
+                            where: {
+                                productId: product.id,
+                                publishedAt: { gte: start, lte: end },
+                            },
+                            orderBy: { publishedAt: 'desc' },
+                        });
+                        if (hist) {
+                            unitPrice = hist.retailPrice;
+                            bulkMinQty = hist.bulkMinQty;
+                            bulkDiscountPercent = hist.bulkDiscountPercent;
+                        }
+                    }
+                }
                 const qty = Number(item.qty) || 1;
                 const lineOriginalTotal = unitPrice * qty;
                 let effectiveUnitPrice = unitPrice;
                 let lineBulkSavings = 0;
                 let isBulkApplied = false;
-                if (product && product.bulkMinQty > 0 && product.bulkDiscountPercent > 0 && qty >= product.bulkMinQty) {
+                if (product && bulkMinQty > 0 && bulkDiscountPercent > 0 && qty >= bulkMinQty) {
                     isBulkApplied = true;
-                    const discountRatio = product.bulkDiscountPercent / 100;
+                    const discountRatio = bulkDiscountPercent / 100;
                     effectiveUnitPrice = Number((unitPrice * (1 - discountRatio)).toFixed(2));
                     lineBulkSavings = Number(((unitPrice - effectiveUnitPrice) * qty).toFixed(2));
                 }

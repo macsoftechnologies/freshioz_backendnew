@@ -2,7 +2,7 @@ import { PrismaService } from '../prisma/prisma.service';
 export declare class CatalogService {
     private readonly prisma;
     constructor(prisma: PrismaService);
-    getPublicCatalog(): Promise<{
+    getPublicCatalog(targetDate?: string): Promise<{
         categories: {
             id: string;
             name: string;
@@ -20,41 +20,42 @@ export declare class CatalogService {
         }[];
         products: {
             category: string;
+            retailPrice: any;
+            retailMarketPrice: any;
+            bulkMinQty: any;
+            bulkDiscountPercent: any;
+            gstPercent: any;
+            hasCustomDailyPrice: boolean;
             id: string;
-            name: string;
             status: string;
             desc: string;
+            name: string;
             kannadaName: string;
             categoryId: string;
             retailUnit: string;
-            retailPrice: number;
-            retailMarketPrice: number;
-            bulkMinQty: number;
-            bulkDiscountPercent: number;
             origin: string;
             shelfLife: string;
             image: string;
             badge: string;
             tags: string[];
-            gstPercent: number;
             inStock: boolean;
         }[];
         societies: {
             id: string;
-            name: string;
+            warehouseId: string;
             status: string;
+            name: string;
             type: string;
             address: string;
             imageUrl: string;
             lat: number;
             lng: number;
-            warehouseId: string;
             deliveryMode: string;
         }[];
         warehouses: {
             id: string;
-            name: string;
             status: string;
+            name: string;
             lat: number;
             lng: number;
             code: string;
@@ -63,6 +64,7 @@ export declare class CatalogService {
             cutoffTime: string;
         }[];
         deliveryConfig: import("./delivery.constants").DeliveryConfig;
+        activeDeliveryDate: string;
         syncedAt: string;
     }>;
 }

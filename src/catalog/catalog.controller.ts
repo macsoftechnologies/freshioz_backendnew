@@ -1,5 +1,5 @@
-import { Controller, Get } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Controller, Get, Query } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { CatalogService } from './catalog.service';
 
 @ApiTags('Catalog')
@@ -9,8 +9,9 @@ export class CatalogController {
 
   @ApiOperation({ summary: 'Get public read-only catalog (allow-listed without PII or banking fields)' })
   @ApiResponse({ status: 200, description: 'Public catalog retrieved successfully' })
+  @ApiQuery({ name: 'date', required: false, description: 'Target delivery date (YYYY-MM-DD)' })
   @Get()
-  async getPublicCatalog() {
-    return this.catalogService.getPublicCatalog();
+  async getPublicCatalog(@Query('date') date?: string) {
+    return this.catalogService.getPublicCatalog(date);
   }
 }

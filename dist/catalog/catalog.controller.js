@@ -8,6 +8,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CatalogController = void 0;
 const common_1 = require("@nestjs/common");
@@ -17,17 +20,19 @@ let CatalogController = class CatalogController {
     constructor(catalogService) {
         this.catalogService = catalogService;
     }
-    async getPublicCatalog() {
-        return this.catalogService.getPublicCatalog();
+    async getPublicCatalog(date) {
+        return this.catalogService.getPublicCatalog(date);
     }
 };
 exports.CatalogController = CatalogController;
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Get public read-only catalog (allow-listed without PII or banking fields)' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Public catalog retrieved successfully' }),
+    (0, swagger_1.ApiQuery)({ name: 'date', required: false, description: 'Target delivery date (YYYY-MM-DD)' }),
     (0, common_1.Get)(),
+    __param(0, (0, common_1.Query)('date')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], CatalogController.prototype, "getPublicCatalog", null);
 exports.CatalogController = CatalogController = __decorate([

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, Param, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { ProcurementService } from './procurement.service';
 import { CreateProcurementBillDto } from './dto/create-procurement-bill.dto';
@@ -40,5 +40,14 @@ export class ProcurementController {
   @ApiResponse({ status: 201, type: ProcurementBillResponseDto })
   create(@Body() dto: CreateProcurementBillDto) {
     return this.procurementService.create(dto);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'PROCUREMENT_OFFICER')
+  @Delete(':id')
+  @ApiOperation({ summary: 'Delete procurement bill' })
+  delete(@Param('id') id: string) {
+    return this.procurementService.delete(id);
   }
 }

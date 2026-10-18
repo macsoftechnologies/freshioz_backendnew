@@ -117,4 +117,13 @@ export class ProcurementService {
       };
     });
   }
+
+  async delete(id: string) {
+    const existing = await this.prisma.procurementBill.findUnique({ where: { id } });
+    if (!existing) {
+      throw new NotFoundException(`Procurement bill #${id} not found`);
+    }
+    await this.prisma.procurementBill.delete({ where: { id } });
+    return { success: true, message: `Procurement bill #${id} deleted` };
+  }
 }

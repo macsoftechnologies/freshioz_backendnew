@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, UseGuards, Header } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { PricingService } from './pricing.service';
 import { BatchPricingDto } from './dto/batch-pricing.dto';
@@ -15,6 +15,9 @@ export class PricingController {
   @ApiOperation({ summary: 'Get published daily produce price sheet' })
   @ApiQuery({ name: 'date', required: false, description: 'Filter by date (DD/MM/YYYY)' })
   @ApiResponse({ status: 200, type: DailyPriceResponseDto })
+  @Header('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0')
+  @Header('Pragma', 'no-cache')
+  @Header('Expires', '0')
   @Get()
   async getPrices(@Query('date') date?: string) {
     return this.pricingService.getPricesByDate(date);

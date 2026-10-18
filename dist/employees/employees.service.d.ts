@@ -5,53 +5,53 @@ export declare class EmployeesService {
     findAll(): Promise<{
         id: string;
         uuid: string;
+        status: string;
+        createdAt: Date;
+        updatedAt: Date;
         name: string;
         phone: string;
         email: string;
         roles: string[];
         assignedWarehouseId: string;
-        status: string;
         dateJoined: Date;
-        createdAt: Date;
-        updatedAt: Date;
     }[]>;
     findOne(idOrUuid: string): Promise<{
         id: string;
         uuid: string;
+        status: string;
+        createdAt: Date;
+        updatedAt: Date;
         name: string;
         phone: string;
         email: string;
         roles: string[];
         assignedWarehouseId: string;
-        status: string;
         dateJoined: Date;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     create(body: any): Promise<{
         id: string;
         uuid: string;
+        status: string;
+        createdAt: Date;
+        updatedAt: Date;
         name: string;
         phone: string;
         email: string;
         roles: string[];
         assignedWarehouseId: string;
-        status: string;
         dateJoined: Date;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     update(id: string, data: any): Promise<{
         id: string;
         uuid: string;
+        status: string;
+        createdAt: Date;
+        updatedAt: Date;
         name: string;
         phone: string;
         email: string;
         roles: string[];
         assignedWarehouseId: string;
-        status: string;
         dateJoined: Date;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
 }

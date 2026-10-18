@@ -97,6 +97,8 @@ export declare class OrdersService {
         codCollectedBy: string | null;
         societyCommissionEarned: number;
         deliveredAt: Date | null;
+        cancelledReason: string | null;
+        cancelledAt: Date | null;
         orderPlacedAt: Date;
         createdAt: Date;
         updatedAt: Date;
@@ -189,6 +191,8 @@ export declare class OrdersService {
         codCollectedBy: string | null;
         societyCommissionEarned: number;
         deliveredAt: Date | null;
+        cancelledReason: string | null;
+        cancelledAt: Date | null;
         orderPlacedAt: Date;
         createdAt: Date;
         updatedAt: Date;
@@ -281,6 +285,8 @@ export declare class OrdersService {
         codCollectedBy: string | null;
         societyCommissionEarned: number;
         deliveredAt: Date | null;
+        cancelledReason: string | null;
+        cancelledAt: Date | null;
         orderPlacedAt: Date;
         createdAt: Date;
         updatedAt: Date;
@@ -356,6 +362,8 @@ export declare class OrdersService {
         codCollectedBy: string | null;
         societyCommissionEarned: number;
         deliveredAt: Date | null;
+        cancelledReason: string | null;
+        cancelledAt: Date | null;
         orderPlacedAt: Date;
         createdAt: Date;
         updatedAt: Date;
@@ -431,6 +439,8 @@ export declare class OrdersService {
         codCollectedBy: string | null;
         societyCommissionEarned: number;
         deliveredAt: Date | null;
+        cancelledReason: string | null;
+        cancelledAt: Date | null;
         orderPlacedAt: Date;
         createdAt: Date;
         updatedAt: Date;

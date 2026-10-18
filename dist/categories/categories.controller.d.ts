@@ -10,10 +10,10 @@ export declare class CategoriesController {
         };
     } & {
         id: string;
-        name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         description: string | null;
         slug: string;
         icon: string;
@@ -23,12 +23,11 @@ export declare class CategoriesController {
         products: {
             id: string;
             uuid: string;
-            name: string;
             status: string;
             createdAt: Date;
             updatedAt: Date;
             desc: string | null;
-            tags: string[];
+            name: string;
             bulkDiscountPercent: number;
             kannadaName: string | null;
             categoryId: string;
@@ -40,15 +39,16 @@ export declare class CategoriesController {
             shelfLife: string | null;
             image: string;
             badge: string | null;
+            tags: string[];
             gstPercent: number;
             inStock: boolean;
         }[];
     } & {
         id: string;
-        name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         description: string | null;
         slug: string;
         icon: string;
@@ -56,10 +56,10 @@ export declare class CategoriesController {
     }>;
     create(dto: CreateCategoryDto): Promise<{
         id: string;
-        name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         description: string | null;
         slug: string;
         icon: string;
@@ -67,10 +67,10 @@ export declare class CategoriesController {
     }>;
     update(id: string, dto: UpdateCategoryDto): Promise<{
         id: string;
-        name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         description: string | null;
         slug: string;
         icon: string;
@@ -78,10 +78,10 @@ export declare class CategoriesController {
     }>;
     remove(id: string): Promise<{
         id: string;
-        name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         description: string | null;
         slug: string;
         icon: string;

@@ -9,12 +9,12 @@ export declare class SocietiesService {
         warehouse: {
             id: string;
             uuid: string;
-            name: string;
-            lat: number | null;
-            lng: number | null;
             status: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
+            lat: number | null;
+            lng: number | null;
             code: string;
             location: string;
             openTime: string;
@@ -25,18 +25,20 @@ export declare class SocietiesService {
         };
         id: string;
         uuid: string;
+        warehouseId: string | null;
+        status: string;
+        createdAt: Date;
+        updatedAt: Date;
         name: string;
         type: string;
         address: string;
         imageUrl: string | null;
         lat: number | null;
         lng: number | null;
-        warehouseId: string | null;
         secretaryName: string | null;
         totalFloors: number | null;
         totalUnits: number | null;
         deliveryMode: string;
-        status: string;
         commissionType: string;
         commissionValue: number;
         balanceEarned: number;
@@ -44,8 +46,6 @@ export declare class SocietiesService {
         bankName: string | null;
         accountHolder: string | null;
         branch: string | null;
-        createdAt: Date;
-        updatedAt: Date;
     }[]>;
     findOne(idOrUuid: string): Promise<{
         accountNumber: string;
@@ -54,12 +54,12 @@ export declare class SocietiesService {
         warehouse: {
             id: string;
             uuid: string;
-            name: string;
-            lat: number | null;
-            lng: number | null;
             status: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
+            lat: number | null;
+            lng: number | null;
             code: string;
             location: string;
             openTime: string;
@@ -70,18 +70,20 @@ export declare class SocietiesService {
         };
         id: string;
         uuid: string;
+        warehouseId: string | null;
+        status: string;
+        createdAt: Date;
+        updatedAt: Date;
         name: string;
         type: string;
         address: string;
         imageUrl: string | null;
         lat: number | null;
         lng: number | null;
-        warehouseId: string | null;
         secretaryName: string | null;
         totalFloors: number | null;
         totalUnits: number | null;
         deliveryMode: string;
-        status: string;
         commissionType: string;
         commissionValue: number;
         balanceEarned: number;
@@ -89,19 +91,17 @@ export declare class SocietiesService {
         bankName: string | null;
         accountHolder: string | null;
         branch: string | null;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     requestPayout(societyId: string, amount: number): Promise<{
         id: string;
+        societyId: string;
         status: string;
+        paymentMethod: string;
         createdAt: Date;
         amount: number;
-        paymentMethod: string;
         transactionRef: string;
         notes: string | null;
         authorizedBy: string | null;
-        societyId: string;
     }>;
     listPayouts(query?: {
         societyId?: string;
@@ -120,32 +120,34 @@ export declare class SocietiesService {
         };
     } & {
         id: string;
+        societyId: string;
         status: string;
+        paymentMethod: string;
         createdAt: Date;
         amount: number;
-        paymentMethod: string;
         transactionRef: string;
         notes: string | null;
         authorizedBy: string | null;
-        societyId: string;
     })[]>;
     approvePayout(payoutId: string, adminUser: any, bankUtr?: string): Promise<{
         society: {
             id: string;
             uuid: string;
+            warehouseId: string | null;
+            status: string;
+            createdAt: Date;
+            updatedAt: Date;
             name: string;
             type: string;
             address: string;
             imageUrl: string | null;
             lat: number | null;
             lng: number | null;
-            warehouseId: string | null;
             secretaryName: string | null;
             secretaryPhone: string | null;
             totalFloors: number | null;
             totalUnits: number | null;
             deliveryMode: string;
-            status: string;
             commissionType: string;
             commissionValue: number;
             balanceEarned: number;
@@ -155,37 +157,37 @@ export declare class SocietiesService {
             accountNumber: string | null;
             ifscCode: string | null;
             branch: string | null;
-            createdAt: Date;
-            updatedAt: Date;
         };
     } & {
         id: string;
+        societyId: string;
         status: string;
+        paymentMethod: string;
         createdAt: Date;
         amount: number;
-        paymentMethod: string;
         transactionRef: string;
         notes: string | null;
         authorizedBy: string | null;
-        societyId: string;
     }>;
     rejectPayout(payoutId: string, adminUser: any, reason?: string): Promise<{
         society: {
             id: string;
             uuid: string;
+            warehouseId: string | null;
+            status: string;
+            createdAt: Date;
+            updatedAt: Date;
             name: string;
             type: string;
             address: string;
             imageUrl: string | null;
             lat: number | null;
             lng: number | null;
-            warehouseId: string | null;
             secretaryName: string | null;
             secretaryPhone: string | null;
             totalFloors: number | null;
             totalUnits: number | null;
             deliveryMode: string;
-            status: string;
             commissionType: string;
             commissionValue: number;
             balanceEarned: number;
@@ -195,30 +197,28 @@ export declare class SocietiesService {
             accountNumber: string | null;
             ifscCode: string | null;
             branch: string | null;
-            createdAt: Date;
-            updatedAt: Date;
         };
     } & {
         id: string;
+        societyId: string;
         status: string;
+        paymentMethod: string;
         createdAt: Date;
         amount: number;
-        paymentMethod: string;
         transactionRef: string;
         notes: string | null;
         authorizedBy: string | null;
-        societyId: string;
     }>;
     create(body: any): Promise<{
         warehouse: {
             id: string;
             uuid: string;
-            name: string;
-            lat: number | null;
-            lng: number | null;
             status: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
+            lat: number | null;
+            lng: number | null;
             code: string;
             location: string;
             openTime: string;
@@ -230,19 +230,21 @@ export declare class SocietiesService {
     } & {
         id: string;
         uuid: string;
+        warehouseId: string | null;
+        status: string;
+        createdAt: Date;
+        updatedAt: Date;
         name: string;
         type: string;
         address: string;
         imageUrl: string | null;
         lat: number | null;
         lng: number | null;
-        warehouseId: string | null;
         secretaryName: string | null;
         secretaryPhone: string | null;
         totalFloors: number | null;
         totalUnits: number | null;
         deliveryMode: string;
-        status: string;
         commissionType: string;
         commissionValue: number;
         balanceEarned: number;
@@ -252,19 +254,17 @@ export declare class SocietiesService {
         accountNumber: string | null;
         ifscCode: string | null;
         branch: string | null;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     update(idOrUuid: string, data: any): Promise<{
         warehouse: {
             id: string;
             uuid: string;
-            name: string;
-            lat: number | null;
-            lng: number | null;
             status: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
+            lat: number | null;
+            lng: number | null;
             code: string;
             location: string;
             openTime: string;
@@ -276,19 +276,21 @@ export declare class SocietiesService {
     } & {
         id: string;
         uuid: string;
+        warehouseId: string | null;
+        status: string;
+        createdAt: Date;
+        updatedAt: Date;
         name: string;
         type: string;
         address: string;
         imageUrl: string | null;
         lat: number | null;
         lng: number | null;
-        warehouseId: string | null;
         secretaryName: string | null;
         secretaryPhone: string | null;
         totalFloors: number | null;
         totalUnits: number | null;
         deliveryMode: string;
-        status: string;
         commissionType: string;
         commissionValue: number;
         balanceEarned: number;
@@ -298,7 +300,5 @@ export declare class SocietiesService {
         accountNumber: string | null;
         ifscCode: string | null;
         branch: string | null;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
 }

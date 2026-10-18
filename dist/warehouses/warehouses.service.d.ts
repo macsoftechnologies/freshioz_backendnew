@@ -6,10 +6,10 @@ export declare class WarehousesService {
         managerPhone: string;
         id: string;
         uuid: string;
-        name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         lat: number | null;
         lng: number | null;
         code: string;
@@ -43,10 +43,10 @@ export declare class WarehousesService {
         managerPhone: string;
         id: string;
         uuid: string;
-        name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         lat: number | null;
         lng: number | null;
         code: string;
@@ -58,10 +58,10 @@ export declare class WarehousesService {
     create(body: any): Promise<{
         id: string;
         uuid: string;
-        name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         lat: number | null;
         lng: number | null;
         code: string;
@@ -75,10 +75,10 @@ export declare class WarehousesService {
     update(id: string, data: any): Promise<{
         id: string;
         uuid: string;
-        name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         lat: number | null;
         lng: number | null;
         code: string;
@@ -92,10 +92,10 @@ export declare class WarehousesService {
     delete(id: string): Promise<{
         id: string;
         uuid: string;
-        name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         lat: number | null;
         lng: number | null;
         code: string;

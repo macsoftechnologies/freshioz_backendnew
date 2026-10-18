@@ -6,9 +6,9 @@ export declare class CatalogService {
         categories: {
             id: string;
             name: string;
+            description: string;
             slug: string;
             icon: string;
-            description: string;
             sortOrder: number;
         }[];
         units: {

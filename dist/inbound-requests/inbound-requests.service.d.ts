@@ -8,11 +8,11 @@ export declare class InboundRequestsService {
             createdTimeIST: string;
             id: string;
             uuid: string;
+            societyName: string;
             status: string;
             createdAt: Date;
             updatedAt: Date;
             address: string | null;
-            societyName: string;
             contactName: string;
             contactPhone: string;
             contactRole: string | null;
@@ -26,11 +26,11 @@ export declare class InboundRequestsService {
         createdTimeIST: string;
         id: string;
         uuid: string;
+        societyName: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
         address: string | null;
-        societyName: string;
         contactName: string;
         contactPhone: string;
         contactRole: string | null;
@@ -42,11 +42,11 @@ export declare class InboundRequestsService {
         createdTimeIST: string;
         id: string;
         uuid: string;
+        societyName: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
         address: string | null;
-        societyName: string;
         contactName: string;
         contactPhone: string;
         contactRole: string | null;

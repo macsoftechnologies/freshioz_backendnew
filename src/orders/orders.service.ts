@@ -382,6 +382,8 @@ export class OrdersService {
         where: { id: existing.id },
         data: {
           status: 'CANCELLED',
+          cancelledReason: reason || 'Cancelled by resident before cutoff',
+          cancelledAt: new Date(),
         },
         include: { items: true, society: true },
       });

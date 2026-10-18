@@ -17,6 +17,8 @@ const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const reviews_service_1 = require("./reviews.service");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
+const roles_guard_1 = require("../auth/roles.guard");
+const roles_decorator_1 = require("../auth/roles.decorator");
 let ReviewsController = class ReviewsController {
     constructor(reviewsService) {
         this.reviewsService = reviewsService;
@@ -95,7 +97,8 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Staff: Get all reviews for moderation' }),
     (0, swagger_1.ApiBearerAuth)(),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('SUPER_ADMIN'),
     (0, common_1.Get)('admin'),
     __param(0, (0, common_1.Query)('type')),
     __param(1, (0, common_1.Query)('status')),
@@ -107,7 +110,8 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Staff: Approve, hide, or flag a review' }),
     (0, swagger_1.ApiBearerAuth)(),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('SUPER_ADMIN'),
     (0, common_1.Patch)('admin/:id/moderate'),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Param)('id')),

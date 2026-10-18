@@ -2,6 +2,8 @@ import { Controller, Get, Post, Patch, Body, Param, Query, Req, UseGuards } from
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { CustomerDiscountsService, CreateCustomerDiscountDto } from './customer-discounts.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 
 @ApiTags('Customer Discounts')
 @Controller('customer-discounts')
@@ -10,7 +12,8 @@ export class CustomerDiscountsController {
 
   @ApiOperation({ summary: 'Admin: Award a feedback discount to a customer account' })
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN')
   @Post('admin')
   async createDiscount(@Req() req: any, @Body() body: CreateCustomerDiscountDto) {
     return this.discountsService.createDiscount(req.user, body);
@@ -18,7 +21,8 @@ export class CustomerDiscountsController {
 
   @ApiOperation({ summary: 'Admin: Get list of awarded discounts' })
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN')
   @Get('admin')
   async getAdminDiscounts(@Query('status') status?: string, @Query('userId') userId?: string) {
     return this.discountsService.getAdminDiscounts({ status, userId });
@@ -26,7 +30,8 @@ export class CustomerDiscountsController {
 
   @ApiOperation({ summary: 'Admin: Revoke an unused discount' })
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN')
   @Patch('admin/:id/revoke')
   async revokeDiscount(@Req() req: any, @Param('id') id: string) {
     return this.discountsService.revokeDiscount(id, req.user);

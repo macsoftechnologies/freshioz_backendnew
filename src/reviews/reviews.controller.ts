@@ -2,6 +2,8 @@ import { Controller, Get, Post, Put, Patch, Body, Param, Query, Req, UseGuards }
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { ReviewsService, CreateReviewDto, UpdateReviewDto } from './reviews.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 
 @ApiTags('Reviews')
 @Controller('reviews')
@@ -46,7 +48,8 @@ export class ReviewsController {
 
   @ApiOperation({ summary: 'Staff: Get all reviews for moderation' })
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN')
   @Get('admin')
   async getAdminReviews(
     @Query('type') type?: string,
@@ -58,7 +61,8 @@ export class ReviewsController {
 
   @ApiOperation({ summary: 'Staff: Approve, hide, or flag a review' })
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN')
   @Patch('admin/:id/moderate')
   async moderateReview(
     @Req() req: any,

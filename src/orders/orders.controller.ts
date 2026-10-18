@@ -45,7 +45,8 @@ export class OrdersController {
     }
     // 3. For internal staff: if user has an assigned warehouse and is not Super Admin, scope by warehouseId
     const isSuperAdmin = user?.roles?.includes('SUPER_ADMIN') || user?.role === 'SUPER_ADMIN';
-    const effectiveWarehouseId = (!isSuperAdmin && user?.warehouseId) ? user.warehouseId : warehouseId;
+    const staffWarehouseId = user?.assignedWarehouseId || user?.warehouseId;
+    const effectiveWarehouseId = (!isSuperAdmin && staffWarehouseId && staffWarehouseId !== 'ALL') ? staffWarehouseId : warehouseId;
 
     return this.ordersService.findAll({ status, societyId, phone, warehouseId: effectiveWarehouseId });
   }

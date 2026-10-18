@@ -52,6 +52,7 @@ let AuthService = class AuthService {
                         phone: employee.phone,
                         roles: employeeRoles,
                         assignedWarehouseId: employee.assignedWarehouseId,
+                        warehouseId: employee.assignedWarehouseId,
                         type: 'EMPLOYEE',
                     };
                     const token = this.jwtService.sign(userPayload);

@@ -17,6 +17,8 @@ const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const customer_discounts_service_1 = require("./customer-discounts.service");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
+const roles_guard_1 = require("../auth/roles.guard");
+const roles_decorator_1 = require("../auth/roles.decorator");
 let CustomerDiscountsController = class CustomerDiscountsController {
     constructor(discountsService) {
         this.discountsService = discountsService;
@@ -41,7 +43,8 @@ exports.CustomerDiscountsController = CustomerDiscountsController;
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Admin: Award a feedback discount to a customer account' }),
     (0, swagger_1.ApiBearerAuth)(),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('SUPER_ADMIN'),
     (0, common_1.Post)('admin'),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
@@ -52,7 +55,8 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Admin: Get list of awarded discounts' }),
     (0, swagger_1.ApiBearerAuth)(),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('SUPER_ADMIN'),
     (0, common_1.Get)('admin'),
     __param(0, (0, common_1.Query)('status')),
     __param(1, (0, common_1.Query)('userId')),
@@ -63,7 +67,8 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Admin: Revoke an unused discount' }),
     (0, swagger_1.ApiBearerAuth)(),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('SUPER_ADMIN'),
     (0, common_1.Patch)('admin/:id/revoke'),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Param)('id')),

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order.dto';
@@ -360,6 +360,10 @@ export class OrdersService {
         throw new NotFoundException(`Order #${idOrUuid} not found`);
       }
 
+      if (existing.status === 'CANCELLED') {
+        throw new BadRequestException('Cannot update status of an order that has already been cancelled.');
+      }
+
       const updateData: any = {};
       if (dto.status) updateData.status = dto.status;
       if (dto.paymentStatus) updateData.paymentStatus = dto.paymentStatus;
@@ -369,10 +373,24 @@ export class OrdersService {
         updateData.codCollectedAt = new Date();
       }
 
-      // CREDIT SOCIETY EARNINGS EXACTLY ONCE WHEN STATUS BECOMES 'DELIVERED'
-      if (dto.status === 'DELIVERED' && existing.status !== 'DELIVERED') {
+      // ATOMIC CONCURRENCY CHECK FOR DELIVERED:
+      // Prevents race conditions where an order is concurrently cancelled while being delivered
+      if (dto.status === 'DELIVERED') {
         updateData.deliveredAt = new Date();
 
+        const updateResult = await tx.order.updateMany({
+          where: {
+            id: existing.id,
+            status: { notIn: ['DELIVERED', 'CANCELLED'] },
+          },
+          data: updateData,
+        });
+
+        if (updateResult.count === 0) {
+          throw new ConflictException('Cannot mark order as delivered because it was concurrently cancelled or already delivered.');
+        }
+
+        // Credit society earnings exactly once when status becomes DELIVERED
         if (existing.societyId && existing.societyCommissionEarned > 0) {
           await tx.society.update({
             where: { id: existing.societyId },
@@ -382,11 +400,15 @@ export class OrdersService {
             },
           });
         }
+      } else {
+        await tx.order.update({
+          where: { id: existing.id },
+          data: updateData,
+        });
       }
 
-      const updated = await tx.order.update({
+      const updated = await tx.order.findUnique({
         where: { id: existing.id },
-        data: updateData,
         include: { items: true, society: true },
       });
 
@@ -425,6 +447,25 @@ export class OrdersService {
         throw new BadRequestException('Delivered orders cannot be cancelled.');
       }
 
+      // ATOMIC CONCURRENCY CHECK FOR CANCELLATION:
+      // Atomically transition to CANCELLED only if status is still NOT DELIVERED and NOT CANCELLED.
+      // This completely eliminates any race condition between delivery and cancellation.
+      const cancelResult = await tx.order.updateMany({
+        where: {
+          id: existing.id,
+          status: { notIn: ['DELIVERED', 'CANCELLED'] },
+        },
+        data: {
+          status: 'CANCELLED',
+          cancelledReason: reason || 'Cancelled by resident before cutoff',
+          cancelledAt: new Date(),
+        },
+      });
+
+      if (cancelResult.count === 0) {
+        throw new ConflictException('Order cannot be cancelled because it was concurrently delivered or already cancelled.');
+      }
+
       // Restore reserved warehouse stock
       if (existing.warehouseId && Array.isArray(existing.items)) {
         for (const item of existing.items) {
@@ -454,24 +495,8 @@ export class OrdersService {
         }
       }
 
-      // If it was previously marked DELIVERED and staff cancels, reverse society commission
-      if (existing.status === 'DELIVERED' && existing.societyId && existing.societyCommissionEarned > 0) {
-        await tx.society.update({
-          where: { id: existing.societyId },
-          data: {
-            balanceEarned: { decrement: existing.societyCommissionEarned },
-            totalOrdersDelivered: { decrement: 1 },
-          },
-        });
-      }
-
-      const updated = await tx.order.update({
+      const updated = await tx.order.findUnique({
         where: { id: existing.id },
-        data: {
-          status: 'CANCELLED',
-          cancelledReason: reason || 'Cancelled by resident before cutoff',
-          cancelledAt: new Date(),
-        },
         include: { items: true, society: true },
       });
 

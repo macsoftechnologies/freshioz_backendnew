@@ -24,6 +24,7 @@ export declare class AuthService {
             phone: string;
             roles: string[];
             assignedWarehouseId: string;
+            warehouseId: string;
             type: string;
         };
     } | {

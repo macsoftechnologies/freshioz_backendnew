@@ -8,7 +8,9 @@ export interface CreateCustomerDiscountDto {
   discountValue: number; // e.g. 50 (₹) or 15 (%)
   minOrderAmount?: number;
   maxUses?: number; // default 1
-  expiresAt: string; // ISO date or YYYY-MM-DD
+  expiresAt?: string; // ISO date or YYYY-MM-DD
+  expiryDays?: number; // Days from now (e.g. 30)
+  code?: string; // Optional custom code
   issueReason?: string; // Audit reason
 }
 
@@ -30,15 +32,33 @@ export class CustomerDiscountsService {
       throw new BadRequestException('Percentage discount cannot exceed 100%');
     }
 
-    const exp = new Date(dto.expiresAt);
+    // Support both expiresAt string and expiryDays number
+    let exp: Date;
+    if (dto.expiresAt) {
+      exp = new Date(dto.expiresAt);
+    } else if (dto.expiryDays) {
+      exp = new Date(Date.now() + Number(dto.expiryDays) * 86400000);
+    } else {
+      exp = new Date(Date.now() + 30 * 86400000); // 30 days default
+    }
+
     if (isNaN(exp.getTime()) || exp.getTime() <= Date.now()) {
       throw new BadRequestException('Expiry date must be in the future');
     }
 
-    // Generate unique readable reward code
-    const cleanPhone = dto.userId.slice(-4);
-    const rand = Math.floor(1000 + Math.random() * 9000);
-    const code = `REWARD-${cleanPhone}-${rand}`;
+    // Determine code: use custom code if provided, otherwise generate reward code
+    let code: string;
+    if (dto.code && dto.code.trim()) {
+      code = dto.code.trim().toUpperCase();
+      const existing = await this.prisma.customerDiscount.findUnique({ where: { code } });
+      if (existing) {
+        throw new BadRequestException(`Discount code "${code}" already exists. Please choose a different code.`);
+      }
+    } else {
+      const cleanPhone = dto.userId.slice(-4);
+      const rand = Math.floor(1000 + Math.random() * 9000);
+      code = `REWARD-${cleanPhone}-${rand}`;
+    }
 
     return this.prisma.customerDiscount.create({
       data: {

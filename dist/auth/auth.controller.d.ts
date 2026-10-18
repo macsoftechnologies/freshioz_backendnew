@@ -18,6 +18,7 @@ export declare class AuthController {
             phone: string;
             roles: string[];
             assignedWarehouseId: string;
+            warehouseId: string;
             type: string;
         };
     } | {

@@ -48,6 +48,7 @@ export class AuthService {
             phone: employee.phone,
             roles: employeeRoles,
             assignedWarehouseId: employee.assignedWarehouseId,
+            warehouseId: employee.assignedWarehouseId,
             type: 'EMPLOYEE',
           };
 

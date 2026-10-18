@@ -27,13 +27,32 @@ let CustomerDiscountsService = class CustomerDiscountsService {
         if (dto.discountType === 'PERCENTAGE' && val > 100) {
             throw new common_1.BadRequestException('Percentage discount cannot exceed 100%');
         }
-        const exp = new Date(dto.expiresAt);
+        let exp;
+        if (dto.expiresAt) {
+            exp = new Date(dto.expiresAt);
+        }
+        else if (dto.expiryDays) {
+            exp = new Date(Date.now() + Number(dto.expiryDays) * 86400000);
+        }
+        else {
+            exp = new Date(Date.now() + 30 * 86400000);
+        }
         if (isNaN(exp.getTime()) || exp.getTime() <= Date.now()) {
             throw new common_1.BadRequestException('Expiry date must be in the future');
         }
-        const cleanPhone = dto.userId.slice(-4);
-        const rand = Math.floor(1000 + Math.random() * 9000);
-        const code = `REWARD-${cleanPhone}-${rand}`;
+        let code;
+        if (dto.code && dto.code.trim()) {
+            code = dto.code.trim().toUpperCase();
+            const existing = await this.prisma.customerDiscount.findUnique({ where: { code } });
+            if (existing) {
+                throw new common_1.BadRequestException(`Discount code "${code}" already exists. Please choose a different code.`);
+            }
+        }
+        else {
+            const cleanPhone = dto.userId.slice(-4);
+            const rand = Math.floor(1000 + Math.random() * 9000);
+            code = `REWARD-${cleanPhone}-${rand}`;
+        }
         return this.prisma.customerDiscount.create({
             data: {
                 code,

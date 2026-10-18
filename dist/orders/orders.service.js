@@ -308,6 +308,9 @@ let OrdersService = class OrdersService {
             if (!existing) {
                 throw new common_1.NotFoundException(`Order #${idOrUuid} not found`);
             }
+            if (existing.status === 'CANCELLED') {
+                throw new common_1.BadRequestException('Cannot update status of an order that has already been cancelled.');
+            }
             const updateData = {};
             if (dto.status)
                 updateData.status = dto.status;
@@ -319,8 +322,18 @@ let OrdersService = class OrdersService {
                 updateData.codCollectedBy = dto.codCollectedBy;
                 updateData.codCollectedAt = new Date();
             }
-            if (dto.status === 'DELIVERED' && existing.status !== 'DELIVERED') {
+            if (dto.status === 'DELIVERED') {
                 updateData.deliveredAt = new Date();
+                const updateResult = await tx.order.updateMany({
+                    where: {
+                        id: existing.id,
+                        status: { notIn: ['DELIVERED', 'CANCELLED'] },
+                    },
+                    data: updateData,
+                });
+                if (updateResult.count === 0) {
+                    throw new common_1.ConflictException('Cannot mark order as delivered because it was concurrently cancelled or already delivered.');
+                }
                 if (existing.societyId && existing.societyCommissionEarned > 0) {
                     await tx.society.update({
                         where: { id: existing.societyId },
@@ -331,9 +344,14 @@ let OrdersService = class OrdersService {
                     });
                 }
             }
-            const updated = await tx.order.update({
+            else {
+                await tx.order.update({
+                    where: { id: existing.id },
+                    data: updateData,
+                });
+            }
+            const updated = await tx.order.findUnique({
                 where: { id: existing.id },
-                data: updateData,
                 include: { items: true, society: true },
             });
             return {
@@ -364,6 +382,20 @@ let OrdersService = class OrdersService {
             if (existing.status === 'DELIVERED') {
                 throw new common_1.BadRequestException('Delivered orders cannot be cancelled.');
             }
+            const cancelResult = await tx.order.updateMany({
+                where: {
+                    id: existing.id,
+                    status: { notIn: ['DELIVERED', 'CANCELLED'] },
+                },
+                data: {
+                    status: 'CANCELLED',
+                    cancelledReason: reason || 'Cancelled by resident before cutoff',
+                    cancelledAt: new Date(),
+                },
+            });
+            if (cancelResult.count === 0) {
+                throw new common_1.ConflictException('Order cannot be cancelled because it was concurrently delivered or already cancelled.');
+            }
             if (existing.warehouseId && Array.isArray(existing.items)) {
                 for (const item of existing.items) {
                     if (!item.productId)
@@ -392,22 +424,8 @@ let OrdersService = class OrdersService {
                     }
                 }
             }
-            if (existing.status === 'DELIVERED' && existing.societyId && existing.societyCommissionEarned > 0) {
-                await tx.society.update({
-                    where: { id: existing.societyId },
-                    data: {
-                        balanceEarned: { decrement: existing.societyCommissionEarned },
-                        totalOrdersDelivered: { decrement: 1 },
-                    },
-                });
-            }
-            const updated = await tx.order.update({
+            const updated = await tx.order.findUnique({
                 where: { id: existing.id },
-                data: {
-                    status: 'CANCELLED',
-                    cancelledReason: reason || 'Cancelled by resident before cutoff',
-                    cancelledAt: new Date(),
-                },
                 include: { items: true, society: true },
             });
             return {

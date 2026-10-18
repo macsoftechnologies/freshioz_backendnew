@@ -205,8 +205,8 @@ let OrdersService = class OrdersService {
                     deliveryDate: dto.deliveryDate,
                     deliverySlot: dto.deliverySlot,
                     status: 'CONFIRMED',
-                    paymentMethod: dto.paymentMethod || 'UPI',
-                    paymentStatus: dto.paymentStatus || 'PAID',
+                    paymentMethod: 'PAY_ON_DELIVERY',
+                    paymentStatus: 'PENDING_COD',
                     societyCommissionEarned: societyCommission,
                     items: {
                         create: verifiedItems,

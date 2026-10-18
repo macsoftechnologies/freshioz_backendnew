@@ -25,6 +25,7 @@ const store_module_1 = require("./store/store.module");
 const uploads_module_1 = require("./uploads/uploads.module");
 const categories_module_1 = require("./categories/categories.module");
 const units_module_1 = require("./units/units.module");
+const catalog_module_1 = require("./catalog/catalog.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -48,6 +49,7 @@ exports.AppModule = AppModule = __decorate([
             health_module_1.HealthModule,
             store_module_1.StoreModule,
             uploads_module_1.UploadsModule,
+            catalog_module_1.CatalogModule,
         ],
     })
 ], AppModule);

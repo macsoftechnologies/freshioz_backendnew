@@ -231,8 +231,12 @@ export class OrdersService {
           deliveryDate: dto.deliveryDate,
           deliverySlot: dto.deliverySlot,
           status: 'CONFIRMED',
-          paymentMethod: dto.paymentMethod || 'UPI',
-          paymentStatus: dto.paymentStatus || 'PAID',
+          // Phase 1: Only Pay on Delivery (COD) is permitted.
+          // Instant online UPI is commented out so clients cannot inject 'PAID' via console or REST API.
+          // paymentMethod: dto.paymentMethod || 'UPI',
+          // paymentStatus: dto.paymentStatus || 'PAID',
+          paymentMethod: 'PAY_ON_DELIVERY',
+          paymentStatus: 'PENDING_COD',
           societyCommissionEarned: societyCommission,
           items: {
             create: verifiedItems,

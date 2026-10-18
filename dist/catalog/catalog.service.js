@@ -89,7 +89,10 @@ let CatalogService = class CatalogService {
                         lte: end,
                     },
                 },
-                orderBy: { publishedAt: 'desc' },
+                orderBy: [
+                    { publishedAt: 'desc' },
+                    { id: 'desc' },
+                ],
             }),
         ]);
         const historyMap = new Map();

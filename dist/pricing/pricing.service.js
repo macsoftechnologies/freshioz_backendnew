@@ -42,6 +42,9 @@ let PricingService = class PricingService {
     async getPricesByDate(date) {
         const formattedDate = date || (0, date_utils_1.toISTDateString)(new Date());
         const { start, end } = parseDateRange(date);
+        const now = new Date();
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+        const isPastDate = end < todayStart;
         const products = await this.prisma.product.findMany({
             orderBy: { id: 'asc' },
         });
@@ -51,7 +54,10 @@ let PricingService = class PricingService {
                     lte: end,
                 },
             },
-            orderBy: { publishedAt: 'desc' },
+            orderBy: [
+                { publishedAt: 'desc' },
+                { id: 'desc' },
+            ],
         });
         const historyMap = new Map();
         for (const h of historyEntries) {
@@ -59,22 +65,14 @@ let PricingService = class PricingService {
                 historyMap.set(h.productId, h);
             }
         }
-        const unmappedProductIds = products.filter((p) => !historyMap.has(p.id)).map((p) => p.id);
-        if (unmappedProductIds.length > 0) {
-            const earliestEntries = await this.prisma.dailyPriceHistory.findMany({
-                where: {
-                    productId: { in: unmappedProductIds },
-                },
-                orderBy: { publishedAt: 'asc' },
-            });
-            for (const e of earliestEntries) {
-                if (!historyMap.has(e.productId)) {
-                    historyMap.set(e.productId, e);
-                }
-            }
-        }
         const merged = products.map((p) => {
             const h = historyMap.get(p.id);
+            const effectiveRetailPrice = h
+                ? h.retailPrice
+                : (isPastDate ? null : p.retailPrice);
+            const effectiveMarketPrice = h
+                ? h.retailMarketPrice
+                : (isPastDate ? null : p.retailMarketPrice);
             return {
                 id: p.id,
                 productId: p.id,
@@ -82,8 +80,8 @@ let PricingService = class PricingService {
                 kannadaName: p.kannadaName,
                 categoryId: p.categoryId,
                 retailUnit: p.retailUnit,
-                retailPrice: h ? h.retailPrice : p.retailPrice,
-                retailMarketPrice: h ? h.retailMarketPrice : p.retailMarketPrice,
+                retailPrice: effectiveRetailPrice,
+                retailMarketPrice: effectiveMarketPrice,
                 bulkMinQty: h ? h.bulkMinQty : p.bulkMinQty,
                 bulkDiscountPercent: h ? h.bulkDiscountPercent : p.bulkDiscountPercent,
                 origin: p.origin,
@@ -130,6 +128,10 @@ let PricingService = class PricingService {
         todayStart.setHours(0, 0, 0, 0);
         const todayEnd = new Date();
         todayEnd.setHours(23, 59, 59, 999);
+        const targetDayStart = new Date(publishDate);
+        targetDayStart.setHours(0, 0, 0, 0);
+        const targetDayEnd = new Date(publishDate);
+        targetDayEnd.setHours(23, 59, 59, 999);
         const isToday = publishDate >= todayStart && publishDate <= todayEnd;
         const results = await this.prisma.$transaction(async (tx) => {
             const records = [];
@@ -154,6 +156,15 @@ let PricingService = class PricingService {
                         },
                     });
                 }
+                await tx.dailyPriceHistory.deleteMany({
+                    where: {
+                        productId: prodId,
+                        publishedAt: {
+                            gte: targetDayStart,
+                            lte: targetDayEnd,
+                        },
+                    },
+                });
                 const hist = await tx.dailyPriceHistory.create({
                     data: {
                         productId: prodId,

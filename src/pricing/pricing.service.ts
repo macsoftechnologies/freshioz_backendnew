@@ -32,20 +32,27 @@ export class PricingService {
     const formattedDate = date || toISTDateString(new Date());
     const { start, end } = parseDateRange(date);
 
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+    const isPastDate = end < todayStart;
+
     // 1. Get all base products
     const products = await this.prisma.product.findMany({
       orderBy: { id: 'asc' },
     });
 
     // 2. Find daily price history entries published ON or BEFORE this target date
-    // This strictly guarantees that changes to today's or future rates NEVER leak into past dates
+    // Ordered by publishedAt desc, id desc so the most recent publish for that date always wins
     const historyEntries = await this.prisma.dailyPriceHistory.findMany({
       where: {
         publishedAt: {
           lte: end,
         },
       },
-      orderBy: { publishedAt: 'desc' },
+      orderBy: [
+        { publishedAt: 'desc' },
+        { id: 'desc' },
+      ],
     });
 
     // Map latest history entry per product effective as of this target date
@@ -56,26 +63,17 @@ export class PricingService {
       }
     }
 
-    // For any products without history on or before this date, find the earliest known historical record
-    // so past date archives remain isolated from current / today's live edits
-    const unmappedProductIds = products.filter((p) => !historyMap.has(p.id)).map((p) => p.id);
-    if (unmappedProductIds.length > 0) {
-      const earliestEntries = await this.prisma.dailyPriceHistory.findMany({
-        where: {
-          productId: { in: unmappedProductIds },
-        },
-        orderBy: { publishedAt: 'asc' },
-      });
-      for (const e of earliestEntries) {
-        if (!historyMap.has(e.productId)) {
-          historyMap.set(e.productId, e);
-        }
-      }
-    }
-
     // Merge history pricing with product details so each date gets its own independent pricing snapshot
     const merged = products.map((p) => {
       const h = historyMap.get(p.id);
+      // For past dates without any recorded pricing on or before that date, do NOT leak today's future rates
+      const effectiveRetailPrice = h 
+        ? h.retailPrice 
+        : (isPastDate ? null : p.retailPrice);
+      const effectiveMarketPrice = h 
+        ? h.retailMarketPrice 
+        : (isPastDate ? null : p.retailMarketPrice);
+
       return {
         id: p.id,
         productId: p.id,
@@ -83,8 +81,8 @@ export class PricingService {
         kannadaName: p.kannadaName,
         categoryId: p.categoryId,
         retailUnit: p.retailUnit,
-        retailPrice: h ? h.retailPrice : p.retailPrice,
-        retailMarketPrice: h ? h.retailMarketPrice : p.retailMarketPrice,
+        retailPrice: effectiveRetailPrice,
+        retailMarketPrice: effectiveMarketPrice,
         bulkMinQty: h ? h.bulkMinQty : p.bulkMinQty,
         bulkDiscountPercent: h ? h.bulkDiscountPercent : p.bulkDiscountPercent,
         origin: p.origin,
@@ -137,6 +135,11 @@ export class PricingService {
     const todayEnd = new Date();
     todayEnd.setHours(23, 59, 59, 999);
 
+    const targetDayStart = new Date(publishDate);
+    targetDayStart.setHours(0, 0, 0, 0);
+    const targetDayEnd = new Date(publishDate);
+    targetDayEnd.setHours(23, 59, 59, 999);
+
     const isToday = publishDate >= todayStart && publishDate <= todayEnd;
 
     const results = await this.prisma.$transaction(async (tx) => {
@@ -164,6 +167,18 @@ export class PricingService {
             },
           });
         }
+
+        // Cleanly delete any existing history entry for this product on this target day
+        // This ensures that republishing prices for the same date always cleanly replaces the earlier entry
+        await tx.dailyPriceHistory.deleteMany({
+          where: {
+            productId: prodId,
+            publishedAt: {
+              gte: targetDayStart,
+              lte: targetDayEnd,
+            },
+          },
+        });
 
         const hist = await tx.dailyPriceHistory.create({
           data: {

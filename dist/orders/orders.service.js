@@ -175,21 +175,21 @@ let OrdersService = class OrdersService {
                         },
                     });
                     if (inv) {
-                        if (inv.currentQty < qty) {
-                            throw new common_1.BadRequestException(`Produce item "${product.name}" has insufficient stock in warehouse. Available: ${inv.currentQty} ${inv.unit}, requested: ${qty} ${inv.unit}`);
-                        }
-                        await tx.warehouseInventory.update({
-                            where: {
-                                warehouseId_productId: {
-                                    warehouseId,
-                                    productId: product.id,
+                        const availableToReserve = Math.min(Math.max(0, inv.currentQty), qty);
+                        if (availableToReserve > 0) {
+                            await tx.warehouseInventory.update({
+                                where: {
+                                    warehouseId_productId: {
+                                        warehouseId,
+                                        productId: product.id,
+                                    },
                                 },
-                            },
-                            data: {
-                                currentQty: inv.currentQty - qty,
-                                reservedQty: inv.reservedQty + qty,
-                            },
-                        });
+                                data: {
+                                    currentQty: Math.max(0, inv.currentQty - availableToReserve),
+                                    reservedQty: (inv.reservedQty || 0) + availableToReserve,
+                                },
+                            });
+                        }
                     }
                 }
             }
@@ -409,18 +409,21 @@ let OrdersService = class OrdersService {
                         },
                     });
                     if (inv) {
-                        await tx.warehouseInventory.update({
-                            where: {
-                                warehouseId_productId: {
-                                    warehouseId: existing.warehouseId,
-                                    productId: item.productId,
+                        const toRestore = Math.min(Math.max(0, inv.reservedQty || 0), item.qty);
+                        if (toRestore > 0) {
+                            await tx.warehouseInventory.update({
+                                where: {
+                                    warehouseId_productId: {
+                                        warehouseId: existing.warehouseId,
+                                        productId: item.productId,
+                                    },
                                 },
-                            },
-                            data: {
-                                currentQty: inv.currentQty + item.qty,
-                                reservedQty: Math.max(0, inv.reservedQty - item.qty),
-                            },
-                        });
+                                data: {
+                                    currentQty: inv.currentQty + toRestore,
+                                    reservedQty: Math.max(0, (inv.reservedQty || 0) - toRestore),
+                                },
+                            });
+                        }
                     }
                 }
             }

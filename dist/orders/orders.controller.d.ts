@@ -12,16 +12,16 @@ export declare class OrdersController {
         society: {
             id: string;
             uuid: string;
-            name: string;
+            warehouseId: string | null;
             status: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
             type: string;
             address: string;
             imageUrl: string | null;
             lat: number | null;
             lng: number | null;
-            warehouseId: string | null;
             secretaryName: string | null;
             secretaryPhone: string | null;
             totalFloors: number | null;
@@ -40,10 +40,10 @@ export declare class OrdersController {
         warehouse: {
             id: string;
             uuid: string;
-            name: string;
             status: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
             lat: number | null;
             lng: number | null;
             code: string;
@@ -56,8 +56,8 @@ export declare class OrdersController {
         };
         items: {
             id: string;
-            name: string;
             bulkSavings: number | null;
+            name: string;
             orderId: string;
             productId: string;
             unit: string;
@@ -70,16 +70,13 @@ export declare class OrdersController {
         }[];
         id: string;
         uuid: string;
-        status: string;
-        createdAt: Date;
-        updatedAt: Date;
-        societyId: string | null;
-        flatNo: string | null;
-        warehouseId: string | null;
         userId: string;
         userName: string;
         userPhone: string;
+        societyId: string | null;
         societyName: string | null;
+        flatNo: string | null;
+        warehouseId: string | null;
         warehouseCode: string | null;
         orderType: string;
         subtotal: number;
@@ -89,6 +86,7 @@ export declare class OrdersController {
         totalAmount: number;
         deliveryDate: string;
         deliverySlot: string;
+        status: string;
         paymentMethod: string;
         paymentStatus: string;
         codCollectedAmount: number | null;
@@ -99,6 +97,8 @@ export declare class OrdersController {
         cancelledReason: string | null;
         cancelledAt: Date | null;
         orderPlacedAt: Date;
+        createdAt: Date;
+        updatedAt: Date;
     }[]>;
     findOne(req: any, id: string): Promise<{
         orderPlacedAtFormatted: string;
@@ -106,16 +106,16 @@ export declare class OrdersController {
         society: {
             id: string;
             uuid: string;
-            name: string;
+            warehouseId: string | null;
             status: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
             type: string;
             address: string;
             imageUrl: string | null;
             lat: number | null;
             lng: number | null;
-            warehouseId: string | null;
             secretaryName: string | null;
             secretaryPhone: string | null;
             totalFloors: number | null;
@@ -134,10 +134,10 @@ export declare class OrdersController {
         warehouse: {
             id: string;
             uuid: string;
-            name: string;
             status: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
             lat: number | null;
             lng: number | null;
             code: string;
@@ -150,8 +150,8 @@ export declare class OrdersController {
         };
         items: {
             id: string;
-            name: string;
             bulkSavings: number | null;
+            name: string;
             orderId: string;
             productId: string;
             unit: string;
@@ -164,16 +164,13 @@ export declare class OrdersController {
         }[];
         id: string;
         uuid: string;
-        status: string;
-        createdAt: Date;
-        updatedAt: Date;
-        societyId: string | null;
-        flatNo: string | null;
-        warehouseId: string | null;
         userId: string;
         userName: string;
         userPhone: string;
+        societyId: string | null;
         societyName: string | null;
+        flatNo: string | null;
+        warehouseId: string | null;
         warehouseCode: string | null;
         orderType: string;
         subtotal: number;
@@ -183,6 +180,7 @@ export declare class OrdersController {
         totalAmount: number;
         deliveryDate: string;
         deliverySlot: string;
+        status: string;
         paymentMethod: string;
         paymentStatus: string;
         codCollectedAmount: number | null;
@@ -193,6 +191,8 @@ export declare class OrdersController {
         cancelledReason: string | null;
         cancelledAt: Date | null;
         orderPlacedAt: Date;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     trackOrder(req: any, id: string): Promise<{
         id: string;
@@ -205,6 +205,29 @@ export declare class OrdersController {
         orderPlacedAt: Date;
         deliveredAt: Date;
         itemsCount: number;
+        totalAmount: number;
+        subtotal: number;
+        bulkSavings: number;
+        deliveryFee: number;
+        gstAmount: number;
+        paymentMethod: string;
+        paymentStatus: string;
+        codCollectedAmount: number;
+        cancelledReason: string;
+        cancelledAt: Date;
+        items: {
+            id: string;
+            productId: string;
+            name: string;
+            unit: string;
+            qty: number;
+            price: number;
+            effectivePrice: number;
+            totalPrice: number;
+            isBulkApplied: boolean;
+            bulkDiscountPercent: number;
+            bulkSavings: number;
+        }[];
     }>;
     create(req: any, dto: CreateOrderDto): Promise<{
         orderPlacedAtFormatted: string;
@@ -212,16 +235,16 @@ export declare class OrdersController {
         society: {
             id: string;
             uuid: string;
-            name: string;
+            warehouseId: string | null;
             status: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
             type: string;
             address: string;
             imageUrl: string | null;
             lat: number | null;
             lng: number | null;
-            warehouseId: string | null;
             secretaryName: string | null;
             secretaryPhone: string | null;
             totalFloors: number | null;
@@ -240,10 +263,10 @@ export declare class OrdersController {
         warehouse: {
             id: string;
             uuid: string;
-            name: string;
             status: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
             lat: number | null;
             lng: number | null;
             code: string;
@@ -256,8 +279,8 @@ export declare class OrdersController {
         };
         items: {
             id: string;
-            name: string;
             bulkSavings: number | null;
+            name: string;
             orderId: string;
             productId: string;
             unit: string;
@@ -270,16 +293,13 @@ export declare class OrdersController {
         }[];
         id: string;
         uuid: string;
-        status: string;
-        createdAt: Date;
-        updatedAt: Date;
-        societyId: string | null;
-        flatNo: string | null;
-        warehouseId: string | null;
         userId: string;
         userName: string;
         userPhone: string;
+        societyId: string | null;
         societyName: string | null;
+        flatNo: string | null;
+        warehouseId: string | null;
         warehouseCode: string | null;
         orderType: string;
         subtotal: number;
@@ -289,6 +309,7 @@ export declare class OrdersController {
         totalAmount: number;
         deliveryDate: string;
         deliverySlot: string;
+        status: string;
         paymentMethod: string;
         paymentStatus: string;
         codCollectedAmount: number | null;
@@ -299,6 +320,8 @@ export declare class OrdersController {
         cancelledReason: string | null;
         cancelledAt: Date | null;
         orderPlacedAt: Date;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     updateStatus(id: string, dto: UpdateOrderStatusDto): Promise<{
         orderPlacedAtFormatted: string;
@@ -306,16 +329,16 @@ export declare class OrdersController {
         society: {
             id: string;
             uuid: string;
-            name: string;
+            warehouseId: string | null;
             status: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
             type: string;
             address: string;
             imageUrl: string | null;
             lat: number | null;
             lng: number | null;
-            warehouseId: string | null;
             secretaryName: string | null;
             secretaryPhone: string | null;
             totalFloors: number | null;
@@ -333,8 +356,8 @@ export declare class OrdersController {
         };
         items: {
             id: string;
-            name: string;
             bulkSavings: number | null;
+            name: string;
             orderId: string;
             productId: string;
             unit: string;
@@ -347,16 +370,13 @@ export declare class OrdersController {
         }[];
         id: string;
         uuid: string;
-        status: string;
-        createdAt: Date;
-        updatedAt: Date;
-        societyId: string | null;
-        flatNo: string | null;
-        warehouseId: string | null;
         userId: string;
         userName: string;
         userPhone: string;
+        societyId: string | null;
         societyName: string | null;
+        flatNo: string | null;
+        warehouseId: string | null;
         warehouseCode: string | null;
         orderType: string;
         subtotal: number;
@@ -366,6 +386,7 @@ export declare class OrdersController {
         totalAmount: number;
         deliveryDate: string;
         deliverySlot: string;
+        status: string;
         paymentMethod: string;
         paymentStatus: string;
         codCollectedAmount: number | null;
@@ -376,6 +397,8 @@ export declare class OrdersController {
         cancelledReason: string | null;
         cancelledAt: Date | null;
         orderPlacedAt: Date;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     cancelOrder(req: any, id: string, body?: {
         reason?: string;
@@ -385,16 +408,16 @@ export declare class OrdersController {
         society: {
             id: string;
             uuid: string;
-            name: string;
+            warehouseId: string | null;
             status: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
             type: string;
             address: string;
             imageUrl: string | null;
             lat: number | null;
             lng: number | null;
-            warehouseId: string | null;
             secretaryName: string | null;
             secretaryPhone: string | null;
             totalFloors: number | null;
@@ -412,8 +435,8 @@ export declare class OrdersController {
         };
         items: {
             id: string;
-            name: string;
             bulkSavings: number | null;
+            name: string;
             orderId: string;
             productId: string;
             unit: string;
@@ -426,16 +449,13 @@ export declare class OrdersController {
         }[];
         id: string;
         uuid: string;
-        status: string;
-        createdAt: Date;
-        updatedAt: Date;
-        societyId: string | null;
-        flatNo: string | null;
-        warehouseId: string | null;
         userId: string;
         userName: string;
         userPhone: string;
+        societyId: string | null;
         societyName: string | null;
+        flatNo: string | null;
+        warehouseId: string | null;
         warehouseCode: string | null;
         orderType: string;
         subtotal: number;
@@ -445,6 +465,7 @@ export declare class OrdersController {
         totalAmount: number;
         deliveryDate: string;
         deliverySlot: string;
+        status: string;
         paymentMethod: string;
         paymentStatus: string;
         codCollectedAmount: number | null;
@@ -455,5 +476,7 @@ export declare class OrdersController {
         cancelledReason: string | null;
         cancelledAt: Date | null;
         orderPlacedAt: Date;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
 }

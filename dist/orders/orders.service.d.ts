@@ -15,16 +15,16 @@ export declare class OrdersService {
         society: {
             id: string;
             uuid: string;
-            name: string;
+            warehouseId: string | null;
             status: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
             type: string;
             address: string;
             imageUrl: string | null;
             lat: number | null;
             lng: number | null;
-            warehouseId: string | null;
             secretaryName: string | null;
             secretaryPhone: string | null;
             totalFloors: number | null;
@@ -43,10 +43,10 @@ export declare class OrdersService {
         warehouse: {
             id: string;
             uuid: string;
-            name: string;
             status: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
             lat: number | null;
             lng: number | null;
             code: string;
@@ -59,8 +59,8 @@ export declare class OrdersService {
         };
         items: {
             id: string;
-            name: string;
             bulkSavings: number | null;
+            name: string;
             orderId: string;
             productId: string;
             unit: string;
@@ -73,16 +73,13 @@ export declare class OrdersService {
         }[];
         id: string;
         uuid: string;
-        status: string;
-        createdAt: Date;
-        updatedAt: Date;
-        societyId: string | null;
-        flatNo: string | null;
-        warehouseId: string | null;
         userId: string;
         userName: string;
         userPhone: string;
+        societyId: string | null;
         societyName: string | null;
+        flatNo: string | null;
+        warehouseId: string | null;
         warehouseCode: string | null;
         orderType: string;
         subtotal: number;
@@ -92,6 +89,7 @@ export declare class OrdersService {
         totalAmount: number;
         deliveryDate: string;
         deliverySlot: string;
+        status: string;
         paymentMethod: string;
         paymentStatus: string;
         codCollectedAmount: number | null;
@@ -102,6 +100,8 @@ export declare class OrdersService {
         cancelledReason: string | null;
         cancelledAt: Date | null;
         orderPlacedAt: Date;
+        createdAt: Date;
+        updatedAt: Date;
     }[]>;
     findOne(idOrUuid: string): Promise<{
         orderPlacedAtFormatted: string;
@@ -109,16 +109,16 @@ export declare class OrdersService {
         society: {
             id: string;
             uuid: string;
-            name: string;
+            warehouseId: string | null;
             status: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
             type: string;
             address: string;
             imageUrl: string | null;
             lat: number | null;
             lng: number | null;
-            warehouseId: string | null;
             secretaryName: string | null;
             secretaryPhone: string | null;
             totalFloors: number | null;
@@ -137,10 +137,10 @@ export declare class OrdersService {
         warehouse: {
             id: string;
             uuid: string;
-            name: string;
             status: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
             lat: number | null;
             lng: number | null;
             code: string;
@@ -153,8 +153,8 @@ export declare class OrdersService {
         };
         items: {
             id: string;
-            name: string;
             bulkSavings: number | null;
+            name: string;
             orderId: string;
             productId: string;
             unit: string;
@@ -167,16 +167,13 @@ export declare class OrdersService {
         }[];
         id: string;
         uuid: string;
-        status: string;
-        createdAt: Date;
-        updatedAt: Date;
-        societyId: string | null;
-        flatNo: string | null;
-        warehouseId: string | null;
         userId: string;
         userName: string;
         userPhone: string;
+        societyId: string | null;
         societyName: string | null;
+        flatNo: string | null;
+        warehouseId: string | null;
         warehouseCode: string | null;
         orderType: string;
         subtotal: number;
@@ -186,6 +183,7 @@ export declare class OrdersService {
         totalAmount: number;
         deliveryDate: string;
         deliverySlot: string;
+        status: string;
         paymentMethod: string;
         paymentStatus: string;
         codCollectedAmount: number | null;
@@ -196,6 +194,8 @@ export declare class OrdersService {
         cancelledReason: string | null;
         cancelledAt: Date | null;
         orderPlacedAt: Date;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     create(dto: CreateOrderDto): Promise<{
         orderPlacedAtFormatted: string;
@@ -203,16 +203,16 @@ export declare class OrdersService {
         society: {
             id: string;
             uuid: string;
-            name: string;
+            warehouseId: string | null;
             status: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
             type: string;
             address: string;
             imageUrl: string | null;
             lat: number | null;
             lng: number | null;
-            warehouseId: string | null;
             secretaryName: string | null;
             secretaryPhone: string | null;
             totalFloors: number | null;
@@ -231,10 +231,10 @@ export declare class OrdersService {
         warehouse: {
             id: string;
             uuid: string;
-            name: string;
             status: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
             lat: number | null;
             lng: number | null;
             code: string;
@@ -247,8 +247,8 @@ export declare class OrdersService {
         };
         items: {
             id: string;
-            name: string;
             bulkSavings: number | null;
+            name: string;
             orderId: string;
             productId: string;
             unit: string;
@@ -261,16 +261,13 @@ export declare class OrdersService {
         }[];
         id: string;
         uuid: string;
-        status: string;
-        createdAt: Date;
-        updatedAt: Date;
-        societyId: string | null;
-        flatNo: string | null;
-        warehouseId: string | null;
         userId: string;
         userName: string;
         userPhone: string;
+        societyId: string | null;
         societyName: string | null;
+        flatNo: string | null;
+        warehouseId: string | null;
         warehouseCode: string | null;
         orderType: string;
         subtotal: number;
@@ -280,6 +277,7 @@ export declare class OrdersService {
         totalAmount: number;
         deliveryDate: string;
         deliverySlot: string;
+        status: string;
         paymentMethod: string;
         paymentStatus: string;
         codCollectedAmount: number | null;
@@ -290,6 +288,8 @@ export declare class OrdersService {
         cancelledReason: string | null;
         cancelledAt: Date | null;
         orderPlacedAt: Date;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     updateStatus(idOrUuid: string, dto: UpdateOrderStatusDto): Promise<{
         orderPlacedAtFormatted: string;
@@ -297,16 +297,16 @@ export declare class OrdersService {
         society: {
             id: string;
             uuid: string;
-            name: string;
+            warehouseId: string | null;
             status: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
             type: string;
             address: string;
             imageUrl: string | null;
             lat: number | null;
             lng: number | null;
-            warehouseId: string | null;
             secretaryName: string | null;
             secretaryPhone: string | null;
             totalFloors: number | null;
@@ -324,8 +324,8 @@ export declare class OrdersService {
         };
         items: {
             id: string;
-            name: string;
             bulkSavings: number | null;
+            name: string;
             orderId: string;
             productId: string;
             unit: string;
@@ -338,16 +338,13 @@ export declare class OrdersService {
         }[];
         id: string;
         uuid: string;
-        status: string;
-        createdAt: Date;
-        updatedAt: Date;
-        societyId: string | null;
-        flatNo: string | null;
-        warehouseId: string | null;
         userId: string;
         userName: string;
         userPhone: string;
+        societyId: string | null;
         societyName: string | null;
+        flatNo: string | null;
+        warehouseId: string | null;
         warehouseCode: string | null;
         orderType: string;
         subtotal: number;
@@ -357,6 +354,7 @@ export declare class OrdersService {
         totalAmount: number;
         deliveryDate: string;
         deliverySlot: string;
+        status: string;
         paymentMethod: string;
         paymentStatus: string;
         codCollectedAmount: number | null;
@@ -367,6 +365,8 @@ export declare class OrdersService {
         cancelledReason: string | null;
         cancelledAt: Date | null;
         orderPlacedAt: Date;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     cancelOrder(idOrUuid: string, user: any, reason?: string): Promise<{
         orderPlacedAtFormatted: string;
@@ -374,16 +374,16 @@ export declare class OrdersService {
         society: {
             id: string;
             uuid: string;
-            name: string;
+            warehouseId: string | null;
             status: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
             type: string;
             address: string;
             imageUrl: string | null;
             lat: number | null;
             lng: number | null;
-            warehouseId: string | null;
             secretaryName: string | null;
             secretaryPhone: string | null;
             totalFloors: number | null;
@@ -401,8 +401,8 @@ export declare class OrdersService {
         };
         items: {
             id: string;
-            name: string;
             bulkSavings: number | null;
+            name: string;
             orderId: string;
             productId: string;
             unit: string;
@@ -415,16 +415,13 @@ export declare class OrdersService {
         }[];
         id: string;
         uuid: string;
-        status: string;
-        createdAt: Date;
-        updatedAt: Date;
-        societyId: string | null;
-        flatNo: string | null;
-        warehouseId: string | null;
         userId: string;
         userName: string;
         userPhone: string;
+        societyId: string | null;
         societyName: string | null;
+        flatNo: string | null;
+        warehouseId: string | null;
         warehouseCode: string | null;
         orderType: string;
         subtotal: number;
@@ -434,6 +431,7 @@ export declare class OrdersService {
         totalAmount: number;
         deliveryDate: string;
         deliverySlot: string;
+        status: string;
         paymentMethod: string;
         paymentStatus: string;
         codCollectedAmount: number | null;
@@ -444,5 +442,7 @@ export declare class OrdersService {
         cancelledReason: string | null;
         cancelledAt: Date | null;
         orderPlacedAt: Date;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
 }

@@ -105,7 +105,7 @@ export class OrdersController {
           : '••••'
         : null;
 
-    // Return sanitized tracking-safe view (milestones, delivery slot, status)
+    // Return sanitized tracking-safe view (milestones, delivery slot, status, line items, and totals)
     return {
       id: order.id,
       uuid: order.uuid,
@@ -117,6 +117,29 @@ export class OrdersController {
       orderPlacedAt: order.orderPlacedAt,
       deliveredAt: order.deliveredAt,
       itemsCount: order.items?.length || 0,
+      totalAmount: order.totalAmount,
+      subtotal: order.subtotal,
+      bulkSavings: order.bulkSavings,
+      deliveryFee: order.deliveryFee,
+      gstAmount: order.gstAmount,
+      paymentMethod: order.paymentMethod,
+      paymentStatus: order.paymentStatus,
+      codCollectedAmount: order.codCollectedAmount,
+      cancelledReason: order.cancelledReason,
+      cancelledAt: order.cancelledAt,
+      items: (order.items || []).map(i => ({
+        id: i.id,
+        productId: i.productId,
+        name: i.name,
+        unit: i.unit,
+        qty: i.qty,
+        price: i.price,
+        effectivePrice: i.effectivePrice,
+        totalPrice: i.totalPrice,
+        isBulkApplied: i.isBulkApplied,
+        bulkDiscountPercent: i.bulkDiscountPercent,
+        bulkSavings: i.bulkSavings,
+      })),
     };
   }
 

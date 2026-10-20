@@ -17,11 +17,11 @@ export declare class CustomerDiscountsService {
     createDiscount(staffUser: any, dto: CreateCustomerDiscountDto): Promise<{
         id: string;
         uuid: string;
+        userId: string;
+        userName: string | null;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
-        userName: string | null;
         code: string;
         orderId: string | null;
         discountType: string;
@@ -40,11 +40,11 @@ export declare class CustomerDiscountsService {
     getCustomerDiscounts(user: any): Promise<{
         id: string;
         uuid: string;
+        userId: string;
+        userName: string | null;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
-        userName: string | null;
         code: string;
         orderId: string | null;
         discountType: string;
@@ -66,11 +66,11 @@ export declare class CustomerDiscountsService {
     }): Promise<{
         id: string;
         uuid: string;
+        userId: string;
+        userName: string | null;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
-        userName: string | null;
         code: string;
         orderId: string | null;
         discountType: string;
@@ -89,11 +89,11 @@ export declare class CustomerDiscountsService {
     revokeDiscount(id: string, staffUser: any): Promise<{
         id: string;
         uuid: string;
+        userId: string;
+        userName: string | null;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
-        userName: string | null;
         code: string;
         orderId: string | null;
         discountType: string;

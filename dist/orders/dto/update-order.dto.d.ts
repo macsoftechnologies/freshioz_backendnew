@@ -3,4 +3,7 @@ export declare class UpdateOrderStatusDto {
     paymentStatus?: string;
     codCollectedAmount?: number;
     codCollectedBy?: string;
+    codSettledToHub?: boolean;
+    codSettledBy?: string;
+    codReceivedMode?: string;
 }

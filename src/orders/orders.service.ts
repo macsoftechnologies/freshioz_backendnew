@@ -371,6 +371,16 @@ export class OrdersService {
         updateData.codCollectedBy = dto.codCollectedBy;
         updateData.codCollectedAt = new Date();
       }
+      if (dto.codSettledToHub !== undefined) {
+        updateData.codSettledToHub = dto.codSettledToHub;
+        if (dto.codSettledToHub) {
+          updateData.codSettledAt = new Date();
+          updateData.codSettledBy = dto.codSettledBy || 'Hub Cashier Desk';
+        }
+      }
+      if (dto.codReceivedMode) {
+        updateData.codReceivedMode = dto.codReceivedMode;
+      }
 
       // ATOMIC CONCURRENCY CHECK FOR DELIVERED:
       // Prevents race conditions where an order is concurrently cancelled while being delivered

@@ -92,6 +92,10 @@ export declare class OrdersController {
         codCollectedAmount: number | null;
         codCollectedAt: Date | null;
         codCollectedBy: string | null;
+        codSettledToHub: boolean;
+        codSettledAt: Date | null;
+        codSettledBy: string | null;
+        codReceivedMode: string | null;
         societyCommissionEarned: number;
         deliveredAt: Date | null;
         cancelledReason: string | null;
@@ -186,6 +190,10 @@ export declare class OrdersController {
         codCollectedAmount: number | null;
         codCollectedAt: Date | null;
         codCollectedBy: string | null;
+        codSettledToHub: boolean;
+        codSettledAt: Date | null;
+        codSettledBy: string | null;
+        codReceivedMode: string | null;
         societyCommissionEarned: number;
         deliveredAt: Date | null;
         cancelledReason: string | null;
@@ -315,6 +323,10 @@ export declare class OrdersController {
         codCollectedAmount: number | null;
         codCollectedAt: Date | null;
         codCollectedBy: string | null;
+        codSettledToHub: boolean;
+        codSettledAt: Date | null;
+        codSettledBy: string | null;
+        codReceivedMode: string | null;
         societyCommissionEarned: number;
         deliveredAt: Date | null;
         cancelledReason: string | null;
@@ -392,6 +404,10 @@ export declare class OrdersController {
         codCollectedAmount: number | null;
         codCollectedAt: Date | null;
         codCollectedBy: string | null;
+        codSettledToHub: boolean;
+        codSettledAt: Date | null;
+        codSettledBy: string | null;
+        codReceivedMode: string | null;
         societyCommissionEarned: number;
         deliveredAt: Date | null;
         cancelledReason: string | null;
@@ -471,6 +487,10 @@ export declare class OrdersController {
         codCollectedAmount: number | null;
         codCollectedAt: Date | null;
         codCollectedBy: string | null;
+        codSettledToHub: boolean;
+        codSettledAt: Date | null;
+        codSettledBy: string | null;
+        codReceivedMode: string | null;
         societyCommissionEarned: number;
         deliveredAt: Date | null;
         cancelledReason: string | null;

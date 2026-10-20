@@ -21,4 +21,18 @@ export class UpdateOrderStatusDto {
   @IsOptional()
   @IsString()
   codCollectedBy?: string;
+
+  @ApiPropertyOptional({ example: true })
+  @IsOptional()
+  codSettledToHub?: boolean;
+
+  @ApiPropertyOptional({ example: 'Hub Cashier Desk' })
+  @IsOptional()
+  @IsString()
+  codSettledBy?: string;
+
+  @ApiPropertyOptional({ example: 'CASH', enum: ['CASH', 'UPI_QR'] })
+  @IsOptional()
+  @IsString()
+  codReceivedMode?: string;
 }

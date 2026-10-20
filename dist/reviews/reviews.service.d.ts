@@ -25,9 +25,9 @@ export declare class ReviewsService {
         type: string;
         orderId: string | null;
         productId: string | null;
+        productName: string | null;
         rating: number;
         comment: string | null;
-        productName: string | null;
         flagged: boolean;
         moderatedById: string | null;
         moderatedAt: Date | null;
@@ -44,9 +44,9 @@ export declare class ReviewsService {
         type: string;
         orderId: string | null;
         productId: string | null;
+        productName: string | null;
         rating: number;
         comment: string | null;
-        productName: string | null;
         flagged: boolean;
         moderatedById: string | null;
         moderatedAt: Date | null;
@@ -82,9 +82,9 @@ export declare class ReviewsService {
         type: string;
         orderId: string | null;
         productId: string | null;
+        productName: string | null;
         rating: number;
         comment: string | null;
-        productName: string | null;
         flagged: boolean;
         moderatedById: string | null;
         moderatedAt: Date | null;
@@ -105,9 +105,9 @@ export declare class ReviewsService {
         type: string;
         orderId: string | null;
         productId: string | null;
+        productName: string | null;
         rating: number;
         comment: string | null;
-        productName: string | null;
         flagged: boolean;
         moderatedById: string | null;
         moderatedAt: Date | null;
@@ -124,9 +124,9 @@ export declare class ReviewsService {
         type: string;
         orderId: string | null;
         productId: string | null;
+        productName: string | null;
         rating: number;
         comment: string | null;
-        productName: string | null;
         flagged: boolean;
         moderatedById: string | null;
         moderatedAt: Date | null;

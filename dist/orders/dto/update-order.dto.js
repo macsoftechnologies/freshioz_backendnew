@@ -39,4 +39,21 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateOrderStatusDto.prototype, "codCollectedBy", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: true }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], UpdateOrderStatusDto.prototype, "codSettledToHub", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'Hub Cashier Desk' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateOrderStatusDto.prototype, "codSettledBy", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'CASH', enum: ['CASH', 'UPI_QR'] }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateOrderStatusDto.prototype, "codReceivedMode", void 0);
 //# sourceMappingURL=update-order.dto.js.map

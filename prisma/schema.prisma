@@ -232,6 +232,10 @@ model Order {
   codCollectedAmount     Float?      @default(0.0)
   codCollectedAt         DateTime?
   codCollectedBy         String?
+  codSettledToHub        Boolean     @default(false)
+  codSettledAt           DateTime?
+  codSettledBy           String?
+  codReceivedMode        String?     @default("CASH")
   societyCommissionEarned Float      @default(0.0)
   deliveredAt            DateTime?
   cancelledReason        String?

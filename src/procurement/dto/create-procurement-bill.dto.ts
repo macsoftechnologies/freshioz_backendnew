@@ -111,6 +111,11 @@ export class CreateProcurementBillDto {
   @IsString()
   slot?: string;
 
+  @ApiPropertyOptional({ example: '2026-10-20' })
+  @IsOptional()
+  @IsString()
+  deliveryDate?: string;
+
   @ApiProperty({ type: [ProcurementItemDto] })
   @IsArray()
   items!: ProcurementItemDto[];

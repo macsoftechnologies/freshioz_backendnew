@@ -26,6 +26,7 @@ let ProcurementService = class ProcurementService {
         });
         return bills.map((b) => ({
             ...b,
+            deliveryDate: (0, date_utils_1.toISTDateString)(b.procuredAt),
             procuredAtFormatted: (0, date_utils_1.toISTDateString)(b.procuredAt),
             procuredAtTime: (0, date_utils_1.toISTTimeString)(b.procuredAt),
             createdAtFormatted: (0, date_utils_1.toISTFullString)(b.createdAt),
@@ -88,6 +89,10 @@ let ProcurementService = class ProcurementService {
                         },
                     });
                     if (matchingProduct) {
+                        const rawQty = item.qty;
+                        const parsedQty = typeof rawQty === 'string'
+                            ? (parseFloat(rawQty.replace(/[^0-9.]/g, '')) || 0)
+                            : (Number(rawQty) || 0);
                         await tx.warehouseInventory.upsert({
                             where: {
                                 warehouseId_productId: {
@@ -96,12 +101,12 @@ let ProcurementService = class ProcurementService {
                                 },
                             },
                             update: {
-                                currentQty: { increment: Number(item.qty) || 0 },
+                                currentQty: { increment: parsedQty },
                             },
                             create: {
                                 warehouseId: dto.destinationWarehouseId,
                                 productId: matchingProduct.id,
-                                currentQty: Number(item.qty) || 0,
+                                currentQty: parsedQty,
                                 reservedQty: 0,
                                 unit: item.unit || 'kg',
                             },
@@ -111,6 +116,7 @@ let ProcurementService = class ProcurementService {
             }
             return {
                 ...created,
+                deliveryDate: (0, date_utils_1.toISTDateString)(created.procuredAt),
                 procuredAtFormatted: (0, date_utils_1.toISTDateString)(created.procuredAt),
                 createdAtFormatted: (0, date_utils_1.toISTFullString)(created.createdAt),
             };

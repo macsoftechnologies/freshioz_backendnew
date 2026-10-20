@@ -37,6 +37,8 @@ let InventoryService = class InventoryService {
             productId: item.productId,
             productName: item.product?.name,
             currentQty: item.currentQty,
+            quantity: item.currentQty,
+            stockQty: item.currentQty,
             reservedQty: item.reservedQty,
             availableQty: Math.max(0, item.currentQty - item.reservedQty),
             unit: item.unit,

@@ -146,6 +146,12 @@ __decorate([
     __metadata("design:type", String)
 ], CreateProcurementBillDto.prototype, "slot", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: '2026-10-20' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateProcurementBillDto.prototype, "deliveryDate", void 0);
+__decorate([
     (0, swagger_1.ApiProperty)({ type: [ProcurementItemDto] }),
     (0, class_validator_1.IsArray)(),
     __metadata("design:type", Array)

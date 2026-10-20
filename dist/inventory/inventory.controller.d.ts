@@ -10,6 +10,8 @@ export declare class InventoryController {
         productId: string;
         productName: string;
         currentQty: number;
+        quantity: number;
+        stockQty: number;
         reservedQty: number;
         availableQty: number;
         unit: string;

@@ -21,5 +21,6 @@ export declare class CreateProcurementBillDto {
     receiptPhoto?: string;
     procuredBy?: string;
     slot?: string;
+    deliveryDate?: string;
     items: ProcurementItemDto[];
 }

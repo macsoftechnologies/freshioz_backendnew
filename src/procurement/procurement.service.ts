@@ -17,6 +17,7 @@ export class ProcurementService {
 
     return bills.map((b) => ({
       ...b,
+      deliveryDate: toISTDateString(b.procuredAt),
       procuredAtFormatted: toISTDateString(b.procuredAt),
       procuredAtTime: toISTTimeString(b.procuredAt),
       createdAtFormatted: toISTFullString(b.createdAt),
@@ -88,6 +89,11 @@ export class ProcurementService {
           });
 
           if (matchingProduct) {
+            const rawQty: any = item.qty;
+            const parsedQty = typeof rawQty === 'string'
+              ? (parseFloat(rawQty.replace(/[^0-9.]/g, '')) || 0)
+              : (Number(rawQty) || 0);
+
             await tx.warehouseInventory.upsert({
               where: {
                 warehouseId_productId: {
@@ -96,12 +102,12 @@ export class ProcurementService {
                 },
               },
               update: {
-                currentQty: { increment: Number(item.qty) || 0 },
+                currentQty: { increment: parsedQty },
               },
               create: {
                 warehouseId: dto.destinationWarehouseId,
                 productId: matchingProduct.id,
-                currentQty: Number(item.qty) || 0,
+                currentQty: parsedQty,
                 reservedQty: 0,
                 unit: item.unit || 'kg',
               },
@@ -112,6 +118,7 @@ export class ProcurementService {
 
       return {
         ...created,
+        deliveryDate: toISTDateString(created.procuredAt),
         procuredAtFormatted: toISTDateString(created.procuredAt),
         createdAtFormatted: toISTFullString(created.createdAt),
       };

@@ -165,8 +165,14 @@ export class PricingService {
       for (const p of rawPrices) {
         const prodId = p.productId || p.id;
         if (!prodId) continue;
-        const rp = parseFloat(p.retailPrice) || 40.0;
-        const rmp = parseFloat(p.retailMarketPrice) || Math.round(rp * 1.3);
+        const rawRp = parseFloat(p.retailPrice);
+        if (isNaN(rawRp) || rawRp < 0) {
+          throw new BadRequestException(`Invalid retail price '${p.retailPrice}' for produce ID '${prodId}'. Retail price must be a valid non-negative number.`);
+        }
+        const rp = Number(rawRp.toFixed(2));
+        const rmp = (parseFloat(p.retailMarketPrice) && parseFloat(p.retailMarketPrice) >= 0)
+          ? Number(parseFloat(p.retailMarketPrice).toFixed(2))
+          : Math.round(rp * 1.3);
         const bq = parseFloat(p.bulkMinQty) || 0;
         const bd = parseFloat(p.bulkDiscountPercent) || 0;
         const gst = parseFloat(p.gstPercent) || 0;

@@ -34,14 +34,13 @@ const storage = diskStorage({
   },
 });
 
-// Allowed file types: images and PDF receipts/invoices
+// Allowed file types: images and PDF receipts/invoices (SVG removed for XSS prevention)
 const fileFilter = (req: any, file: any, cb: any) => {
   const allowedMimes = [
     'image/jpeg',
     'image/png',
     'image/webp',
     'image/gif',
-    'image/svg+xml',
     'application/pdf',
   ];
   if (allowedMimes.includes(file.mimetype)) {
@@ -49,7 +48,7 @@ const fileFilter = (req: any, file: any, cb: any) => {
   } else {
     cb(
       new BadRequestException(
-        `Unsupported file type: ${file.mimetype}. Allowed types: JPEG, PNG, WEBP, GIF, SVG, PDF`,
+        `Unsupported file type: ${file.mimetype}. Allowed types: JPEG, PNG, WEBP, GIF, PDF`,
       ),
       false,
     );
@@ -57,6 +56,8 @@ const fileFilter = (req: any, file: any, cb: any) => {
 };
 
 @ApiTags('File Uploads')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('uploads')
 export class UploadsController {
   @Post()
@@ -67,7 +68,7 @@ export class UploadsController {
     FileInterceptor('file', {
       storage,
       fileFilter,
-      limits: { fileSize: 15 * 1024 * 1024 }, // 15MB limit
+      limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
     }),
   )
   uploadSingleFile(@UploadedFile() file: any) {
@@ -94,7 +95,7 @@ export class UploadsController {
     FilesInterceptor('files', 10, {
       storage,
       fileFilter,
-      limits: { fileSize: 15 * 1024 * 1024 },
+      limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
     }),
   )
   uploadMultipleFiles(@UploadedFiles() files: any[]) {

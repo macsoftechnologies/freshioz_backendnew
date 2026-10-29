@@ -27,16 +27,16 @@ export declare class StoreService {
             secretaryPhone: string;
             id: string;
             uuid: string;
-            warehouseId: string | null;
+            name: string;
             status: string;
             createdAt: Date;
             updatedAt: Date;
-            name: string;
             type: string;
             address: string;
             imageUrl: string | null;
             lat: number | null;
             lng: number | null;
+            warehouseId: string | null;
             secretaryName: string | null;
             totalFloors: number | null;
             totalUnits: number | null;
@@ -58,10 +58,10 @@ export declare class StoreService {
         employees: any[];
         categories: {
             id: string;
+            name: string;
             status: string;
             createdAt: Date;
             updatedAt: Date;
-            name: string;
             description: string | null;
             slug: string;
             icon: string;
@@ -69,10 +69,10 @@ export declare class StoreService {
         }[];
         units: {
             id: string;
+            name: string;
             status: string;
             createdAt: Date;
             updatedAt: Date;
-            name: string;
             description: string | null;
             label: string;
             isBulk: boolean;

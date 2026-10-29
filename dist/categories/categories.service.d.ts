@@ -10,10 +10,10 @@ export declare class CategoriesService {
         };
     } & {
         id: string;
+        name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         description: string | null;
         slug: string;
         icon: string;
@@ -23,12 +23,10 @@ export declare class CategoriesService {
         products: {
             id: string;
             uuid: string;
+            name: string;
             status: string;
             createdAt: Date;
             updatedAt: Date;
-            desc: string | null;
-            name: string;
-            bulkDiscountPercent: number;
             tags: string[];
             kannadaName: string | null;
             categoryId: string;
@@ -36,8 +34,10 @@ export declare class CategoriesService {
             retailPrice: number;
             retailMarketPrice: number;
             bulkMinQty: number;
+            bulkDiscountPercent: number;
             origin: string | null;
             shelfLife: string | null;
+            desc: string | null;
             image: string;
             badge: string | null;
             gstPercent: number;
@@ -45,10 +45,10 @@ export declare class CategoriesService {
         }[];
     } & {
         id: string;
+        name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         description: string | null;
         slug: string;
         icon: string;
@@ -56,10 +56,10 @@ export declare class CategoriesService {
     }>;
     create(dto: CreateCategoryDto): Promise<{
         id: string;
+        name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         description: string | null;
         slug: string;
         icon: string;
@@ -67,10 +67,10 @@ export declare class CategoriesService {
     }>;
     update(id: string, dto: UpdateCategoryDto): Promise<{
         id: string;
+        name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         description: string | null;
         slug: string;
         icon: string;
@@ -78,10 +78,10 @@ export declare class CategoriesService {
     }>;
     remove(id: string): Promise<{
         id: string;
+        name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         description: string | null;
         slug: string;
         icon: string;

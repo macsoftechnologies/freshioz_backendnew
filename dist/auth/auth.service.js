@@ -25,7 +25,7 @@ let AuthService = class AuthService {
         if (hashOrPlain.startsWith('$2')) {
             return bcrypt.compare(plain, hashOrPlain);
         }
-        return plain === hashOrPlain;
+        return false;
     }
     async login(body) {
         const { email, phone, password } = body;
@@ -179,6 +179,9 @@ let AuthService = class AuthService {
         });
         if (!society) {
             throw new common_1.UnauthorizedException('No registered community found with the specified ID or Phone');
+        }
+        if (society.status !== 'APPROVED') {
+            throw new common_1.UnauthorizedException(`Partner portal access is only available for APPROVED communities. Current status: ${society.status}`);
         }
         const secretaryPhoneClean = (society.secretaryPhone || '').replace(/\D/g, '').slice(-10);
         if (secretaryPhoneClean && cleanPhone !== secretaryPhoneClean) {

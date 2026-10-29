@@ -71,21 +71,33 @@ let OrdersService = class OrdersService {
             throw new common_1.BadRequestException('Order must contain at least one line item');
         }
         return this.prisma.$transaction(async (tx) => {
-            let society = null;
-            if (dto.societyId) {
-                society = await tx.society.findFirst({
-                    where: { OR: [{ id: dto.societyId }, { uuid: dto.societyId }] },
-                });
+            if (!dto.societyId) {
+                throw new common_1.BadRequestException('Society ID is required. Please select a registered community.');
             }
-            let warehouse = null;
-            const targetWarehouseId = dto.warehouseId || society?.warehouseId;
-            if (targetWarehouseId) {
-                warehouse = await tx.warehouse.findFirst({
-                    where: { OR: [{ id: targetWarehouseId }, { uuid: targetWarehouseId }] },
-                });
+            const society = await tx.society.findFirst({
+                where: { OR: [{ id: dto.societyId }, { uuid: dto.societyId }] },
+            });
+            if (!society) {
+                throw new common_1.BadRequestException(`Selected society '${dto.societyId}' does not exist.`);
             }
-            const warehouseId = warehouse ? warehouse.id : null;
-            const societyId = society ? society.id : null;
+            if (society.status !== 'APPROVED') {
+                throw new common_1.BadRequestException(`Society '${society.name}' is currently '${society.status}'. Orders can only be placed for APPROVED communities.`);
+            }
+            if (!society.warehouseId) {
+                throw new common_1.BadRequestException(`Society '${society.name}' has no assigned regional warehouse hub.`);
+            }
+            const warehouse = await tx.warehouse.findFirst({
+                where: { OR: [{ id: society.warehouseId }, { uuid: society.warehouseId }] },
+            });
+            if (!warehouse || warehouse.status !== 'ACTIVE') {
+                throw new common_1.BadRequestException(`Serving warehouse for '${society.name}' is inactive or not found.`);
+            }
+            const warehouseId = warehouse.id;
+            const societyId = society.id;
+            const flatNo = (dto.flatNo || '').trim();
+            if (!flatNo) {
+                throw new common_1.BadRequestException('Flat / Door number is required for delivery.');
+            }
             let user = await tx.user.findUnique({
                 where: { phone: dto.userPhone.trim() },
             });
@@ -96,7 +108,7 @@ let OrdersService = class OrdersService {
                         phone: dto.userPhone.trim(),
                         name: dto.userName.trim(),
                         societyId,
-                        flatNo: dto.flatNo || 'Flat 101',
+                        flatNo,
                     },
                 });
             }
@@ -139,7 +151,14 @@ let OrdersService = class OrdersService {
                         }
                     }
                 }
-                const qty = Number(item.qty) || 1;
+                const rawQty = Number(item.qty);
+                if (isNaN(rawQty) || rawQty <= 0) {
+                    throw new common_1.BadRequestException(`Invalid quantity for produce '${item.name || item.productId}'. Quantity must be greater than zero.`);
+                }
+                if (rawQty > 1000) {
+                    throw new common_1.BadRequestException(`Quantity '${rawQty}' exceeds maximum allowed limit (1000) for '${item.name || item.productId}'.`);
+                }
+                const qty = Number(rawQty.toFixed(2));
                 const lineOriginalTotal = unitPrice * qty;
                 let effectiveUnitPrice = unitPrice;
                 let lineBulkSavings = 0;

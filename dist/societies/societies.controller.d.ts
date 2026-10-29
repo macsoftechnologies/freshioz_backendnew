@@ -11,10 +11,10 @@ export declare class SocietiesController {
         warehouse: {
             id: string;
             uuid: string;
+            name: string;
             status: string;
             createdAt: Date;
             updatedAt: Date;
-            name: string;
             lat: number | null;
             lng: number | null;
             code: string;
@@ -27,16 +27,16 @@ export declare class SocietiesController {
         };
         id: string;
         uuid: string;
-        warehouseId: string | null;
+        name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         type: string;
         address: string;
         imageUrl: string | null;
         lat: number | null;
         lng: number | null;
+        warehouseId: string | null;
         secretaryName: string | null;
         totalFloors: number | null;
         totalUnits: number | null;
@@ -63,11 +63,11 @@ export declare class SocietiesController {
         };
     } & {
         id: string;
-        societyId: string;
         status: string;
-        paymentMethod: string;
         createdAt: Date;
+        societyId: string;
         amount: number;
+        paymentMethod: string;
         transactionRef: string;
         notes: string | null;
         authorizedBy: string | null;
@@ -78,16 +78,16 @@ export declare class SocietiesController {
         society: {
             id: string;
             uuid: string;
-            warehouseId: string | null;
+            name: string;
             status: string;
             createdAt: Date;
             updatedAt: Date;
-            name: string;
             type: string;
             address: string;
             imageUrl: string | null;
             lat: number | null;
             lng: number | null;
+            warehouseId: string | null;
             secretaryName: string | null;
             secretaryPhone: string | null;
             totalFloors: number | null;
@@ -105,11 +105,11 @@ export declare class SocietiesController {
         };
     } & {
         id: string;
-        societyId: string;
         status: string;
-        paymentMethod: string;
         createdAt: Date;
+        societyId: string;
         amount: number;
+        paymentMethod: string;
         transactionRef: string;
         notes: string | null;
         authorizedBy: string | null;
@@ -120,16 +120,16 @@ export declare class SocietiesController {
         society: {
             id: string;
             uuid: string;
-            warehouseId: string | null;
+            name: string;
             status: string;
             createdAt: Date;
             updatedAt: Date;
-            name: string;
             type: string;
             address: string;
             imageUrl: string | null;
             lat: number | null;
             lng: number | null;
+            warehouseId: string | null;
             secretaryName: string | null;
             secretaryPhone: string | null;
             totalFloors: number | null;
@@ -147,11 +147,11 @@ export declare class SocietiesController {
         };
     } & {
         id: string;
-        societyId: string;
         status: string;
-        paymentMethod: string;
         createdAt: Date;
+        societyId: string;
         amount: number;
+        paymentMethod: string;
         transactionRef: string;
         notes: string | null;
         authorizedBy: string | null;
@@ -163,10 +163,10 @@ export declare class SocietiesController {
         warehouse: {
             id: string;
             uuid: string;
+            name: string;
             status: string;
             createdAt: Date;
             updatedAt: Date;
-            name: string;
             lat: number | null;
             lng: number | null;
             code: string;
@@ -179,16 +179,16 @@ export declare class SocietiesController {
         };
         id: string;
         uuid: string;
-        warehouseId: string | null;
+        name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         type: string;
         address: string;
         imageUrl: string | null;
         lat: number | null;
         lng: number | null;
+        warehouseId: string | null;
         secretaryName: string | null;
         totalFloors: number | null;
         totalUnits: number | null;
@@ -205,10 +205,10 @@ export declare class SocietiesController {
         warehouse: {
             id: string;
             uuid: string;
+            name: string;
             status: string;
             createdAt: Date;
             updatedAt: Date;
-            name: string;
             lat: number | null;
             lng: number | null;
             code: string;
@@ -222,16 +222,16 @@ export declare class SocietiesController {
     } & {
         id: string;
         uuid: string;
-        warehouseId: string | null;
+        name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         type: string;
         address: string;
         imageUrl: string | null;
         lat: number | null;
         lng: number | null;
+        warehouseId: string | null;
         secretaryName: string | null;
         secretaryPhone: string | null;
         totalFloors: number | null;
@@ -251,10 +251,10 @@ export declare class SocietiesController {
         warehouse: {
             id: string;
             uuid: string;
+            name: string;
             status: string;
             createdAt: Date;
             updatedAt: Date;
-            name: string;
             lat: number | null;
             lng: number | null;
             code: string;
@@ -268,16 +268,16 @@ export declare class SocietiesController {
     } & {
         id: string;
         uuid: string;
-        warehouseId: string | null;
+        name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         type: string;
         address: string;
         imageUrl: string | null;
         lat: number | null;
         lng: number | null;
+        warehouseId: string | null;
         secretaryName: string | null;
         secretaryPhone: string | null;
         totalFloors: number | null;
@@ -297,10 +297,10 @@ export declare class SocietiesController {
         warehouse: {
             id: string;
             uuid: string;
+            name: string;
             status: string;
             createdAt: Date;
             updatedAt: Date;
-            name: string;
             lat: number | null;
             lng: number | null;
             code: string;
@@ -314,16 +314,16 @@ export declare class SocietiesController {
     } & {
         id: string;
         uuid: string;
-        warehouseId: string | null;
+        name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         type: string;
         address: string;
         imageUrl: string | null;
         lat: number | null;
         lng: number | null;
+        warehouseId: string | null;
         secretaryName: string | null;
         secretaryPhone: string | null;
         totalFloors: number | null;
@@ -343,11 +343,11 @@ export declare class SocietiesController {
         amount: number;
     }): Promise<{
         id: string;
-        societyId: string;
         status: string;
-        paymentMethod: string;
         createdAt: Date;
+        societyId: string;
         amount: number;
+        paymentMethod: string;
         transactionRef: string;
         notes: string | null;
         authorizedBy: string | null;

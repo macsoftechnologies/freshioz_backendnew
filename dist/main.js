@@ -13,8 +13,8 @@ async function bootstrap() {
         fs.mkdirSync(uploadsDir, { recursive: true });
     }
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
-    app.use((0, express_1.json)({ limit: '50mb' }));
-    app.use((0, express_1.urlencoded)({ limit: '50mb', extended: true }));
+    app.use((0, express_1.json)({ limit: '2mb' }));
+    app.use((0, express_1.urlencoded)({ limit: '2mb', extended: true }));
     app.useStaticAssets(uploadsDir, { prefix: '/uploads' });
     const allowedOrigins = [
         'http://localhost:5173',

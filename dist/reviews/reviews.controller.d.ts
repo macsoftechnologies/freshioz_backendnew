@@ -5,15 +5,15 @@ export declare class ReviewsController {
     createReview(req: any, body: CreateReviewDto): Promise<{
         id: string;
         uuid: string;
-        userId: string;
-        userName: string;
-        userPhone: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
         type: string;
         orderId: string | null;
         productId: string | null;
+        userId: string;
+        userName: string;
+        userPhone: string;
         productName: string | null;
         rating: number;
         comment: string | null;
@@ -24,15 +24,15 @@ export declare class ReviewsController {
     updateReview(req: any, id: string, body: UpdateReviewDto): Promise<{
         id: string;
         uuid: string;
-        userId: string;
-        userName: string;
-        userPhone: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
         type: string;
         orderId: string | null;
         productId: string | null;
+        userId: string;
+        userName: string;
+        userPhone: string;
         productName: string | null;
         rating: number;
         comment: string | null;
@@ -43,15 +43,15 @@ export declare class ReviewsController {
     getMyReviews(req: any): Promise<{
         id: string;
         uuid: string;
-        userId: string;
-        userName: string;
-        userPhone: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
         type: string;
         orderId: string | null;
         productId: string | null;
+        userId: string;
+        userName: string;
+        userPhone: string;
         productName: string | null;
         rating: number;
         comment: string | null;
@@ -65,31 +65,31 @@ export declare class ReviewsController {
         totalReviews: number;
         reviews: {
             id: string;
-            userName: string;
             createdAt: Date;
+            userName: string;
             rating: number;
             comment: string;
         }[];
     }>;
     getWebsiteReviews(): Promise<{
         id: string;
-        userName: string;
         createdAt: Date;
+        userName: string;
         rating: number;
         comment: string;
     }[]>;
     getAdminReviews(type?: string, status?: string, flagged?: string): Promise<{
         id: string;
         uuid: string;
-        userId: string;
-        userName: string;
-        userPhone: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
         type: string;
         orderId: string | null;
         productId: string | null;
+        userId: string;
+        userName: string;
+        userPhone: string;
         productName: string | null;
         rating: number;
         comment: string | null;
@@ -103,15 +103,15 @@ export declare class ReviewsController {
     }): Promise<{
         id: string;
         uuid: string;
-        userId: string;
-        userName: string;
-        userPhone: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
         type: string;
         orderId: string | null;
         productId: string | null;
+        userId: string;
+        userName: string;
+        userPhone: string;
         productName: string | null;
         rating: number;
         comment: string | null;

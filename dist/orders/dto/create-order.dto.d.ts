@@ -2,7 +2,7 @@ export declare class CreateOrderItemDto {
     productId: string;
     name: string;
     unit?: string;
-    qty?: number;
+    qty: number;
     price?: number;
     effectivePrice?: number;
     totalPrice?: number;
@@ -13,7 +13,7 @@ export declare class CreateOrderItemDto {
 export declare class CreateOrderDto {
     userPhone: string;
     userName: string;
-    societyId?: string;
+    societyId: string;
     societyName?: string;
     flatNo: string;
     warehouseId?: string;

@@ -16,15 +16,15 @@ export declare class ReviewsService {
     createReview(user: any, dto: CreateReviewDto): Promise<{
         id: string;
         uuid: string;
-        userId: string;
-        userName: string;
-        userPhone: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
         type: string;
         orderId: string | null;
         productId: string | null;
+        userId: string;
+        userName: string;
+        userPhone: string;
         productName: string | null;
         rating: number;
         comment: string | null;
@@ -35,15 +35,15 @@ export declare class ReviewsService {
     updateReview(id: string, user: any, dto: UpdateReviewDto): Promise<{
         id: string;
         uuid: string;
-        userId: string;
-        userName: string;
-        userPhone: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
         type: string;
         orderId: string | null;
         productId: string | null;
+        userId: string;
+        userName: string;
+        userPhone: string;
         productName: string | null;
         rating: number;
         comment: string | null;
@@ -57,31 +57,31 @@ export declare class ReviewsService {
         totalReviews: number;
         reviews: {
             id: string;
-            userName: string;
             createdAt: Date;
+            userName: string;
             rating: number;
             comment: string;
         }[];
     }>;
     getWebsiteReviewsPublic(): Promise<{
         id: string;
-        userName: string;
         createdAt: Date;
+        userName: string;
         rating: number;
         comment: string;
     }[]>;
     getCustomerReviews(user: any): Promise<{
         id: string;
         uuid: string;
-        userId: string;
-        userName: string;
-        userPhone: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
         type: string;
         orderId: string | null;
         productId: string | null;
+        userId: string;
+        userName: string;
+        userPhone: string;
         productName: string | null;
         rating: number;
         comment: string | null;
@@ -96,15 +96,15 @@ export declare class ReviewsService {
     }): Promise<{
         id: string;
         uuid: string;
-        userId: string;
-        userName: string;
-        userPhone: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
         type: string;
         orderId: string | null;
         productId: string | null;
+        userId: string;
+        userName: string;
+        userPhone: string;
         productName: string | null;
         rating: number;
         comment: string | null;
@@ -115,15 +115,15 @@ export declare class ReviewsService {
     moderateReview(id: string, staffUser: any, status: 'APPROVED' | 'HIDDEN', flagged?: boolean): Promise<{
         id: string;
         uuid: string;
-        userId: string;
-        userName: string;
-        userPhone: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
         type: string;
         orderId: string | null;
         productId: string | null;
+        userId: string;
+        userName: string;
+        userPhone: string;
         productName: string | null;
         rating: number;
         comment: string | null;

@@ -17,10 +17,11 @@ export declare class VendorsController {
         formattedTime: string;
         id: string;
         uuid: string;
+        name: string;
+        phone: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         lat: number | null;
         lng: number | null;
         bankName: string | null;
@@ -28,7 +29,6 @@ export declare class VendorsController {
         accountNumber: string | null;
         ifscCode: string | null;
         category: string;
-        phone: string;
         mandiLocation: string;
         upiId: string | null;
     }[]>;
@@ -45,10 +45,11 @@ export declare class VendorsController {
         formattedTime: string;
         id: string;
         uuid: string;
+        name: string;
+        phone: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         lat: number | null;
         lng: number | null;
         bankName: string | null;
@@ -56,7 +57,6 @@ export declare class VendorsController {
         accountNumber: string | null;
         ifscCode: string | null;
         category: string;
-        phone: string;
         mandiLocation: string;
         upiId: string | null;
     }>;
@@ -73,10 +73,11 @@ export declare class VendorsController {
         formattedTime: string;
         id: string;
         uuid: string;
+        name: string;
+        phone: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         lat: number | null;
         lng: number | null;
         bankName: string | null;
@@ -84,7 +85,6 @@ export declare class VendorsController {
         accountNumber: string | null;
         ifscCode: string | null;
         category: string;
-        phone: string;
         mandiLocation: string;
         upiId: string | null;
     }>;
@@ -101,10 +101,11 @@ export declare class VendorsController {
         formattedTime: string;
         id: string;
         uuid: string;
+        name: string;
+        phone: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         lat: number | null;
         lng: number | null;
         bankName: string | null;
@@ -112,7 +113,6 @@ export declare class VendorsController {
         accountNumber: string | null;
         ifscCode: string | null;
         category: string;
-        phone: string;
         mandiLocation: string;
         upiId: string | null;
     }>;
@@ -129,10 +129,11 @@ export declare class VendorsController {
         formattedTime: string;
         id: string;
         uuid: string;
+        name: string;
+        phone: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         lat: number | null;
         lng: number | null;
         bankName: string | null;
@@ -140,7 +141,6 @@ export declare class VendorsController {
         accountNumber: string | null;
         ifscCode: string | null;
         category: string;
-        phone: string;
         mandiLocation: string;
         upiId: string | null;
     }>;

@@ -17,13 +17,13 @@ export declare class CustomerDiscountsService {
     createDiscount(staffUser: any, dto: CreateCustomerDiscountDto): Promise<{
         id: string;
         uuid: string;
-        userId: string;
-        userName: string | null;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        code: string;
         orderId: string | null;
+        code: string;
+        userId: string;
+        userName: string | null;
         discountType: string;
         discountValue: number;
         minOrderAmount: number;
@@ -40,13 +40,13 @@ export declare class CustomerDiscountsService {
     getCustomerDiscounts(user: any): Promise<{
         id: string;
         uuid: string;
-        userId: string;
-        userName: string | null;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        code: string;
         orderId: string | null;
+        code: string;
+        userId: string;
+        userName: string | null;
         discountType: string;
         discountValue: number;
         minOrderAmount: number;
@@ -66,13 +66,13 @@ export declare class CustomerDiscountsService {
     }): Promise<{
         id: string;
         uuid: string;
-        userId: string;
-        userName: string | null;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        code: string;
         orderId: string | null;
+        code: string;
+        userId: string;
+        userName: string | null;
         discountType: string;
         discountValue: number;
         minOrderAmount: number;
@@ -89,13 +89,13 @@ export declare class CustomerDiscountsService {
     revokeDiscount(id: string, staffUser: any): Promise<{
         id: string;
         uuid: string;
-        userId: string;
-        userName: string | null;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        code: string;
         orderId: string | null;
+        code: string;
+        userId: string;
+        userName: string | null;
         discountType: string;
         discountValue: number;
         minOrderAmount: number;

@@ -20,6 +20,7 @@ const multer_1 = require("multer");
 const path_1 = require("path");
 const crypto = require("crypto");
 const fs = require("fs");
+const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 const uploadsDir = (0, path_1.join)(process.cwd(), 'uploads');
 if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true });
@@ -41,14 +42,13 @@ const fileFilter = (req, file, cb) => {
         'image/png',
         'image/webp',
         'image/gif',
-        'image/svg+xml',
         'application/pdf',
     ];
     if (allowedMimes.includes(file.mimetype)) {
         cb(null, true);
     }
     else {
-        cb(new common_1.BadRequestException(`Unsupported file type: ${file.mimetype}. Allowed types: JPEG, PNG, WEBP, GIF, SVG, PDF`), false);
+        cb(new common_1.BadRequestException(`Unsupported file type: ${file.mimetype}. Allowed types: JPEG, PNG, WEBP, GIF, PDF`), false);
     }
 };
 let UploadsController = class UploadsController {
@@ -90,7 +90,7 @@ __decorate([
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
         storage,
         fileFilter,
-        limits: { fileSize: 15 * 1024 * 1024 },
+        limits: { fileSize: 5 * 1024 * 1024 },
     })),
     __param(0, (0, common_1.UploadedFile)()),
     __metadata("design:type", Function),
@@ -105,7 +105,7 @@ __decorate([
     (0, common_1.UseInterceptors)((0, platform_express_1.FilesInterceptor)('files', 10, {
         storage,
         fileFilter,
-        limits: { fileSize: 15 * 1024 * 1024 },
+        limits: { fileSize: 5 * 1024 * 1024 },
     })),
     __param(0, (0, common_1.UploadedFiles)()),
     __metadata("design:type", Function),
@@ -114,6 +114,8 @@ __decorate([
 ], UploadsController.prototype, "uploadMultipleFiles", null);
 exports.UploadsController = UploadsController = __decorate([
     (0, swagger_1.ApiTags)('File Uploads'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Controller)('uploads')
 ], UploadsController);
 //# sourceMappingURL=uploads.controller.js.map

@@ -16,7 +16,8 @@ export class AuthService {
     if (hashOrPlain.startsWith('$2')) {
       return bcrypt.compare(plain, hashOrPlain);
     }
-    return plain === hashOrPlain;
+    // Strictly reject unhashed plaintext passwords in database
+    return false;
   }
 
   async login(body: { email?: string; phone?: string; password?: string }) {
@@ -192,6 +193,10 @@ export class AuthService {
 
     if (!society) {
       throw new UnauthorizedException('No registered community found with the specified ID or Phone');
+    }
+
+    if (society.status !== 'APPROVED') {
+      throw new UnauthorizedException(`Partner portal access is only available for APPROVED communities. Current status: ${society.status}`);
     }
 
     const secretaryPhoneClean = (society.secretaryPhone || '').replace(/\D/g, '').slice(-10);

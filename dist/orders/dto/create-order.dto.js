@@ -35,9 +35,12 @@ __decorate([
     __metadata("design:type", String)
 ], CreateOrderItemDto.prototype, "unit", void 0);
 __decorate([
-    (0, swagger_1.ApiPropertyOptional)({ example: 2, default: 1 }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsNumber)(),
+    (0, swagger_1.ApiProperty)({ example: 2, default: 1 }),
+    (0, class_validator_1.IsNotEmpty)({ message: 'Quantity is required' }),
+    (0, class_validator_1.IsNumber)({}, { message: 'Quantity must be a valid number' }),
+    (0, class_validator_1.IsPositive)({ message: 'Quantity must be a positive number greater than zero' }),
+    (0, class_validator_1.Min)(0.01, { message: 'Quantity must be at least 0.01' }),
+    (0, class_validator_1.Max)(1000, { message: 'Quantity cannot exceed 1000 per line item' }),
     __metadata("design:type", Number)
 ], CreateOrderItemDto.prototype, "qty", void 0);
 __decorate([
@@ -91,8 +94,8 @@ __decorate([
     __metadata("design:type", String)
 ], CreateOrderDto.prototype, "userName", void 0);
 __decorate([
-    (0, swagger_1.ApiPropertyOptional)({ example: 'SOC_PRESTIGE_01' }),
-    (0, class_validator_1.IsOptional)(),
+    (0, swagger_1.ApiProperty)({ example: 'SOC_PRESTIGE_01' }),
+    (0, class_validator_1.IsNotEmpty)({ message: 'Society ID is required. Please select your society/hostel.' }),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateOrderDto.prototype, "societyId", void 0);

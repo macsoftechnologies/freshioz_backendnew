@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsNumber, IsOptional, IsArray, ValidateNested } from 'class-validator';
+import { IsNotEmpty, IsString, IsNumber, IsOptional, IsArray, ValidateNested, IsPositive, Min, Max } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateOrderItemDto {
@@ -18,10 +18,13 @@ export class CreateOrderItemDto {
   @IsString()
   unit?: string;
 
-  @ApiPropertyOptional({ example: 2, default: 1 })
-  @IsOptional()
-  @IsNumber()
-  qty?: number;
+  @ApiProperty({ example: 2, default: 1 })
+  @IsNotEmpty({ message: 'Quantity is required' })
+  @IsNumber({}, { message: 'Quantity must be a valid number' })
+  @IsPositive({ message: 'Quantity must be a positive number greater than zero' })
+  @Min(0.01, { message: 'Quantity must be at least 0.01' })
+  @Max(1000, { message: 'Quantity cannot exceed 1000 per line item' })
+  qty!: number;
 
   @ApiPropertyOptional({ example: 40, description: 'Optional: Server fetches product retailPrice' })
   @IsOptional()
@@ -64,10 +67,10 @@ export class CreateOrderDto {
   @IsString()
   userName!: string;
 
-  @ApiPropertyOptional({ example: 'SOC_PRESTIGE_01' })
-  @IsOptional()
+  @ApiProperty({ example: 'SOC_PRESTIGE_01' })
+  @IsNotEmpty({ message: 'Society ID is required. Please select your society/hostel.' })
   @IsString()
-  societyId?: string;
+  societyId!: string;
 
   @ApiPropertyOptional({ example: 'Prestige Falcon City' })
   @IsOptional()

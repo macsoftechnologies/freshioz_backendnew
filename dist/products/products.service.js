@@ -41,15 +41,33 @@ let ProductsService = class ProductsService {
         if (existing) {
             throw new common_1.ConflictException(`Produce item "${name}" is already cataloged`);
         }
+        if (!categoryId) {
+            throw new common_1.BadRequestException('Category ID is required for cataloging produce.');
+        }
+        const cat = await this.prisma.category.findFirst({
+            where: { OR: [{ id: categoryId }, { slug: categoryId }] },
+        });
+        if (!cat) {
+            throw new common_1.BadRequestException(`Category '${categoryId}' does not exist in master catalog.`);
+        }
+        const rawPrice = parseFloat(retailPrice);
+        if (isNaN(rawPrice) || rawPrice < 0) {
+            throw new common_1.BadRequestException('Retail selling price must be a valid non-negative number.');
+        }
+        const validRetailPrice = Number(rawPrice.toFixed(2));
+        const rawMarketPrice = parseFloat(retailMarketPrice);
+        const validMarketPrice = (!isNaN(rawMarketPrice) && rawMarketPrice >= 0)
+            ? Number(rawMarketPrice.toFixed(2))
+            : Math.round(validRetailPrice * 1.3);
         return this.prisma.product.create({
             data: {
                 id: id || `FRZ_PRD_${Date.now()}`,
                 name: name.trim(),
                 kannadaName,
-                categoryId: categoryId || 'VEGETABLES',
+                categoryId: cat.id,
                 retailUnit: retailUnit || '1 kg',
-                retailPrice: parseFloat(retailPrice) || 40.0,
-                retailMarketPrice: parseFloat(retailMarketPrice) || 55.0,
+                retailPrice: validRetailPrice,
+                retailMarketPrice: validMarketPrice,
                 bulkMinQty: parseFloat(bulkMinQty) || 0,
                 bulkDiscountPercent: parseFloat(bulkDiscountPercent) || 0,
                 origin: origin || 'APMC Mandi',

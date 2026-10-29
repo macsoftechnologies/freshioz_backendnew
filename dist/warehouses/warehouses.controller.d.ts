@@ -10,10 +10,10 @@ export declare class WarehousesController {
         managerPhone: string;
         id: string;
         uuid: string;
+        name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         lat: number | null;
         lng: number | null;
         code: string;
@@ -47,10 +47,10 @@ export declare class WarehousesController {
         managerPhone: string;
         id: string;
         uuid: string;
+        name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         lat: number | null;
         lng: number | null;
         code: string;
@@ -62,10 +62,10 @@ export declare class WarehousesController {
     create(body: CreateWarehouseDto): Promise<{
         id: string;
         uuid: string;
+        name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         lat: number | null;
         lng: number | null;
         code: string;
@@ -79,10 +79,10 @@ export declare class WarehousesController {
     updateWithParam(id: string, body: any): Promise<{
         id: string;
         uuid: string;
+        name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         lat: number | null;
         lng: number | null;
         code: string;
@@ -96,10 +96,10 @@ export declare class WarehousesController {
     update(body: UpdateWarehouseDto): Promise<{
         id: string;
         uuid: string;
+        name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         lat: number | null;
         lng: number | null;
         code: string;
@@ -113,10 +113,10 @@ export declare class WarehousesController {
     delete(id: string): Promise<{
         id: string;
         uuid: string;
+        name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         lat: number | null;
         lng: number | null;
         code: string;

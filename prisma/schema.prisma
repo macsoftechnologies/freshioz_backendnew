@@ -137,6 +137,7 @@ model DailyPriceHistory {
   publishedBy         Employee? @relation(fields: [publishedById], references: [id])
   publishedAt         DateTime @default(now())
 
+  @@index([productId, publishedAt(sort: Desc)])
   @@map("daily_price_history")
 }
 
@@ -159,7 +160,7 @@ model Society {
   totalFloors          Int?       @default(1)
   totalUnits           Int?       @default(10)
   deliveryMode         String     @default("SOCIETY_DESK")
-  status               String     @default("APPROVED") // PENDING, APPROVED, REJECTED
+  status               String     @default("PENDING") // PENDING, APPROVED, REJECTED
   commissionType       String     @default("PERCENTAGE") // PERCENTAGE | FIXED_PER_ORDER
   commissionValue      Float      @default(3.5)
   balanceEarned        Float      @default(0.0)
@@ -176,6 +177,7 @@ model Society {
   users    User[]
   payouts  SocietyPayout[]
 
+  @@index([warehouseId])
   @@map("societies")
 }
 
@@ -247,6 +249,10 @@ model Order {
   items   OrderItem[]
   reviews Review[]
 
+  @@index([deliveryDate, warehouseId, status])
+  @@index([societyId, deliveryDate])
+  @@index([userId, createdAt])
+  @@index([status])
   @@map("orders")
 }
 
@@ -266,6 +272,8 @@ model OrderItem {
   bulkDiscountPercent Float?   @default(0)
   bulkSavings         Float?   @default(0)
 
+  @@index([orderId])
+  @@index([productId])
   @@map("order_items")
 }
 
@@ -284,6 +292,7 @@ model SocietyPayout {
   authorizedBy   String?
   createdAt      DateTime @default(now())
 
+  @@index([societyId, status])
   @@map("society_payouts")
 }
 
@@ -397,6 +406,8 @@ model Review {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
+  @@index([productId, status])
+  @@index([orderId])
   @@map("reviews")
 }
 
@@ -426,5 +437,7 @@ model CustomerDiscount {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
+  @@index([userId, status])
+  @@index([code])
   @@map("customer_discounts")
 }

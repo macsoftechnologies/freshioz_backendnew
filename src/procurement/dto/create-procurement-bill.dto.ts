@@ -3,6 +3,11 @@ import { IsString, IsNotEmpty, IsOptional, IsNumber, IsArray } from 'class-valid
 import { Type } from 'class-transformer';
 
 export class ProcurementItemDto {
+  @ApiPropertyOptional({ example: 'FRZ_PRD_01' })
+  @IsOptional()
+  @IsString()
+  productId?: string;
+
   @ApiProperty({ example: 'Country Tomatoes (Nati Tomato)' })
   @IsNotEmpty()
   @IsString()

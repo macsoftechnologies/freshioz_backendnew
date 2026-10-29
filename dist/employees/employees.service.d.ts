@@ -1,57 +1,58 @@
 import { PrismaService } from '../prisma/prisma.service';
+export declare const VALID_EMPLOYEE_ROLES: string[];
 export declare class EmployeesService {
     private readonly prisma;
     constructor(prisma: PrismaService);
     findAll(): Promise<{
         id: string;
         uuid: string;
-        email: string;
         name: string;
-        phone: string;
-        roles: string[];
-        assignedWarehouseId: string;
         status: string;
-        dateJoined: Date;
         createdAt: Date;
         updatedAt: Date;
+        roles: string[];
+        phone: string;
+        email: string;
+        assignedWarehouseId: string;
+        dateJoined: Date;
     }[]>;
     findOne(idOrUuid: string): Promise<{
         id: string;
         uuid: string;
-        email: string;
         name: string;
-        phone: string;
-        roles: string[];
-        assignedWarehouseId: string;
         status: string;
-        dateJoined: Date;
         createdAt: Date;
         updatedAt: Date;
+        roles: string[];
+        phone: string;
+        email: string;
+        assignedWarehouseId: string;
+        dateJoined: Date;
     }>;
     create(body: any): Promise<{
         id: string;
         uuid: string;
-        email: string;
         name: string;
-        phone: string;
-        roles: string[];
-        assignedWarehouseId: string;
         status: string;
-        dateJoined: Date;
         createdAt: Date;
         updatedAt: Date;
+        roles: string[];
+        phone: string;
+        email: string;
+        assignedWarehouseId: string;
+        dateJoined: Date;
     }>;
     update(id: string, data: any): Promise<{
         id: string;
         uuid: string;
-        email: string;
         name: string;
-        phone: string;
-        roles: string[];
-        assignedWarehouseId: string;
         status: string;
-        dateJoined: Date;
         createdAt: Date;
         updatedAt: Date;
+        roles: string[];
+        phone: string;
+        email: string;
+        assignedWarehouseId: string;
+        dateJoined: Date;
     }>;
 }

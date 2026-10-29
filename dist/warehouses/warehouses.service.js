@@ -123,6 +123,18 @@ let WarehousesService = class WarehousesService {
         });
         if (!existing)
             throw new common_1.NotFoundException('Warehouse not found');
+        const mappedSocieties = await this.prisma.society.count({
+            where: { warehouseId: existing.id },
+        });
+        if (mappedSocieties > 0) {
+            throw new common_1.BadRequestException(`Cannot delete warehouse "${existing.name}": ${mappedSocieties} communities are currently mapped to it. Please reassign them first.`);
+        }
+        const mappedOrders = await this.prisma.order.count({
+            where: { warehouseId: existing.id },
+        });
+        if (mappedOrders > 0) {
+            throw new common_1.BadRequestException(`Cannot delete warehouse "${existing.name}": ${mappedOrders} orders are associated with it. Please mark it INACTIVE instead of deleting.`);
+        }
         return this.prisma.warehouse.delete({ where: { id: existing.id } });
     }
 };

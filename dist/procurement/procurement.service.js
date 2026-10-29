@@ -49,18 +49,22 @@ let ProcurementService = class ProcurementService {
     }
     async create(dto) {
         return this.prisma.$transaction(async (tx) => {
+            if (dto.destinationWarehouseId) {
+                const wh = await tx.warehouse.findUnique({
+                    where: { id: dto.destinationWarehouseId },
+                });
+                if (!wh) {
+                    throw new common_1.BadRequestException(`Destination warehouse "${dto.destinationWarehouseId}" does not exist.`);
+                }
+            }
             const billNumber = dto.billNumber || `APMC-${Date.now().toString().slice(-6)}`;
             const billId = `PB_${Date.now()}`;
             const computedWeight = dto.totalWeightKg !== undefined
                 ? Number(dto.totalWeightKg)
                 : (dto.items || []).reduce((sum, it) => sum + (Number(it.qty) || 0), 0);
-            const computedProduceAmount = dto.produceAmount !== undefined
-                ? Number(dto.produceAmount)
-                : (dto.items || []).reduce((sum, it) => sum + ((Number(it.qty) || 0) * (Number(it.rate) || 0)), 0);
+            const computedProduceAmount = (dto.items || []).reduce((sum, it) => sum + ((Number(it.qty) || 0) * (Number(it.rate) || 0)), 0);
             const computedTransport = Number(dto.transportAmount) || 0;
-            const computedTotalPaid = dto.totalAmountPaid !== undefined
-                ? Number(dto.totalAmountPaid)
-                : (dto.totalAmount !== undefined ? Number(dto.totalAmount) : (computedProduceAmount + computedTransport));
+            const computedTotalPaid = computedProduceAmount + computedTransport;
             const created = await tx.procurementBill.create({
                 data: {
                     id: billId,
@@ -83,11 +87,26 @@ let ProcurementService = class ProcurementService {
             });
             if (dto.destinationWarehouseId && Array.isArray(dto.items)) {
                 for (const item of dto.items) {
-                    const matchingProduct = await tx.product.findFirst({
-                        where: {
-                            name: { contains: item.name, mode: 'insensitive' },
-                        },
-                    });
+                    let matchingProduct = null;
+                    if (item.productId) {
+                        matchingProduct = await tx.product.findUnique({
+                            where: { id: item.productId },
+                        });
+                    }
+                    if (!matchingProduct && item.name) {
+                        matchingProduct = await tx.product.findFirst({
+                            where: {
+                                name: { equals: item.name.trim(), mode: 'insensitive' },
+                            },
+                        });
+                    }
+                    if (!matchingProduct && item.name) {
+                        matchingProduct = await tx.product.findFirst({
+                            where: {
+                                name: { contains: item.name.trim(), mode: 'insensitive' },
+                            },
+                        });
+                    }
                     if (matchingProduct) {
                         const rawQty = item.qty;
                         const parsedQty = typeof rawQty === 'string'

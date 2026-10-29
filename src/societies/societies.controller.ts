@@ -88,8 +88,8 @@ export class SocietiesController {
   @ApiOperation({ summary: 'Approve or update society settings & commission by param ID' })
   @ApiResponse({ status: 200, type: SocietySchema })
   @Put(':id')
-  async updateWithParam(@Param('id') id: string, @Body() body: UpdateSocietyDto) {
-    return this.societiesService.update(id, body);
+  async updateWithParam(@Req() req: any, @Param('id') id: string, @Body() body: UpdateSocietyDto) {
+    return this.societiesService.update(id, body, req.user);
   }
 
   @ApiBearerAuth()
@@ -98,8 +98,8 @@ export class SocietiesController {
   @ApiOperation({ summary: 'Approve or update society settings & commission' })
   @ApiResponse({ status: 200, type: SocietySchema })
   @Put()
-  async update(@Body() body: UpdateSocietyDto) {
-    return this.societiesService.update(body.id, body);
+  async update(@Req() req: any, @Body() body: UpdateSocietyDto) {
+    return this.societiesService.update(body.id, body, req.user);
   }
 
   @ApiBearerAuth()

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProcurementBillDto } from './dto/create-procurement-bill.dto';
 import { toISTDateString, toISTTimeString, toISTFullString } from '../common/date-utils';
@@ -42,6 +42,16 @@ export class ProcurementService {
 
   async create(dto: CreateProcurementBillDto) {
     return this.prisma.$transaction(async (tx) => {
+      // Validate destination warehouse exists
+      if (dto.destinationWarehouseId) {
+        const wh = await tx.warehouse.findUnique({
+          where: { id: dto.destinationWarehouseId },
+        });
+        if (!wh) {
+          throw new BadRequestException(`Destination warehouse "${dto.destinationWarehouseId}" does not exist.`);
+        }
+      }
+
       const billNumber = dto.billNumber || `APMC-${Date.now().toString().slice(-6)}`;
       const billId = `PB_${Date.now()}`;
 
@@ -49,14 +59,14 @@ export class ProcurementService {
         ? Number(dto.totalWeightKg)
         : (dto.items || []).reduce((sum, it) => sum + (Number(it.qty) || 0), 0);
 
-      const computedProduceAmount = dto.produceAmount !== undefined
-        ? Number(dto.produceAmount)
-        : (dto.items || []).reduce((sum, it) => sum + ((Number(it.qty) || 0) * (Number(it.rate) || 0)), 0);
+      // Strictly compute produce totals and payment on the server to prevent calculation tampering
+      const computedProduceAmount = (dto.items || []).reduce(
+        (sum, it) => sum + ((Number(it.qty) || 0) * (Number(it.rate) || 0)),
+        0,
+      );
 
       const computedTransport = Number(dto.transportAmount) || 0;
-      const computedTotalPaid = dto.totalAmountPaid !== undefined
-        ? Number(dto.totalAmountPaid)
-        : (dto.totalAmount !== undefined ? Number(dto.totalAmount) : (computedProduceAmount + computedTransport));
+      const computedTotalPaid = computedProduceAmount + computedTransport;
 
       const created = await tx.procurementBill.create({
         data: {
@@ -82,11 +92,32 @@ export class ProcurementService {
       // AUTO-INWARD PRODUCE INTO WAREHOUSE INVENTORY
       if (dto.destinationWarehouseId && Array.isArray(dto.items)) {
         for (const item of dto.items) {
-          const matchingProduct = await tx.product.findFirst({
-            where: {
-              name: { contains: item.name, mode: 'insensitive' },
-            },
-          });
+          let matchingProduct: any = null;
+
+          // Priority 1: match by exact product ID
+          if ((item as any).productId) {
+            matchingProduct = await tx.product.findUnique({
+              where: { id: (item as any).productId },
+            });
+          }
+
+          // Priority 2: match by exact product name
+          if (!matchingProduct && item.name) {
+            matchingProduct = await tx.product.findFirst({
+              where: {
+                name: { equals: item.name.trim(), mode: 'insensitive' },
+              },
+            });
+          }
+
+          // Priority 3: fallback to substring match
+          if (!matchingProduct && item.name) {
+            matchingProduct = await tx.product.findFirst({
+              where: {
+                name: { contains: item.name.trim(), mode: 'insensitive' },
+              },
+            });
+          }
 
           if (matchingProduct) {
             const rawQty: any = item.qty;

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -121,6 +121,27 @@ export class WarehousesService {
       where: { OR: [{ id }, { uuid: id }, { code: id }] },
     });
     if (!existing) throw new NotFoundException('Warehouse not found');
+
+    // Integrity guard: prevent deletion if mapped to societies
+    const mappedSocieties = await this.prisma.society.count({
+      where: { warehouseId: existing.id },
+    });
+    if (mappedSocieties > 0) {
+      throw new BadRequestException(
+        `Cannot delete warehouse "${existing.name}": ${mappedSocieties} communities are currently mapped to it. Please reassign them first.`,
+      );
+    }
+
+    // Integrity guard: prevent deletion if linked to orders
+    const mappedOrders = await this.prisma.order.count({
+      where: { warehouseId: existing.id },
+    });
+    if (mappedOrders > 0) {
+      throw new BadRequestException(
+        `Cannot delete warehouse "${existing.name}": ${mappedOrders} orders are associated with it. Please mark it INACTIVE instead of deleting.`,
+      );
+    }
+
     return this.prisma.warehouse.delete({ where: { id: existing.id } });
   }
 }

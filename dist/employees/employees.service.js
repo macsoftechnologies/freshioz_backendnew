@@ -9,10 +9,18 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.EmployeesService = void 0;
+exports.EmployeesService = exports.VALID_EMPLOYEE_ROLES = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const bcrypt = require("bcryptjs");
+exports.VALID_EMPLOYEE_ROLES = [
+    'SUPER_ADMIN',
+    'WAREHOUSE_MANAGER',
+    'WAREHOUSE_STAFF',
+    'DELIVERY_EXECUTIVE',
+    'SALES_OFFICER',
+    'PROCUREMENT_OFFICER',
+];
 const EMPLOYEE_SELECT_FIELDS = {
     id: true,
     uuid: true,
@@ -63,6 +71,12 @@ let EmployeesService = class EmployeesService {
             }
             throw new common_1.ConflictException(`Employee with phone number ${phone} is already registered`);
         }
+        const rawRoles = Array.isArray(roles) ? roles : [roles || 'SALES_OFFICER'];
+        for (const r of rawRoles) {
+            if (!exports.VALID_EMPLOYEE_ROLES.includes(r)) {
+                throw new common_1.BadRequestException(`Invalid role: "${r}". Valid roles are: ${exports.VALID_EMPLOYEE_ROLES.join(', ')}`);
+            }
+        }
         const rawPassword = password || 'Freshioz@123';
         const hashedPassword = await bcrypt.hash(rawPassword, 10);
         return this.prisma.employee.create({
@@ -72,7 +86,7 @@ let EmployeesService = class EmployeesService {
                 phone: phone.trim(),
                 email: email.trim().toLowerCase(),
                 password: hashedPassword,
-                roles: Array.isArray(roles) ? roles : [roles || 'SALES_OFFICER'],
+                roles: rawRoles,
                 assignedWarehouseId: assignedWarehouseId || 'ALL',
                 status: status || 'ACTIVE',
             },
@@ -103,6 +117,30 @@ let EmployeesService = class EmployeesService {
                 }
                 if (data.phone && duplicate.phone === data.phone.trim()) {
                     throw new common_1.ConflictException(`Employee with phone number ${data.phone} is already registered`);
+                }
+            }
+        }
+        if (data.roles) {
+            const parsedRoles = Array.isArray(data.roles) ? data.roles : [data.roles];
+            for (const r of parsedRoles) {
+                if (!exports.VALID_EMPLOYEE_ROLES.includes(r)) {
+                    throw new common_1.BadRequestException(`Invalid role: "${r}". Valid roles are: ${exports.VALID_EMPLOYEE_ROLES.join(', ')}`);
+                }
+            }
+        }
+        if (existing.roles.includes('SUPER_ADMIN')) {
+            const isDemotingOrDeactivating = (data.status && data.status !== 'ACTIVE') ||
+                (data.roles && !data.roles.includes('SUPER_ADMIN'));
+            if (isDemotingOrDeactivating) {
+                const otherActiveSuperAdmins = await this.prisma.employee.count({
+                    where: {
+                        id: { not: existing.id },
+                        status: 'ACTIVE',
+                        roles: { has: 'SUPER_ADMIN' },
+                    },
+                });
+                if (otherActiveSuperAdmins === 0) {
+                    throw new common_1.BadRequestException('Cannot deactivate or remove SUPER_ADMIN role from the only active Super Admin.');
                 }
             }
         }

@@ -1,4 +1,5 @@
 export declare class ProcurementItemDto {
+    productId?: string;
     name: string;
     qty: number;
     rate: number;

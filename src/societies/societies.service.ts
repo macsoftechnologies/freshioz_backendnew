@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -107,31 +107,34 @@ export class SocietiesService {
   }
 
   async approvePayout(payoutId: string, adminUser: any, bankUtr?: string) {
-    const payout = await this.prisma.societyPayout.findUnique({
-      where: { id: payoutId },
-    });
-    if (!payout) {
-      throw new NotFoundException(`Payout #${payoutId} not found`);
+    if (!bankUtr || !bankUtr.trim()) {
+      throw new BadRequestException('A valid bank UTR / transaction reference number is required to approve payouts.');
     }
-    if (payout.status === 'COMPLETED') {
-      throw new BadRequestException('Payout is already completed.');
-    }
-    if (payout.status === 'REJECTED') {
-      throw new BadRequestException('Cannot approve a rejected payout.');
-    }
-
+    const cleanUtr = bankUtr.trim();
     const authorizedBy = adminUser?.name || adminUser?.email || adminUser?.id || 'SUPER_ADMIN';
 
-    return this.prisma.societyPayout.update({
-      where: { id: payoutId },
+    // Atomic conditional status transition to eliminate race conditions
+    const updateResult = await this.prisma.societyPayout.updateMany({
+      where: {
+        id: payoutId,
+        status: 'PENDING_APPROVAL',
+      },
       data: {
         status: 'COMPLETED',
         authorizedBy,
-        ...(bankUtr && { transactionRef: bankUtr.trim() }),
+        transactionRef: cleanUtr,
       },
-      include: {
-        society: true,
-      },
+    });
+
+    if (updateResult.count === 0) {
+      const existing = await this.prisma.societyPayout.findUnique({ where: { id: payoutId } });
+      if (!existing) throw new NotFoundException(`Payout #${payoutId} not found`);
+      throw new BadRequestException(`Payout cannot be approved: current status is ${existing.status}`);
+    }
+
+    return this.prisma.societyPayout.findUnique({
+      where: { id: payoutId },
+      include: { society: true },
     });
   }
 
@@ -222,7 +225,7 @@ export class SocietiesService {
         totalFloors: totalFloors ? parseInt(totalFloors) : 1,
         totalUnits: totalUnits ? parseInt(totalUnits) : 10,
         deliveryMode: deliveryMode || 'SOCIETY_DESK',
-        status: status || 'APPROVED',
+        status: status || 'PENDING',
         commissionType: commissionType || 'PERCENTAGE',
         commissionValue: commissionValue ? parseFloat(commissionValue) : 3.5,
         bankName: bankName || null,
@@ -234,13 +237,23 @@ export class SocietiesService {
     });
   }
 
-  async update(idOrUuid: string, data: any) {
+  async update(idOrUuid: string, data: any, currentUser?: any) {
     const existing = await this.prisma.society.findFirst({
       where: {
         OR: [{ id: idOrUuid }, { uuid: idOrUuid }],
       },
     });
     if (!existing) throw new NotFoundException('Society not found');
+
+    const isSuperAdmin = currentUser?.roles?.includes('SUPER_ADMIN');
+    if (currentUser && !isSuperAdmin) {
+      if (data.commissionValue !== undefined || data.commissionType !== undefined) {
+        throw new ForbiddenException('Only Super Admin is authorized to modify society commission structure.');
+      }
+      if (data.status !== undefined && data.status !== existing.status) {
+        throw new ForbiddenException('Only Super Admin is authorized to approve or modify society status.');
+      }
+    }
 
     return this.prisma.society.update({
       where: { id: existing.id },

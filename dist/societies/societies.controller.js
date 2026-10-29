@@ -49,11 +49,11 @@ let SocietiesController = class SocietiesController {
     async create(body) {
         return this.societiesService.create(body);
     }
-    async updateWithParam(id, body) {
-        return this.societiesService.update(id, body);
+    async updateWithParam(req, id, body) {
+        return this.societiesService.update(id, body, req.user);
     }
-    async update(body) {
-        return this.societiesService.update(body.id, body);
+    async update(req, body) {
+        return this.societiesService.update(body.id, body, req.user);
     }
     async requestPayout(req, id, body) {
         const user = req.user;
@@ -140,10 +140,11 @@ __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Approve or update society settings & commission by param ID' }),
     (0, swagger_1.ApiResponse)({ status: 200, type: society_schema_1.SocietySchema }),
     (0, common_1.Put)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)()),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('id')),
+    __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_society_dto_1.UpdateSocietyDto]),
+    __metadata("design:paramtypes", [Object, String, update_society_dto_1.UpdateSocietyDto]),
     __metadata("design:returntype", Promise)
 ], SocietiesController.prototype, "updateWithParam", null);
 __decorate([
@@ -153,9 +154,10 @@ __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Approve or update society settings & commission' }),
     (0, swagger_1.ApiResponse)({ status: 200, type: society_schema_1.SocietySchema }),
     (0, common_1.Put)(),
-    __param(0, (0, common_1.Body)()),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [update_society_dto_1.UpdateSocietyDto]),
+    __metadata("design:paramtypes", [Object, update_society_dto_1.UpdateSocietyDto]),
     __metadata("design:returntype", Promise)
 ], SocietiesController.prototype, "update", null);
 __decorate([

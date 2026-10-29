@@ -27,11 +27,13 @@ let PricingController = class PricingController {
     async getPrices(date) {
         return this.pricingService.getPricesByDate(date);
     }
-    async batchPublishBatch(body) {
-        return this.pricingService.batchPublishPrices(body);
+    async batchPublishBatch(req, body) {
+        const actorId = req.user?.id || req.user?.email;
+        return this.pricingService.batchPublishPrices(body, actorId);
     }
-    async batchPublish(body) {
-        return this.pricingService.batchPublishPrices(body);
+    async batchPublish(req, body) {
+        const actorId = req.user?.id || req.user?.email;
+        return this.pricingService.batchPublishPrices(body, actorId);
     }
 };
 exports.PricingController = PricingController;
@@ -55,9 +57,10 @@ __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Batch publish daily prices' }),
     (0, swagger_1.ApiResponse)({ status: 201 }),
     (0, common_1.Post)('batch'),
-    __param(0, (0, common_1.Body)()),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], PricingController.prototype, "batchPublishBatch", null);
 __decorate([
@@ -65,9 +68,10 @@ __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)('SUPER_ADMIN', 'PROCUREMENT_OFFICER', 'WAREHOUSE_MANAGER'),
     (0, common_1.Post)(),
-    __param(0, (0, common_1.Body)()),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], PricingController.prototype, "batchPublish", null);
 exports.PricingController = PricingController = __decorate([

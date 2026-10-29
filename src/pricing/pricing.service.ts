@@ -119,7 +119,7 @@ export class PricingService {
     };
   }
 
-  async batchPublishPrices(body: { date?: string; publishedById?: string; prices?: any[]; items?: any[]; products?: any[] }) {
+  async batchPublishPrices(body: { date?: string; publishedById?: string; prices?: any[]; items?: any[]; products?: any[] }, actorId?: string) {
     const rawPrices = body.prices || body.items || body.products;
     if (!Array.isArray(rawPrices) || rawPrices.length === 0) {
       throw new BadRequestException('prices or items array is required');
@@ -191,18 +191,7 @@ export class PricingService {
           });
         }
 
-        // Cleanly delete any existing history entry for this product on this target day
-        // This ensures that republishing prices for the same date always cleanly replaces the earlier entry
-        await tx.dailyPriceHistory.deleteMany({
-          where: {
-            productId: prodId,
-            publishedAt: {
-              gte: targetDayStart,
-              lte: targetDayEnd,
-            },
-          },
-        });
-
+        // Append-only audit record: every published price is recorded with an exact timestamp
         const hist = await tx.dailyPriceHistory.create({
           data: {
             productId: prodId,
@@ -211,8 +200,8 @@ export class PricingService {
             bulkMinQty: bq,
             bulkDiscountPercent: bd,
             gstPercent: gst,
-            publishedById: body.publishedById || null,
-            publishedAt: publishDate,
+            publishedById: actorId || body.publishedById || null,
+            publishedAt: new Date(),
           },
         });
 

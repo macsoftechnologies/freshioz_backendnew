@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Query, UseGuards, Header } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, UseGuards, Header, Req } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { PricingService } from './pricing.service';
 import { BatchPricingDto } from './dto/batch-pricing.dto';
@@ -29,15 +29,17 @@ export class PricingController {
   @ApiOperation({ summary: 'Batch publish daily prices' })
   @ApiResponse({ status: 201 })
   @Post('batch')
-  async batchPublishBatch(@Body() body: any) {
-    return this.pricingService.batchPublishPrices(body);
+  async batchPublishBatch(@Req() req: any, @Body() body: any) {
+    const actorId = req.user?.id || req.user?.email;
+    return this.pricingService.batchPublishPrices(body, actorId);
   }
 
   @ApiBearerAuth('JWT-auth')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('SUPER_ADMIN', 'PROCUREMENT_OFFICER', 'WAREHOUSE_MANAGER')
   @Post()
-  async batchPublish(@Body() body: any) {
-    return this.pricingService.batchPublishPrices(body);
+  async batchPublish(@Req() req: any, @Body() body: any) {
+    const actorId = req.user?.id || req.user?.email;
+    return this.pricingService.batchPublishPrices(body, actorId);
   }
 }

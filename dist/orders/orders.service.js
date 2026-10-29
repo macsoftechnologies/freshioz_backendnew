@@ -114,6 +114,7 @@ let OrdersService = class OrdersService {
             }
             let calculatedSubtotal = 0;
             let calculatedBulkSavings = 0;
+            let calculatedGstTotal = 0;
             const verifiedItems = [];
             for (const item of dto.items) {
                 const product = await tx.product.findFirst({
@@ -172,6 +173,9 @@ let OrdersService = class OrdersService {
                 const lineFinalTotal = Number((effectiveUnitPrice * qty).toFixed(2));
                 calculatedSubtotal += lineOriginalTotal;
                 calculatedBulkSavings += lineBulkSavings;
+                const itemGstPercent = product ? (product.gstPercent || 0) : 0;
+                const itemGst = itemGstPercent > 0 ? Number(((lineFinalTotal * itemGstPercent) / 100).toFixed(2)) : 0;
+                calculatedGstTotal += itemGst;
                 verifiedItems.push({
                     productId: product ? product.id : item.productId,
                     name: product ? product.name : item.name,
@@ -220,7 +224,7 @@ let OrdersService = class OrdersService {
             else {
                 deliveryFee = 0;
             }
-            const gstAmount = Math.max(0, Number(dto.gstAmount) || 0);
+            const gstAmount = Number(calculatedGstTotal.toFixed(2));
             let appliedDiscountAmount = 0;
             let matchedDiscount = null;
             if (dto.discountCode) {
@@ -264,6 +268,24 @@ let OrdersService = class OrdersService {
                     societyCommission = Number(society.commissionValue.toFixed(2));
                 }
             }
+            const cutoffTimeStr = warehouse?.cutoffTime || '21:00';
+            const [cutoffH, cutoffM] = cutoffTimeStr.split(':').map(Number);
+            const nowUtc = new Date();
+            const istTime = new Date(nowUtc.getTime() + (5.5 * 60 * 60 * 1000));
+            const currentIstHours = istTime.getUTCHours();
+            const currentIstMinutes = istTime.getUTCMinutes();
+            const isPastCutoff = (currentIstHours > cutoffH) || (currentIstHours === cutoffH && currentIstMinutes >= cutoffM);
+            const deliveryDateObj = new Date(istTime);
+            if (isPastCutoff) {
+                deliveryDateObj.setUTCDate(deliveryDateObj.getUTCDate() + 2);
+            }
+            else {
+                deliveryDateObj.setUTCDate(deliveryDateObj.getUTCDate() + 1);
+            }
+            const dDay = String(deliveryDateObj.getUTCDate()).padStart(2, '0');
+            const dMonth = String(deliveryDateObj.getUTCMonth() + 1).padStart(2, '0');
+            const dYear = deliveryDateObj.getUTCFullYear();
+            const serverCalculatedDeliveryDate = `${dDay}/${dMonth}/${dYear}`;
             const orderId = `ORD-${Date.now().toString().slice(-6)}-${Math.floor(1000 + Math.random() * 9000)}`;
             const created = await tx.order.create({
                 data: {
@@ -273,17 +295,17 @@ let OrdersService = class OrdersService {
                     userPhone: dto.userPhone.trim(),
                     societyId: society?.id || null,
                     societyName: society?.name || dto.societyName || 'Direct Resident Delivery',
-                    flatNo: dto.flatNo,
+                    flatNo,
                     warehouseId,
-                    warehouseCode: dto.warehouseCode || null,
+                    warehouseCode: warehouse?.code || dto.warehouseCode || null,
                     orderType: calculatedBulkSavings > 0 ? 'BULK' : 'RETAIL',
                     subtotal: calculatedSubtotal,
                     bulkSavings: calculatedBulkSavings,
                     deliveryFee,
                     gstAmount,
                     totalAmount: calculatedTotalAmount,
-                    deliveryDate: dto.deliveryDate,
-                    deliverySlot: dto.deliverySlot,
+                    deliveryDate: serverCalculatedDeliveryDate,
+                    deliverySlot: dto.deliverySlot || 'Morning Fresh Slot (06:30 AM - 08:30 AM)',
                     status: 'CONFIRMED',
                     paymentMethod: 'PAY_ON_DELIVERY',
                     paymentStatus: 'PENDING_COD',
@@ -299,15 +321,28 @@ let OrdersService = class OrdersService {
                 },
             });
             if (matchedDiscount) {
-                await tx.customerDiscount.update({
-                    where: { id: matchedDiscount.id },
+                const updateCount = await tx.customerDiscount.updateMany({
+                    where: {
+                        id: matchedDiscount.id,
+                        status: 'ACTIVE',
+                        usedCount: { lt: matchedDiscount.maxUses },
+                    },
                     data: {
-                        usedCount: matchedDiscount.usedCount + 1,
-                        status: matchedDiscount.usedCount + 1 >= matchedDiscount.maxUses ? 'REDEEMED' : 'ACTIVE',
+                        usedCount: { increment: 1 },
                         redeemedAt: new Date(),
                         orderId: created.id,
                     },
                 });
+                if (updateCount.count === 0) {
+                    throw new common_1.ConflictException('This discount code was concurrently redeemed or is no longer available.');
+                }
+                const refreshed = await tx.customerDiscount.findUnique({ where: { id: matchedDiscount.id } });
+                if (refreshed && refreshed.usedCount >= refreshed.maxUses) {
+                    await tx.customerDiscount.update({
+                        where: { id: matchedDiscount.id },
+                        data: { status: 'REDEEMED' },
+                    });
+                }
             }
             return {
                 ...created,
@@ -405,6 +440,9 @@ let OrdersService = class OrdersService {
             if (isCustomer && existing.userPhone !== user.phone && existing.userId !== user.id) {
                 throw new common_1.ForbiddenException('Access denied. You can only cancel your own orders.');
             }
+            if (isCustomer && existing.status !== 'CONFIRMED') {
+                throw new common_1.BadRequestException(`Order cannot be cancelled by resident because it is already in '${existing.status}' status.`);
+            }
             if (existing.status === 'CANCELLED') {
                 throw new common_1.BadRequestException('Order is already cancelled.');
             }
@@ -418,12 +456,26 @@ let OrdersService = class OrdersService {
                 },
                 data: {
                     status: 'CANCELLED',
-                    cancelledReason: reason || 'Cancelled by resident before cutoff',
+                    cancelledReason: reason || (isCustomer ? 'Cancelled by resident' : 'Cancelled by hub operations'),
                     cancelledAt: new Date(),
                 },
             });
             if (cancelResult.count === 0) {
                 throw new common_1.ConflictException('Order cannot be cancelled because it was concurrently delivered or already cancelled.');
+            }
+            const appliedDiscount = await tx.customerDiscount.findFirst({
+                where: { orderId: existing.id },
+            });
+            if (appliedDiscount) {
+                await tx.customerDiscount.update({
+                    where: { id: appliedDiscount.id },
+                    data: {
+                        usedCount: Math.max(0, appliedDiscount.usedCount - 1),
+                        status: 'ACTIVE',
+                        redeemedAt: null,
+                        orderId: null,
+                    },
+                });
             }
             if (existing.warehouseId && Array.isArray(existing.items)) {
                 for (const item of existing.items) {
@@ -458,6 +510,40 @@ let OrdersService = class OrdersService {
             }
             const updated = await tx.order.findUnique({
                 where: { id: existing.id },
+                include: { items: true, society: true },
+            });
+            return {
+                ...updated,
+                orderPlacedAtFormatted: (0, date_utils_1.toISTFullString)(updated.orderPlacedAt),
+                createdAtFormatted: (0, date_utils_1.toISTFullString)(updated.createdAt),
+            };
+        });
+    }
+    async settleCod(idOrUuid, manager) {
+        return this.prisma.$transaction(async (tx) => {
+            const existing = await tx.order.findFirst({
+                where: {
+                    OR: [{ id: idOrUuid }, { uuid: idOrUuid }],
+                },
+                include: { items: true, society: true },
+            });
+            if (!existing) {
+                throw new common_1.NotFoundException(`Order #${idOrUuid} not found`);
+            }
+            if (existing.status !== 'DELIVERED') {
+                throw new common_1.BadRequestException(`Only DELIVERED orders can be settled. Current order status: '${existing.status}'.`);
+            }
+            if (existing.codSettledToHub) {
+                throw new common_1.BadRequestException('This order has already been settled to the hub cashier.');
+            }
+            const updated = await tx.order.update({
+                where: { id: existing.id },
+                data: {
+                    codSettledToHub: true,
+                    codSettledAt: new Date(),
+                    codSettledBy: manager?.name || manager?.email || 'Hub Cashier Manager',
+                    paymentStatus: 'PAID',
+                },
                 include: { items: true, society: true },
             });
             return {

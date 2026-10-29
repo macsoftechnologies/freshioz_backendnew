@@ -176,4 +176,14 @@ export class OrdersController {
   cancelOrder(@Req() req: any, @Param('id') id: string, @Body() body?: { reason?: string }) {
     return this.ordersService.cancelOrder(id, req.user, body?.reason);
   }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'WAREHOUSE_MANAGER')
+  @Post(':id/settle-cod')
+  @ApiOperation({ summary: 'Settle rider COD cash to warehouse hub cashier (Manager only)' })
+  @ApiResponse({ status: 200, type: OrderResponseDto })
+  settleCod(@Req() req: any, @Param('id') id: string) {
+    return this.ordersService.settleCod(id, req.user);
+  }
 }

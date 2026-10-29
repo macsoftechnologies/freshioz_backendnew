@@ -115,7 +115,7 @@ let PricingService = class PricingService {
             entries: merged,
         };
     }
-    async batchPublishPrices(body) {
+    async batchPublishPrices(body, actorId) {
         const rawPrices = body.prices || body.items || body.products;
         if (!Array.isArray(rawPrices) || rawPrices.length === 0) {
             throw new common_1.BadRequestException('prices or items array is required');
@@ -181,15 +181,6 @@ let PricingService = class PricingService {
                         },
                     });
                 }
-                await tx.dailyPriceHistory.deleteMany({
-                    where: {
-                        productId: prodId,
-                        publishedAt: {
-                            gte: targetDayStart,
-                            lte: targetDayEnd,
-                        },
-                    },
-                });
                 const hist = await tx.dailyPriceHistory.create({
                     data: {
                         productId: prodId,
@@ -198,8 +189,8 @@ let PricingService = class PricingService {
                         bulkMinQty: bq,
                         bulkDiscountPercent: bd,
                         gstPercent: gst,
-                        publishedById: body.publishedById || null,
-                        publishedAt: publishDate,
+                        publishedById: actorId || body.publishedById || null,
+                        publishedAt: new Date(),
                     },
                 });
                 records.push(hist);

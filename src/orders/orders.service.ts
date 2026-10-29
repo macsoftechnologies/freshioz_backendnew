@@ -119,6 +119,7 @@ export class OrdersService {
       // 3. SERVER-SIDE PRICE & TOTAL CALCULATION (Do not trust client totals)
       let calculatedSubtotal = 0;
       let calculatedBulkSavings = 0;
+      let calculatedGstTotal = 0;
       const verifiedItems: any[] = [];
 
       for (const item of dto.items) {
@@ -187,6 +188,11 @@ export class OrdersService {
         calculatedSubtotal += lineOriginalTotal;
         calculatedBulkSavings += lineBulkSavings;
 
+        // Server-side GST per item
+        const itemGstPercent = product ? (product.gstPercent || 0) : 0;
+        const itemGst = itemGstPercent > 0 ? Number(((lineFinalTotal * itemGstPercent) / 100).toFixed(2)) : 0;
+        calculatedGstTotal += itemGst;
+
         verifiedItems.push({
           productId: product ? product.id : item.productId,
           name: product ? product.name : item.name,
@@ -201,8 +207,6 @@ export class OrdersService {
         });
 
         // 4. INVENTORY RESERVATION / ALLOCATION (If warehouse assigned)
-        // In the next-day dawn harvest model, customer orders drive procurement demand.
-        // We reserve any existing stock without blocking the order if stock is lower than requested.
         if (warehouseId && product) {
           const inv = await tx.warehouseInventory.findUnique({
             where: {
@@ -233,19 +237,17 @@ export class OrdersService {
         }
       }
 
-      // 5. SERVER-SIDE DELIVERY FEE & GST CALCULATION (Defend against client manipulation)
+      // 5. SERVER-SIDE DELIVERY FEE & GST CALCULATION
       const itemsNetTotal = Math.max(0, calculatedSubtotal - calculatedBulkSavings);
       let deliveryFee = 0;
       if (itemsNetTotal > 0 && itemsNetTotal < 299) {
-        // Below ₹299 free delivery threshold: apply standard base fee or validated client fee (minimum 0)
         deliveryFee = Math.max(0, Number(dto.deliveryFee) || 25);
       } else {
-        // Free delivery on orders ₹299+ and wholesale bulk orders
         deliveryFee = 0;
       }
 
-      // GST: Raw farm produce is 0% exempt under Indian tax law; ensure non-negative tax amount
-      const gstAmount = Math.max(0, Number(dto.gstAmount) || 0);
+      // GST: Server-calculated from catalog item tax rates
+      const gstAmount = Number(calculatedGstTotal.toFixed(2));
 
       // 5.1 SERVER-SIDE CUSTOMER REWARD DISCOUNT VERIFICATION
       let appliedDiscountAmount = 0;
@@ -306,6 +308,32 @@ export class OrdersService {
         }
       }
 
+      // 5.2 SERVER-SIDE CUTOFF & DELIVERY DATE ASSIGNMENT (Asia/Kolkata)
+      // Determine cutoff time from warehouse (e.g. "21:00")
+      const cutoffTimeStr = warehouse?.cutoffTime || '21:00';
+      const [cutoffH, cutoffM] = cutoffTimeStr.split(':').map(Number);
+
+      // Current time in IST (UTC + 5:30)
+      const nowUtc = new Date();
+      const istTime = new Date(nowUtc.getTime() + (5.5 * 60 * 60 * 1000));
+      const currentIstHours = istTime.getUTCHours();
+      const currentIstMinutes = istTime.getUTCMinutes();
+
+      const isPastCutoff = (currentIstHours > cutoffH) || (currentIstHours === cutoffH && currentIstMinutes >= cutoffM);
+
+      // Target delivery date: if before cutoff -> Tomorrow, if after cutoff -> Day after tomorrow
+      const deliveryDateObj = new Date(istTime);
+      if (isPastCutoff) {
+        deliveryDateObj.setUTCDate(deliveryDateObj.getUTCDate() + 2);
+      } else {
+        deliveryDateObj.setUTCDate(deliveryDateObj.getUTCDate() + 1);
+      }
+
+      const dDay = String(deliveryDateObj.getUTCDate()).padStart(2, '0');
+      const dMonth = String(deliveryDateObj.getUTCMonth() + 1).padStart(2, '0');
+      const dYear = deliveryDateObj.getUTCFullYear();
+      const serverCalculatedDeliveryDate = `${dDay}/${dMonth}/${dYear}`;
+
       // Unique Collision-Free Order ID
       const orderId = `ORD-${Date.now().toString().slice(-6)}-${Math.floor(1000 + Math.random() * 9000)}`;
 
@@ -317,22 +345,18 @@ export class OrdersService {
           userPhone: dto.userPhone.trim(),
           societyId: society?.id || null,
           societyName: society?.name || dto.societyName || 'Direct Resident Delivery',
-          flatNo: dto.flatNo,
+          flatNo,
           warehouseId,
-          warehouseCode: dto.warehouseCode || null,
+          warehouseCode: warehouse?.code || dto.warehouseCode || null,
           orderType: calculatedBulkSavings > 0 ? 'BULK' : 'RETAIL',
           subtotal: calculatedSubtotal,
           bulkSavings: calculatedBulkSavings,
           deliveryFee,
           gstAmount,
           totalAmount: calculatedTotalAmount,
-          deliveryDate: dto.deliveryDate,
-          deliverySlot: dto.deliverySlot,
+          deliveryDate: serverCalculatedDeliveryDate,
+          deliverySlot: dto.deliverySlot || 'Morning Fresh Slot (06:30 AM - 08:30 AM)',
           status: 'CONFIRMED',
-          // Phase 1: Only Pay on Delivery (COD) is permitted.
-          // Instant online UPI is commented out so clients cannot inject 'PAID' via console or REST API.
-          // paymentMethod: dto.paymentMethod || 'UPI',
-          // paymentStatus: dto.paymentStatus || 'PAID',
           paymentMethod: 'PAY_ON_DELIVERY',
           paymentStatus: 'PENDING_COD',
           societyCommissionEarned: societyCommission,
@@ -347,17 +371,32 @@ export class OrdersService {
         },
       });
 
-      // 6. Record discount redemption if applied
+      // 6. Atomic discount redemption record
       if (matchedDiscount) {
-        await tx.customerDiscount.update({
-          where: { id: matchedDiscount.id },
+        const updateCount = await tx.customerDiscount.updateMany({
+          where: {
+            id: matchedDiscount.id,
+            status: 'ACTIVE',
+            usedCount: { lt: matchedDiscount.maxUses },
+          },
           data: {
-            usedCount: matchedDiscount.usedCount + 1,
-            status: matchedDiscount.usedCount + 1 >= matchedDiscount.maxUses ? 'REDEEMED' : 'ACTIVE',
+            usedCount: { increment: 1 },
             redeemedAt: new Date(),
             orderId: created.id,
           },
         });
+
+        if (updateCount.count === 0) {
+          throw new ConflictException('This discount code was concurrently redeemed or is no longer available.');
+        }
+
+        const refreshed = await tx.customerDiscount.findUnique({ where: { id: matchedDiscount.id } });
+        if (refreshed && refreshed.usedCount >= refreshed.maxUses) {
+          await tx.customerDiscount.update({
+            where: { id: matchedDiscount.id },
+            data: { status: 'REDEEMED' },
+          });
+        }
       }
 
       return {
@@ -470,6 +509,11 @@ export class OrdersService {
         throw new ForbiddenException('Access denied. You can only cancel your own orders.');
       }
 
+      // Customer can only cancel before dispatch/packing
+      if (isCustomer && existing.status !== 'CONFIRMED') {
+        throw new BadRequestException(`Order cannot be cancelled by resident because it is already in '${existing.status}' status.`);
+      }
+
       // Check allowed statuses for cancellation - Delivered orders can NEVER be cancelled
       if (existing.status === 'CANCELLED') {
         throw new BadRequestException('Order is already cancelled.');
@@ -479,8 +523,6 @@ export class OrdersService {
       }
 
       // ATOMIC CONCURRENCY CHECK FOR CANCELLATION:
-      // Atomically transition to CANCELLED only if status is still NOT DELIVERED and NOT CANCELLED.
-      // This completely eliminates any race condition between delivery and cancellation.
       const cancelResult = await tx.order.updateMany({
         where: {
           id: existing.id,
@@ -488,13 +530,29 @@ export class OrdersService {
         },
         data: {
           status: 'CANCELLED',
-          cancelledReason: reason || 'Cancelled by resident before cutoff',
+          cancelledReason: reason || (isCustomer ? 'Cancelled by resident' : 'Cancelled by hub operations'),
           cancelledAt: new Date(),
         },
       });
 
       if (cancelResult.count === 0) {
         throw new ConflictException('Order cannot be cancelled because it was concurrently delivered or already cancelled.');
+      }
+
+      // Release customer discount code if one was redeemed on this order
+      const appliedDiscount = await tx.customerDiscount.findFirst({
+        where: { orderId: existing.id },
+      });
+      if (appliedDiscount) {
+        await tx.customerDiscount.update({
+          where: { id: appliedDiscount.id },
+          data: {
+            usedCount: Math.max(0, appliedDiscount.usedCount - 1),
+            status: 'ACTIVE',
+            redeemedAt: null,
+            orderId: null,
+          },
+        });
       }
 
       // Restore reserved warehouse stock
@@ -531,6 +589,46 @@ export class OrdersService {
 
       const updated = await tx.order.findUnique({
         where: { id: existing.id },
+        include: { items: true, society: true },
+      });
+
+      return {
+        ...updated,
+        orderPlacedAtFormatted: toISTFullString(updated.orderPlacedAt),
+        createdAtFormatted: toISTFullString(updated.createdAt),
+      };
+    });
+  }
+
+  async settleCod(idOrUuid: string, manager: any) {
+    return this.prisma.$transaction(async (tx) => {
+      const existing = await tx.order.findFirst({
+        where: {
+          OR: [{ id: idOrUuid }, { uuid: idOrUuid }],
+        },
+        include: { items: true, society: true },
+      });
+
+      if (!existing) {
+        throw new NotFoundException(`Order #${idOrUuid} not found`);
+      }
+
+      if (existing.status !== 'DELIVERED') {
+        throw new BadRequestException(`Only DELIVERED orders can be settled. Current order status: '${existing.status}'.`);
+      }
+
+      if (existing.codSettledToHub) {
+        throw new BadRequestException('This order has already been settled to the hub cashier.');
+      }
+
+      const updated = await tx.order.update({
+        where: { id: existing.id },
+        data: {
+          codSettledToHub: true,
+          codSettledAt: new Date(),
+          codSettledBy: manager?.name || manager?.email || 'Hub Cashier Manager',
+          paymentStatus: 'PAID',
+        },
         include: { items: true, society: true },
       });
 

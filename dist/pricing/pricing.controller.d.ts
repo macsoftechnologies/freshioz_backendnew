@@ -30,14 +30,14 @@ export declare class PricingController {
             dailyPriceDate: string;
         }[];
     }>;
-    batchPublishBatch(body: any): Promise<{
+    batchPublishBatch(req: any, body: any): Promise<{
         success: boolean;
         date: string;
         dateIST: string;
         message: string;
         recordsCount: number;
     }>;
-    batchPublish(body: any): Promise<{
+    batchPublish(req: any, body: any): Promise<{
         success: boolean;
         date: string;
         dateIST: string;

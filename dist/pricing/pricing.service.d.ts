@@ -36,7 +36,7 @@ export declare class PricingService {
         prices?: any[];
         items?: any[];
         products?: any[];
-    }): Promise<{
+    }, actorId?: string): Promise<{
         success: boolean;
         date: string;
         dateIST: string;

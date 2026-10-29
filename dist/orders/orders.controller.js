@@ -128,6 +128,9 @@ let OrdersController = class OrdersController {
     cancelOrder(req, id, body) {
         return this.ordersService.cancelOrder(id, req.user, body?.reason);
     }
+    settleCod(req, id) {
+        return this.ordersService.settleCod(id, req.user);
+    }
 };
 exports.OrdersController = OrdersController;
 __decorate([
@@ -208,6 +211,19 @@ __decorate([
     __metadata("design:paramtypes", [Object, String, Object]),
     __metadata("design:returntype", void 0)
 ], OrdersController.prototype, "cancelOrder", null);
+__decorate([
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('SUPER_ADMIN', 'WAREHOUSE_MANAGER'),
+    (0, common_1.Post)(':id/settle-cod'),
+    (0, swagger_1.ApiOperation)({ summary: 'Settle rider COD cash to warehouse hub cashier (Manager only)' }),
+    (0, swagger_1.ApiResponse)({ status: 200, type: order_schema_1.OrderResponseDto }),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", void 0)
+], OrdersController.prototype, "settleCod", null);
 exports.OrdersController = OrdersController = __decorate([
     (0, swagger_1.ApiTags)('Orders'),
     (0, common_1.Controller)('orders'),

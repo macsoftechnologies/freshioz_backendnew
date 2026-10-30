@@ -56,6 +56,20 @@ export declare class PaymentsService {
     verifyAndCreateOrder(dto: VerifyRazorpayPaymentDto): Promise<{
         orderPlacedAtFormatted: string;
         createdAtFormatted: string;
+        items: {
+            id: string;
+            name: string;
+            unit: string;
+            bulkSavings: number | null;
+            qty: number;
+            price: number;
+            effectivePrice: number | null;
+            totalPrice: number | null;
+            isBulkApplied: boolean;
+            bulkDiscountPercent: number | null;
+            productId: string;
+            orderId: string;
+        }[];
         warehouse: {
             id: string;
             updatedAt: Date;
@@ -74,6 +88,7 @@ export declare class PaymentsService {
             managerPhone: string | null;
         };
         society: {
+            type: string;
             id: string;
             updatedAt: Date;
             name: string;
@@ -81,7 +96,6 @@ export declare class PaymentsService {
             status: string;
             createdAt: Date;
             warehouseId: string | null;
-            type: string;
             address: string;
             imageUrl: string | null;
             lat: number | null;
@@ -101,24 +115,11 @@ export declare class PaymentsService {
             ifscCode: string | null;
             branch: string | null;
         };
-        items: {
-            id: string;
-            name: string;
-            unit: string;
-            bulkSavings: number | null;
-            qty: number;
-            price: number;
-            effectivePrice: number | null;
-            totalPrice: number | null;
-            isBulkApplied: boolean;
-            bulkDiscountPercent: number | null;
-            productId: string;
-            orderId: string;
-        }[];
-        id: string;
-        updatedAt: Date;
+        societyId: string | null;
         razorpayOrderId: string | null;
         razorpayPaymentId: string | null;
+        id: string;
+        updatedAt: Date;
         uuid: string;
         userName: string;
         userPhone: string;
@@ -150,7 +151,6 @@ export declare class PaymentsService {
         orderPlacedAt: Date;
         createdAt: Date;
         userId: string;
-        societyId: string | null;
         warehouseId: string | null;
     }>;
     handleWebhook(body: any, signature: string): Promise<{

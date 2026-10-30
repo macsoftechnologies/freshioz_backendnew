@@ -282,3 +282,4 @@ export class PaymentsService {
     return { status: 'OK' };
   }
 }
+

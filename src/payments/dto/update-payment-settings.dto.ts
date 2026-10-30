@@ -38,3 +38,4 @@ export class UpdatePaymentSettingsDto {
   @IsString()
   webhookSecret?: string;
 }
+

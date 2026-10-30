@@ -10,19 +10,19 @@ export declare class ProcurementController {
         createdAtFormatted: string;
         vendor: {
             id: string;
-            uuid: string;
+            updatedAt: Date;
             name: string;
-            lat: number | null;
-            lng: number | null;
+            category: string;
+            uuid: string;
             status: string;
             createdAt: Date;
-            updatedAt: Date;
+            phone: string;
+            lat: number | null;
+            lng: number | null;
             bankName: string | null;
             accountHolder: string | null;
             accountNumber: string | null;
             ifscCode: string | null;
-            phone: string;
-            category: string;
             mandiLocation: string;
             upiId: string | null;
         };
@@ -30,10 +30,10 @@ export declare class ProcurementController {
         uuid: string;
         createdAt: Date;
         items: import("@prisma/client/runtime/library").JsonValue;
+        mandiLocation: string;
         billNumber: string;
         vendorId: string | null;
         vendorName: string;
-        mandiLocation: string;
         destinationWarehouseId: string;
         destinationName: string;
         paymentMode: string;
@@ -42,9 +42,9 @@ export declare class ProcurementController {
         transportAmount: number;
         totalAmountPaid: number;
         receiptPhoto: string | null;
-        procuredAt: Date;
         procuredBy: string;
         slot: string;
+        procuredAt: Date;
     }[]>;
     findOne(id: string): Promise<{
         procuredAtFormatted: string;
@@ -52,19 +52,19 @@ export declare class ProcurementController {
         createdAtFormatted: string;
         vendor: {
             id: string;
-            uuid: string;
+            updatedAt: Date;
             name: string;
-            lat: number | null;
-            lng: number | null;
+            category: string;
+            uuid: string;
             status: string;
             createdAt: Date;
-            updatedAt: Date;
+            phone: string;
+            lat: number | null;
+            lng: number | null;
             bankName: string | null;
             accountHolder: string | null;
             accountNumber: string | null;
             ifscCode: string | null;
-            phone: string;
-            category: string;
             mandiLocation: string;
             upiId: string | null;
         };
@@ -72,10 +72,10 @@ export declare class ProcurementController {
         uuid: string;
         createdAt: Date;
         items: import("@prisma/client/runtime/library").JsonValue;
+        mandiLocation: string;
         billNumber: string;
         vendorId: string | null;
         vendorName: string;
-        mandiLocation: string;
         destinationWarehouseId: string;
         destinationName: string;
         paymentMode: string;
@@ -84,9 +84,9 @@ export declare class ProcurementController {
         transportAmount: number;
         totalAmountPaid: number;
         receiptPhoto: string | null;
-        procuredAt: Date;
         procuredBy: string;
         slot: string;
+        procuredAt: Date;
     }>;
     create(dto: CreateProcurementBillDto): Promise<{
         deliveryDate: string;
@@ -96,10 +96,10 @@ export declare class ProcurementController {
         uuid: string;
         createdAt: Date;
         items: import("@prisma/client/runtime/library").JsonValue;
+        mandiLocation: string;
         billNumber: string;
         vendorId: string | null;
         vendorName: string;
-        mandiLocation: string;
         destinationWarehouseId: string;
         destinationName: string;
         paymentMode: string;
@@ -108,9 +108,9 @@ export declare class ProcurementController {
         transportAmount: number;
         totalAmountPaid: number;
         receiptPhoto: string | null;
-        procuredAt: Date;
         procuredBy: string;
         slot: string;
+        procuredAt: Date;
     }>;
     delete(id: string): Promise<{
         success: boolean;

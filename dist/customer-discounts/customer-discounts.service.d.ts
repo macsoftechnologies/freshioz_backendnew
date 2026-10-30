@@ -16,14 +16,14 @@ export declare class CustomerDiscountsService {
     constructor(prisma: PrismaService);
     createDiscount(staffUser: any, dto: CreateCustomerDiscountDto): Promise<{
         id: string;
+        updatedAt: Date;
         uuid: string;
+        userName: string | null;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
-        orderId: string | null;
-        code: string;
         userId: string;
-        userName: string | null;
+        code: string;
+        orderId: string | null;
         discountType: string;
         discountValue: number;
         minOrderAmount: number;
@@ -39,14 +39,14 @@ export declare class CustomerDiscountsService {
     }>;
     getCustomerDiscounts(user: any): Promise<{
         id: string;
+        updatedAt: Date;
         uuid: string;
+        userName: string | null;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
-        orderId: string | null;
-        code: string;
         userId: string;
-        userName: string | null;
+        code: string;
+        orderId: string | null;
         discountType: string;
         discountValue: number;
         minOrderAmount: number;
@@ -65,14 +65,14 @@ export declare class CustomerDiscountsService {
         userId?: string;
     }): Promise<{
         id: string;
+        updatedAt: Date;
         uuid: string;
+        userName: string | null;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
-        orderId: string | null;
-        code: string;
         userId: string;
-        userName: string | null;
+        code: string;
+        orderId: string | null;
         discountType: string;
         discountValue: number;
         minOrderAmount: number;
@@ -88,14 +88,14 @@ export declare class CustomerDiscountsService {
     }[]>;
     revokeDiscount(id: string, staffUser: any): Promise<{
         id: string;
+        updatedAt: Date;
         uuid: string;
+        userName: string | null;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
-        orderId: string | null;
-        code: string;
         userId: string;
-        userName: string | null;
+        code: string;
+        orderId: string | null;
         discountType: string;
         discountValue: number;
         minOrderAmount: number;

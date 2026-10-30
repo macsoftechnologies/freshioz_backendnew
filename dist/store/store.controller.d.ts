@@ -29,17 +29,17 @@ export declare class StoreController {
             ifscCode: string;
             secretaryPhone: string;
             id: string;
-            uuid: string;
+            updatedAt: Date;
             name: string;
+            uuid: string;
             status: string;
             createdAt: Date;
-            updatedAt: Date;
+            warehouseId: string | null;
             type: string;
             address: string;
             imageUrl: string | null;
             lat: number | null;
             lng: number | null;
-            warehouseId: string | null;
             secretaryName: string | null;
             totalFloors: number | null;
             totalUnits: number | null;
@@ -61,10 +61,10 @@ export declare class StoreController {
         employees: any[];
         categories: {
             id: string;
+            updatedAt: Date;
             name: string;
             status: string;
             createdAt: Date;
-            updatedAt: Date;
             description: string | null;
             slug: string;
             icon: string;
@@ -72,10 +72,10 @@ export declare class StoreController {
         }[];
         units: {
             id: string;
+            updatedAt: Date;
             name: string;
             status: string;
             createdAt: Date;
-            updatedAt: Date;
             description: string | null;
             label: string;
             isBulk: boolean;

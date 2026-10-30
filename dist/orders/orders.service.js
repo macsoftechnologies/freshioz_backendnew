@@ -307,8 +307,10 @@ let OrdersService = class OrdersService {
                     deliveryDate: serverCalculatedDeliveryDate,
                     deliverySlot: dto.deliverySlot || 'Morning Fresh Slot (06:30 AM - 08:30 AM)',
                     status: 'CONFIRMED',
-                    paymentMethod: 'PAY_ON_DELIVERY',
-                    paymentStatus: 'PENDING_COD',
+                    paymentMethod: dto.paymentMethod || 'PAY_ON_DELIVERY',
+                    paymentStatus: dto.paymentStatus || (dto.paymentMethod === 'UPI' || dto.paymentMethod === 'ONLINE_RAZORPAY' ? 'PAID' : 'PENDING_COD'),
+                    razorpayOrderId: dto.razorpayOrderId || null,
+                    razorpayPaymentId: dto.razorpayPaymentId || null,
                     societyCommissionEarned: societyCommission,
                     items: {
                         create: verifiedItems,

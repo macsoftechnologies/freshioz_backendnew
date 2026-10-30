@@ -6,50 +6,50 @@ export declare class UnitsController {
     constructor(unitsService: UnitsService);
     findAll(status?: string): Promise<{
         id: string;
+        updatedAt: Date;
         name: string;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
         description: string | null;
         label: string;
         isBulk: boolean;
     }[]>;
     findOne(id: string): Promise<{
         id: string;
+        updatedAt: Date;
         name: string;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
         description: string | null;
         label: string;
         isBulk: boolean;
     }>;
     create(dto: CreateUnitDto): Promise<{
         id: string;
+        updatedAt: Date;
         name: string;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
         description: string | null;
         label: string;
         isBulk: boolean;
     }>;
     update(id: string, dto: UpdateUnitDto): Promise<{
         id: string;
+        updatedAt: Date;
         name: string;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
         description: string | null;
         label: string;
         isBulk: boolean;
     }>;
     remove(id: string): Promise<{
         id: string;
+        updatedAt: Date;
         name: string;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
         description: string | null;
         label: string;
         isBulk: boolean;

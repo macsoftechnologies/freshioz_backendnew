@@ -10,10 +10,10 @@ export declare class CategoriesController {
         };
     } & {
         id: string;
+        updatedAt: Date;
         name: string;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
         description: string | null;
         slug: string;
         icon: string;
@@ -22,11 +22,13 @@ export declare class CategoriesController {
     findOne(idOrSlug: string): Promise<{
         products: {
             id: string;
-            uuid: string;
+            updatedAt: Date;
             name: string;
+            uuid: string;
             status: string;
             createdAt: Date;
-            updatedAt: Date;
+            bulkDiscountPercent: number;
+            desc: string | null;
             tags: string[];
             kannadaName: string | null;
             categoryId: string;
@@ -34,10 +36,8 @@ export declare class CategoriesController {
             retailPrice: number;
             retailMarketPrice: number;
             bulkMinQty: number;
-            bulkDiscountPercent: number;
             origin: string | null;
             shelfLife: string | null;
-            desc: string | null;
             image: string;
             badge: string | null;
             gstPercent: number;
@@ -45,10 +45,10 @@ export declare class CategoriesController {
         }[];
     } & {
         id: string;
+        updatedAt: Date;
         name: string;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
         description: string | null;
         slug: string;
         icon: string;
@@ -56,10 +56,10 @@ export declare class CategoriesController {
     }>;
     create(dto: CreateCategoryDto): Promise<{
         id: string;
+        updatedAt: Date;
         name: string;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
         description: string | null;
         slug: string;
         icon: string;
@@ -67,10 +67,10 @@ export declare class CategoriesController {
     }>;
     update(id: string, dto: UpdateCategoryDto): Promise<{
         id: string;
+        updatedAt: Date;
         name: string;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
         description: string | null;
         slug: string;
         icon: string;
@@ -78,10 +78,10 @@ export declare class CategoriesController {
     }>;
     remove(id: string): Promise<{
         id: string;
+        updatedAt: Date;
         name: string;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
         description: string | null;
         slug: string;
         icon: string;

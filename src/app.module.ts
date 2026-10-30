@@ -19,6 +19,7 @@ import { UnitsModule } from './units/units.module';
 import { CatalogModule } from './catalog/catalog.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { CustomerDiscountsModule } from './customer-discounts/customer-discounts.module';
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { CustomerDiscountsModule } from './customer-discounts/customer-discounts
     CatalogModule,
     ReviewsModule,
     CustomerDiscountsModule,
+    PaymentsModule,
   ],
 })
 export class AppModule {}

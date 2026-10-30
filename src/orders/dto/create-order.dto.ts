@@ -142,6 +142,16 @@ export class CreateOrderDto {
   @IsString()
   paymentStatus?: string;
 
+  @ApiPropertyOptional({ example: 'order_DBJOWzybf0sJbb' })
+  @IsOptional()
+  @IsString()
+  razorpayOrderId?: string;
+
+  @ApiPropertyOptional({ example: 'pay_DBJPHBmErOX5QC' })
+  @IsOptional()
+  @IsString()
+  razorpayPaymentId?: string;
+
   @ApiPropertyOptional({ example: 'REWARD-8821-1234' })
   @IsOptional()
   @IsString()

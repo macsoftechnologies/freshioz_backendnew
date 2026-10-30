@@ -184,6 +184,18 @@ __decorate([
     __metadata("design:type", String)
 ], CreateOrderDto.prototype, "paymentStatus", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'order_DBJOWzybf0sJbb' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateOrderDto.prototype, "razorpayOrderId", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'pay_DBJPHBmErOX5QC' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateOrderDto.prototype, "razorpayPaymentId", void 0);
+__decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: 'REWARD-8821-1234' }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),

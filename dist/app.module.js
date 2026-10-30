@@ -28,6 +28,7 @@ const units_module_1 = require("./units/units.module");
 const catalog_module_1 = require("./catalog/catalog.module");
 const reviews_module_1 = require("./reviews/reviews.module");
 const customer_discounts_module_1 = require("./customer-discounts/customer-discounts.module");
+const payments_module_1 = require("./payments/payments.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -54,6 +55,7 @@ exports.AppModule = AppModule = __decorate([
             catalog_module_1.CatalogModule,
             reviews_module_1.ReviewsModule,
             customer_discounts_module_1.CustomerDiscountsModule,
+            payments_module_1.PaymentsModule,
         ],
     })
 ], AppModule);

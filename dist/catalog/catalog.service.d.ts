@@ -29,13 +29,13 @@ export declare class CatalogService {
             id: string;
             name: string;
             status: string;
+            desc: string;
             tags: string[];
             kannadaName: string;
             categoryId: string;
             retailUnit: string;
             origin: string;
             shelfLife: string;
-            desc: string;
             image: string;
             badge: string;
             inStock: boolean;
@@ -44,12 +44,12 @@ export declare class CatalogService {
             id: string;
             name: string;
             status: string;
+            warehouseId: string;
             type: string;
             address: string;
             imageUrl: string;
             lat: number;
             lng: number;
-            warehouseId: string;
             deliveryMode: string;
         }[];
         warehouses: {

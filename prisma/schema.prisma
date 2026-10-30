@@ -238,6 +238,8 @@ model Order {
   codSettledAt           DateTime?
   codSettledBy           String?
   codReceivedMode        String?     @default("CASH")
+  razorpayOrderId        String?
+  razorpayPaymentId      String?
   societyCommissionEarned Float      @default(0.0)
   deliveredAt            DateTime?
   cancelledReason        String?
@@ -440,4 +442,22 @@ model CustomerDiscount {
   @@index([userId, status])
   @@index([code])
   @@map("customer_discounts")
+}
+
+// ----------------------------------------------------
+// 12. SYSTEM CONFIGURATION & PAYMENT GATEWAYS
+// ----------------------------------------------------
+model PaymentSetting {
+  id                    String   @id @default("GATEWAY_CONFIG")
+  razorpayEnabled       Boolean  @default(false)
+  activeMode            String   @default("TEST") // "TEST" | "LIVE"
+  testKeyId             String?
+  testKeySecret         String?
+  liveKeyId             String?
+  liveKeySecret         String?
+  webhookSecret         String?
+  updatedAt             DateTime @updatedAt
+  updatedBy             String?
+
+  @@map("payment_settings")
 }

@@ -28,6 +28,8 @@ export declare class CreateOrderDto {
     deliverySlot: string;
     paymentMethod?: string;
     paymentStatus?: string;
+    razorpayOrderId?: string;
+    razorpayPaymentId?: string;
     discountCode?: string;
     discountAmount?: number;
     items: CreateOrderItemDto[];

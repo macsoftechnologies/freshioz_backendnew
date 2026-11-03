@@ -11,6 +11,8 @@
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate deploy",
     "db:seed": "node prisma/seed.js",
+    "db:export-master": "node scripts/export-master-data.js",
+    "db:sync-master": "node scripts/import-master-data.js",
     "reset-admin": "node scripts/reset-admin-password.js"
   },
   "dependencies": {

@@ -7,10 +7,6 @@ export declare class StoreController {
     constructor(storeService: StoreService, jwtService: JwtService);
     getStore(req: any): Promise<{
         warehouses: {
-            createdAt: Date;
-            updatedAt: Date;
-            capacityTons: number;
-            managerName: string;
             id: string;
             uuid: string;
             code: string;
@@ -21,37 +17,96 @@ export declare class StoreController {
             openTime: string;
             cutoffTime: string;
             status: string;
+            capacityTons: number;
+            managerName: string;
             managerPhone: string;
         }[];
-        products: any[];
-        societies: {
-            accountNumber: string;
-            ifscCode: string;
-            secretaryPhone: string;
+        products: {
             id: string;
-            updatedAt: Date;
             name: string;
-            uuid: string;
+            kannadaName: string;
+            categoryId: string;
+            category: string;
+            categoryName: string;
+            retailUnit: string;
+            retailPrice: number;
+            retailMarketPrice: number;
+            bulkMinQty: number;
+            bulkDiscountPercent: number;
+            origin: string;
+            shelfLife: string;
+            desc: string;
+            image: string;
+            badge: string;
+            tags: string[];
+            gstPercent: number;
             status: string;
-            createdAt: Date;
-            warehouseId: string | null;
+            inStock: boolean;
+        }[];
+        societies: {
+            id: string;
+            name: string;
             type: string;
             address: string;
-            imageUrl: string | null;
-            lat: number | null;
-            lng: number | null;
-            secretaryName: string | null;
-            totalFloors: number | null;
-            totalUnits: number | null;
+            imageUrl: string;
+            lat: number;
+            lng: number;
+            warehouseId: string;
             deliveryMode: string;
-            commissionType: string;
-            commissionValue: number;
-            balanceEarned: number;
-            totalOrdersDelivered: number;
-            bankName: string | null;
-            accountHolder: string | null;
-            branch: string | null;
+            status: string;
         }[];
+        orders: any[];
+        vendors: any[];
+        procurementLogs: any[];
+        warehouseInventory: {};
+        warehouseInventoryEntries: any[];
+        societyRequests: any[];
+        employees: {
+            id: string;
+            uuid: string;
+            name: string;
+            email: string;
+            phone: string;
+            roles: string[];
+            status: string;
+        }[];
+        categories: {
+            id: string;
+            name: string;
+            slug: string;
+            icon: string;
+            description: string;
+            sortOrder: number;
+        }[];
+        units: {
+            id: string;
+            name: string;
+            label: string;
+            isBulk: boolean;
+        }[];
+        withdrawals: any[];
+        backendConnected: boolean;
+        syncedAtIST: string;
+    } | {
+        warehouses: {
+            createdAt: any;
+            updatedAt: any;
+            capacityTons: any;
+            managerName: any;
+            id: any;
+            uuid: any;
+            code: any;
+            name: any;
+            location: any;
+            lat: any;
+            lng: any;
+            openTime: any;
+            cutoffTime: any;
+            status: any;
+            managerPhone: any;
+        }[];
+        products: any[];
+        societies: any[];
         orders: any[];
         vendors: any[];
         procurementLogs: any[];
@@ -59,27 +114,8 @@ export declare class StoreController {
         warehouseInventoryEntries: any[];
         societyRequests: any[];
         employees: any[];
-        categories: {
-            id: string;
-            updatedAt: Date;
-            name: string;
-            status: string;
-            createdAt: Date;
-            description: string | null;
-            slug: string;
-            icon: string;
-            sortOrder: number;
-        }[];
-        units: {
-            id: string;
-            updatedAt: Date;
-            name: string;
-            status: string;
-            createdAt: Date;
-            description: string | null;
-            label: string;
-            isBulk: boolean;
-        }[];
+        categories: any[];
+        units: any[];
         withdrawals: {
             id: any;
             societyId: any;

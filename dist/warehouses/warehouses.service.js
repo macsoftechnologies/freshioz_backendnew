@@ -22,7 +22,7 @@ let WarehousesService = class WarehousesService {
         });
         return list.map(w => ({
             ...w,
-            managerPhone: w.managerPhone ? `••••${w.managerPhone.slice(-4)}` : null,
+            managerPhone: w.managerPhone ? '••••' + w.managerPhone.slice(-4) : null,
         }));
     }
     async findOne(idOrCode, isStaff = false) {

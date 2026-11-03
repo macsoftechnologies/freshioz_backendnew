@@ -1,20 +1,21 @@
 import { PrismaService } from '../prisma/prisma.service';
 export declare class CatalogService {
     private readonly prisma;
+    private readonly logger;
     constructor(prisma: PrismaService);
     getPublicCatalog(targetDate?: string): Promise<{
         categories: {
-            id: string;
-            name: string;
             description: string;
+            name: string;
+            id: string;
             slug: string;
             icon: string;
             sortOrder: number;
         }[];
         units: {
-            id: string;
-            name: string;
             description: string;
+            name: string;
+            id: string;
             label: string;
             isBulk: boolean;
         }[];
@@ -26,11 +27,11 @@ export declare class CatalogService {
             bulkDiscountPercent: any;
             gstPercent: any;
             hasCustomDailyPrice: boolean;
-            id: string;
             name: string;
+            id: string;
             status: string;
-            desc: string;
             tags: string[];
+            desc: string;
             kannadaName: string;
             categoryId: string;
             retailUnit: string;
@@ -41,20 +42,20 @@ export declare class CatalogService {
             inStock: boolean;
         }[];
         societies: {
-            id: string;
-            name: string;
-            status: string;
-            warehouseId: string;
             type: string;
+            name: string;
+            id: string;
+            status: string;
             address: string;
             imageUrl: string;
             lat: number;
             lng: number;
+            warehouseId: string;
             deliveryMode: string;
         }[];
         warehouses: {
-            id: string;
             name: string;
+            id: string;
             status: string;
             lat: number;
             lng: number;
@@ -67,4 +68,5 @@ export declare class CatalogService {
         activeDeliveryDate: string;
         syncedAt: string;
     }>;
+    private getFallbackCatalog;
 }

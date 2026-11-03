@@ -17,14 +17,14 @@ export declare class AuthService {
         expiresIn: string;
         type: string;
         user: {
-            id: string;
-            uuid: string;
-            name: string;
-            email: string;
-            phone: string;
-            roles: string[];
-            assignedWarehouseId: string;
-            warehouseId: string;
+            id: any;
+            uuid: any;
+            name: any;
+            email: any;
+            phone: any;
+            roles: any[];
+            assignedWarehouseId: any;
+            warehouseId: any;
             type: string;
         };
     } | {

@@ -4,17 +4,17 @@ export declare class CatalogController {
     constructor(catalogService: CatalogService);
     getPublicCatalog(date?: string): Promise<{
         categories: {
-            id: string;
-            name: string;
             description: string;
+            name: string;
+            id: string;
             slug: string;
             icon: string;
             sortOrder: number;
         }[];
         units: {
-            id: string;
-            name: string;
             description: string;
+            name: string;
+            id: string;
             label: string;
             isBulk: boolean;
         }[];
@@ -26,11 +26,11 @@ export declare class CatalogController {
             bulkDiscountPercent: any;
             gstPercent: any;
             hasCustomDailyPrice: boolean;
-            id: string;
             name: string;
+            id: string;
             status: string;
-            desc: string;
             tags: string[];
+            desc: string;
             kannadaName: string;
             categoryId: string;
             retailUnit: string;
@@ -41,20 +41,20 @@ export declare class CatalogController {
             inStock: boolean;
         }[];
         societies: {
-            id: string;
-            name: string;
-            status: string;
-            warehouseId: string;
             type: string;
+            name: string;
+            id: string;
+            status: string;
             address: string;
             imageUrl: string;
             lat: number;
             lng: number;
+            warehouseId: string;
             deliveryMode: string;
         }[];
         warehouses: {
-            id: string;
             name: string;
+            id: string;
             status: string;
             lat: number;
             lng: number;

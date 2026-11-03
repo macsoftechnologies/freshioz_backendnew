@@ -5,10 +5,10 @@ export declare class ProductsService {
     findAll(): Promise<({
         category: {
             id: string;
-            updatedAt: Date;
             name: string;
             status: string;
             createdAt: Date;
+            updatedAt: Date;
             description: string | null;
             slug: string;
             icon: string;
@@ -16,12 +16,11 @@ export declare class ProductsService {
         };
     } & {
         id: string;
-        updatedAt: Date;
-        name: string;
         uuid: string;
+        name: string;
         status: string;
         createdAt: Date;
-        bulkDiscountPercent: number;
+        updatedAt: Date;
         desc: string | null;
         tags: string[];
         kannadaName: string | null;
@@ -30,6 +29,7 @@ export declare class ProductsService {
         retailPrice: number;
         retailMarketPrice: number;
         bulkMinQty: number;
+        bulkDiscountPercent: number;
         origin: string | null;
         shelfLife: string | null;
         image: string;
@@ -40,10 +40,10 @@ export declare class ProductsService {
     findOne(idOrUuid: string): Promise<{
         category: {
             id: string;
-            updatedAt: Date;
             name: string;
             status: string;
             createdAt: Date;
+            updatedAt: Date;
             description: string | null;
             slug: string;
             icon: string;
@@ -51,12 +51,11 @@ export declare class ProductsService {
         };
     } & {
         id: string;
-        updatedAt: Date;
-        name: string;
         uuid: string;
+        name: string;
         status: string;
         createdAt: Date;
-        bulkDiscountPercent: number;
+        updatedAt: Date;
         desc: string | null;
         tags: string[];
         kannadaName: string | null;
@@ -65,6 +64,7 @@ export declare class ProductsService {
         retailPrice: number;
         retailMarketPrice: number;
         bulkMinQty: number;
+        bulkDiscountPercent: number;
         origin: string | null;
         shelfLife: string | null;
         image: string;
@@ -75,10 +75,10 @@ export declare class ProductsService {
     create(body: any): Promise<{
         category: {
             id: string;
-            updatedAt: Date;
             name: string;
             status: string;
             createdAt: Date;
+            updatedAt: Date;
             description: string | null;
             slug: string;
             icon: string;
@@ -86,12 +86,11 @@ export declare class ProductsService {
         };
     } & {
         id: string;
-        updatedAt: Date;
-        name: string;
         uuid: string;
+        name: string;
         status: string;
         createdAt: Date;
-        bulkDiscountPercent: number;
+        updatedAt: Date;
         desc: string | null;
         tags: string[];
         kannadaName: string | null;
@@ -100,6 +99,7 @@ export declare class ProductsService {
         retailPrice: number;
         retailMarketPrice: number;
         bulkMinQty: number;
+        bulkDiscountPercent: number;
         origin: string | null;
         shelfLife: string | null;
         image: string;
@@ -110,10 +110,10 @@ export declare class ProductsService {
     update(idOrUuid: string, data: any): Promise<{
         category: {
             id: string;
-            updatedAt: Date;
             name: string;
             status: string;
             createdAt: Date;
+            updatedAt: Date;
             description: string | null;
             slug: string;
             icon: string;
@@ -121,12 +121,11 @@ export declare class ProductsService {
         };
     } & {
         id: string;
-        updatedAt: Date;
-        name: string;
         uuid: string;
+        name: string;
         status: string;
         createdAt: Date;
-        bulkDiscountPercent: number;
+        updatedAt: Date;
         desc: string | null;
         tags: string[];
         kannadaName: string | null;
@@ -135,6 +134,7 @@ export declare class ProductsService {
         retailPrice: number;
         retailMarketPrice: number;
         bulkMinQty: number;
+        bulkDiscountPercent: number;
         origin: string | null;
         shelfLife: string | null;
         image: string;
@@ -144,12 +144,11 @@ export declare class ProductsService {
     }>;
     delete(idOrUuid: string): Promise<{
         id: string;
-        updatedAt: Date;
-        name: string;
         uuid: string;
+        name: string;
         status: string;
         createdAt: Date;
-        bulkDiscountPercent: number;
+        updatedAt: Date;
         desc: string | null;
         tags: string[];
         kannadaName: string | null;
@@ -158,6 +157,7 @@ export declare class ProductsService {
         retailPrice: number;
         retailMarketPrice: number;
         bulkMinQty: number;
+        bulkDiscountPercent: number;
         origin: string | null;
         shelfLife: string | null;
         image: string;

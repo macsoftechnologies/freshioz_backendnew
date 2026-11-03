@@ -4,14 +4,14 @@ export declare class CustomerDiscountsController {
     constructor(discountsService: CustomerDiscountsService);
     createDiscount(req: any, body: CreateCustomerDiscountDto): Promise<{
         id: string;
-        updatedAt: Date;
         uuid: string;
-        userName: string | null;
         status: string;
         createdAt: Date;
-        userId: string;
+        updatedAt: Date;
         code: string;
         orderId: string | null;
+        userName: string | null;
+        userId: string;
         discountType: string;
         discountValue: number;
         minOrderAmount: number;
@@ -27,14 +27,14 @@ export declare class CustomerDiscountsController {
     }>;
     getAdminDiscounts(status?: string, userId?: string): Promise<{
         id: string;
-        updatedAt: Date;
         uuid: string;
-        userName: string | null;
         status: string;
         createdAt: Date;
-        userId: string;
+        updatedAt: Date;
         code: string;
         orderId: string | null;
+        userName: string | null;
+        userId: string;
         discountType: string;
         discountValue: number;
         minOrderAmount: number;
@@ -50,14 +50,14 @@ export declare class CustomerDiscountsController {
     }[]>;
     revokeDiscount(req: any, id: string): Promise<{
         id: string;
-        updatedAt: Date;
         uuid: string;
-        userName: string | null;
         status: string;
         createdAt: Date;
-        userId: string;
+        updatedAt: Date;
         code: string;
         orderId: string | null;
+        userName: string | null;
+        userId: string;
         discountType: string;
         discountValue: number;
         minOrderAmount: number;
@@ -73,14 +73,14 @@ export declare class CustomerDiscountsController {
     }>;
     getMyDiscounts(req: any): Promise<{
         id: string;
-        updatedAt: Date;
         uuid: string;
-        userName: string | null;
         status: string;
         createdAt: Date;
-        userId: string;
+        updatedAt: Date;
         code: string;
         orderId: string | null;
+        userName: string | null;
+        userId: string;
         discountType: string;
         discountValue: number;
         minOrderAmount: number;

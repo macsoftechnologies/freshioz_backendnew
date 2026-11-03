@@ -10,12 +10,11 @@ export class SocietiesService {
       include: { warehouse: true },
       orderBy: { id: 'asc' },
     });
-    // Sanitize banking data and secretary personal phone for public queries
     return list.map(s => ({
       ...s,
-      accountNumber: s.accountNumber ? `••••${s.accountNumber.slice(-4)}` : null,
-      ifscCode: s.ifscCode ? `••••${s.ifscCode.slice(-4)}` : null,
-      secretaryPhone: s.secretaryPhone ? `••••${s.secretaryPhone.slice(-4)}` : null,
+      accountNumber: s.accountNumber ? '••••' + s.accountNumber.slice(-4) : null,
+      ifscCode: s.ifscCode ? '••••' + s.ifscCode.slice(-4) : null,
+      secretaryPhone: s.secretaryPhone ? '••••' + s.secretaryPhone.slice(-4) : null,
     }));
   }
 
@@ -81,29 +80,34 @@ export class SocietiesService {
   }
 
   async listPayouts(query?: { societyId?: string; status?: string }) {
-    const where: any = {};
-    if (query?.societyId) where.societyId = query.societyId;
-    if (query?.status) where.status = query.status;
+    try {
+      const where: any = {};
+      if (query?.societyId) where.societyId = query.societyId;
+      if (query?.status) where.status = query.status;
 
-    return this.prisma.societyPayout.findMany({
-      where,
-      include: {
-        society: {
-          select: {
-            id: true,
-            name: true,
-            secretaryName: true,
-            secretaryPhone: true,
-            bankName: true,
-            accountHolder: true,
-            accountNumber: true,
-            ifscCode: true,
-            balanceEarned: true,
+      const payouts = await this.prisma.societyPayout.findMany({
+        where,
+        include: {
+          society: {
+            select: {
+              id: true,
+              name: true,
+              secretaryName: true,
+              secretaryPhone: true,
+              bankName: true,
+              accountHolder: true,
+              accountNumber: true,
+              ifscCode: true,
+              balanceEarned: true,
+            },
           },
         },
-      },
-      orderBy: { createdAt: 'desc' },
-    });
+        orderBy: { createdAt: 'desc' },
+      });
+      return payouts || [];
+    } catch (e) {
+      return [];
+    }
   }
 
   async approvePayout(payoutId: string, adminUser: any, bankUtr?: string) {

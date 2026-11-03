@@ -23,9 +23,9 @@ let SocietiesService = class SocietiesService {
         });
         return list.map(s => ({
             ...s,
-            accountNumber: s.accountNumber ? `••••${s.accountNumber.slice(-4)}` : null,
-            ifscCode: s.ifscCode ? `••••${s.ifscCode.slice(-4)}` : null,
-            secretaryPhone: s.secretaryPhone ? `••••${s.secretaryPhone.slice(-4)}` : null,
+            accountNumber: s.accountNumber ? '••••' + s.accountNumber.slice(-4) : null,
+            ifscCode: s.ifscCode ? '••••' + s.ifscCode.slice(-4) : null,
+            secretaryPhone: s.secretaryPhone ? '••••' + s.secretaryPhone.slice(-4) : null,
         }));
     }
     async findOne(idOrUuid) {
@@ -80,30 +80,36 @@ let SocietiesService = class SocietiesService {
         });
     }
     async listPayouts(query) {
-        const where = {};
-        if (query?.societyId)
-            where.societyId = query.societyId;
-        if (query?.status)
-            where.status = query.status;
-        return this.prisma.societyPayout.findMany({
-            where,
-            include: {
-                society: {
-                    select: {
-                        id: true,
-                        name: true,
-                        secretaryName: true,
-                        secretaryPhone: true,
-                        bankName: true,
-                        accountHolder: true,
-                        accountNumber: true,
-                        ifscCode: true,
-                        balanceEarned: true,
+        try {
+            const where = {};
+            if (query?.societyId)
+                where.societyId = query.societyId;
+            if (query?.status)
+                where.status = query.status;
+            const payouts = await this.prisma.societyPayout.findMany({
+                where,
+                include: {
+                    society: {
+                        select: {
+                            id: true,
+                            name: true,
+                            secretaryName: true,
+                            secretaryPhone: true,
+                            bankName: true,
+                            accountHolder: true,
+                            accountNumber: true,
+                            ifscCode: true,
+                            balanceEarned: true,
+                        },
                     },
                 },
-            },
-            orderBy: { createdAt: 'desc' },
-        });
+                orderBy: { createdAt: 'desc' },
+            });
+            return payouts || [];
+        }
+        catch (e) {
+            return [];
+        }
     }
     async approvePayout(payoutId, adminUser, bankUtr) {
         if (!bankUtr || !bankUtr.trim()) {

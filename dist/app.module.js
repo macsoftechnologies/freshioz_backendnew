@@ -29,6 +29,7 @@ const catalog_module_1 = require("./catalog/catalog.module");
 const reviews_module_1 = require("./reviews/reviews.module");
 const customer_discounts_module_1 = require("./customer-discounts/customer-discounts.module");
 const payments_module_1 = require("./payments/payments.module");
+const mis_module_1 = require("./mis/mis.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -56,6 +57,7 @@ exports.AppModule = AppModule = __decorate([
             reviews_module_1.ReviewsModule,
             customer_discounts_module_1.CustomerDiscountsModule,
             payments_module_1.PaymentsModule,
+            mis_module_1.MisModule,
         ],
     })
 ], AppModule);

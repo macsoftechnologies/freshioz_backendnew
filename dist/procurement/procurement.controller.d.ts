@@ -10,19 +10,19 @@ export declare class ProcurementController {
         createdAtFormatted: string;
         vendor: {
             id: string;
-            updatedAt: Date;
-            name: string;
-            category: string;
             uuid: string;
-            status: string;
-            createdAt: Date;
-            phone: string;
+            name: string;
             lat: number | null;
             lng: number | null;
+            status: string;
+            createdAt: Date;
+            updatedAt: Date;
             bankName: string | null;
             accountHolder: string | null;
             accountNumber: string | null;
             ifscCode: string | null;
+            phone: string;
+            category: string;
             mandiLocation: string;
             upiId: string | null;
         };
@@ -42,9 +42,9 @@ export declare class ProcurementController {
         transportAmount: number;
         totalAmountPaid: number;
         receiptPhoto: string | null;
+        procuredAt: Date;
         procuredBy: string;
         slot: string;
-        procuredAt: Date;
     }[]>;
     findOne(id: string): Promise<{
         procuredAtFormatted: string;
@@ -52,19 +52,19 @@ export declare class ProcurementController {
         createdAtFormatted: string;
         vendor: {
             id: string;
-            updatedAt: Date;
-            name: string;
-            category: string;
             uuid: string;
-            status: string;
-            createdAt: Date;
-            phone: string;
+            name: string;
             lat: number | null;
             lng: number | null;
+            status: string;
+            createdAt: Date;
+            updatedAt: Date;
             bankName: string | null;
             accountHolder: string | null;
             accountNumber: string | null;
             ifscCode: string | null;
+            phone: string;
+            category: string;
             mandiLocation: string;
             upiId: string | null;
         };
@@ -84,9 +84,9 @@ export declare class ProcurementController {
         transportAmount: number;
         totalAmountPaid: number;
         receiptPhoto: string | null;
+        procuredAt: Date;
         procuredBy: string;
         slot: string;
-        procuredAt: Date;
     }>;
     create(dto: CreateProcurementBillDto): Promise<{
         deliveryDate: string;
@@ -108,9 +108,9 @@ export declare class ProcurementController {
         transportAmount: number;
         totalAmountPaid: number;
         receiptPhoto: string | null;
+        procuredAt: Date;
         procuredBy: string;
         slot: string;
-        procuredAt: Date;
     }>;
     delete(id: string): Promise<{
         success: boolean;

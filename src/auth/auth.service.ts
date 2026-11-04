@@ -48,6 +48,21 @@ export class AuthService {
             employeeRoles.push('PROCUREMENT_OFFICER');
           }
 
+          let assignedLocationName = 'All Hubs & Warehouses (Citywide)';
+          if (employee.assignedWarehouseId && employee.assignedWarehouseId !== 'ALL') {
+            const wh = await this.prisma.warehouse.findFirst({
+              where: {
+                OR: [
+                  { id: employee.assignedWarehouseId },
+                  { uuid: employee.assignedWarehouseId },
+                  { code: employee.assignedWarehouseId },
+                ],
+              },
+              select: { name: true },
+            });
+            if (wh) assignedLocationName = wh.name;
+          }
+
           const userPayload = {
             id: employee.id,
             uuid: employee.uuid,
@@ -57,6 +72,7 @@ export class AuthService {
             roles: employeeRoles,
             assignedWarehouseId: employee.assignedWarehouseId,
             warehouseId: employee.assignedWarehouseId,
+            assignedLocationName,
             type: 'EMPLOYEE',
           };
 

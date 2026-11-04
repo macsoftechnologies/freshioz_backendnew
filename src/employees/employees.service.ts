@@ -30,9 +30,39 @@ export class EmployeesService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll() {
-    return this.prisma.employee.findMany({
-      select: EMPLOYEE_SELECT_FIELDS,
-      orderBy: { createdAt: 'desc' },
+    const [employees, warehouses] = await Promise.all([
+      this.prisma.employee.findMany({
+        select: EMPLOYEE_SELECT_FIELDS,
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.warehouse.findMany({
+        select: { id: true, uuid: true, code: true, name: true },
+      }),
+    ]);
+
+    const whMap = new Map<string, any>();
+    warehouses.forEach(w => {
+      whMap.set(w.id, w);
+      whMap.set(w.uuid, w);
+      if (w.code) whMap.set(w.code, w);
+    });
+
+    return employees.map(emp => {
+      const wh = emp.assignedWarehouseId && emp.assignedWarehouseId !== 'ALL'
+        ? whMap.get(emp.assignedWarehouseId)
+        : null;
+      const assignedLocationName = wh
+        ? wh.name
+        : (emp.assignedWarehouseId === 'ALL' || !emp.assignedWarehouseId
+          ? 'All Hubs & Warehouses (Citywide)'
+          : emp.assignedWarehouseId);
+
+      return {
+        ...emp,
+        assignedWarehouse: wh || null,
+        assignedWarehouseName: assignedLocationName,
+        assignedLocationName,
+      };
     });
   }
 
@@ -44,7 +74,32 @@ export class EmployeesService {
       select: EMPLOYEE_SELECT_FIELDS,
     });
     if (!emp) throw new NotFoundException(`Employee #${idOrUuid} not found`);
-    return emp;
+
+    if (emp.assignedWarehouseId && emp.assignedWarehouseId !== 'ALL') {
+      const wh = await this.prisma.warehouse.findFirst({
+        where: {
+          OR: [
+            { id: emp.assignedWarehouseId },
+            { uuid: emp.assignedWarehouseId },
+            { code: emp.assignedWarehouseId },
+          ],
+        },
+        select: { id: true, uuid: true, code: true, name: true },
+      });
+      return {
+        ...emp,
+        assignedWarehouse: wh || null,
+        assignedWarehouseName: wh ? wh.name : emp.assignedWarehouseId,
+        assignedLocationName: wh ? wh.name : emp.assignedWarehouseId,
+      };
+    }
+
+    return {
+      ...emp,
+      assignedWarehouse: null,
+      assignedWarehouseName: 'All Hubs & Warehouses (Citywide)',
+      assignedLocationName: 'All Hubs & Warehouses (Citywide)',
+    };
   }
 
   async create(body: any) {

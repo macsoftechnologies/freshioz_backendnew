@@ -23,9 +23,11 @@ export class StoreService {
   async getCombinedStore(currentUser?: any) {
     const isStaffOrAdmin = Boolean(
       currentUser &&
-      currentUser.type === 'EMPLOYEE' &&
-      Array.isArray(currentUser.roles) &&
-      !currentUser.roles.includes('SOCIETY_PARTNER')
+      (currentUser.type === 'EMPLOYEE' ||
+       currentUser.role === 'SUPER_ADMIN' ||
+       currentUser.role === 'ADMIN' ||
+       (Array.isArray(currentUser.roles) && currentUser.roles.some((r: string) => ['SUPER_ADMIN', 'WAREHOUSE_MANAGER', 'WAREHOUSE_STAFF', 'ADMIN', 'PROCUREMENT_OFFICER', 'SALES_OFFICER'].includes(r)))) &&
+      !currentUser.roles?.includes('SOCIETY_PARTNER')
     );
     const isPartner = Boolean(
       currentUser && (currentUser.type === 'PARTNER' || currentUser.roles?.includes('SOCIETY_PARTNER'))

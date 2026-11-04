@@ -5,13 +5,13 @@ import { PrismaService } from '../prisma/prisma.service';
 export class WarehousesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll() {
+  async findAll(isStaff = false) {
     const list = await this.prisma.warehouse.findMany({
       orderBy: { createdAt: 'asc' },
     });
     return list.map(w => ({
       ...w,
-      managerPhone: w.managerPhone ? '••••' + w.managerPhone.slice(-4) : null,
+      managerPhone: (isStaff && w.managerPhone) ? w.managerPhone : (w.managerPhone ? '••••' + w.managerPhone.slice(-4) : null),
     }));
   }
 
@@ -110,7 +110,7 @@ export class WarehousesService {
         ...(data.cutoffTime && { cutoffTime: data.cutoffTime }),
         ...(data.capacityTons !== undefined && { capacityTons: parseFloat(data.capacityTons) }),
         ...(data.managerName !== undefined && { managerName: data.managerName }),
-        ...(data.managerPhone !== undefined && { managerPhone: data.managerPhone }),
+        ...(data.managerPhone !== undefined && !String(data.managerPhone).includes('••••') && { managerPhone: data.managerPhone }),
         ...(data.status && { status: data.status }),
       },
     });

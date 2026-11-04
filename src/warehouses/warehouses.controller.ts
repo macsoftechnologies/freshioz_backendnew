@@ -20,8 +20,25 @@ export class WarehousesController {
   @ApiOperation({ summary: 'List all fulfillment warehouse hubs' })
   @ApiResponse({ status: 200, type: [WarehouseSchema] })
   @Get()
-  async findAll() {
-    return this.warehousesService.findAll();
+  async findAll(@Req() req: any) {
+    let isStaff = false;
+    const authHeader = req?.headers?.['authorization'] || req?.headers?.['Authorization'];
+    if (authHeader && typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
+      try {
+        const decoded: any = this.jwtService.verify(authHeader.split(' ')[1]);
+        isStaff = Boolean(
+          decoded &&
+          (decoded.type === 'EMPLOYEE' ||
+           decoded.role === 'SUPER_ADMIN' ||
+           decoded.role === 'ADMIN' ||
+           (Array.isArray(decoded.roles) && decoded.roles.some((r: string) => ['SUPER_ADMIN', 'WAREHOUSE_MANAGER', 'WAREHOUSE_STAFF', 'ADMIN', 'PROCUREMENT_OFFICER', 'SALES_OFFICER'].includes(r)))) &&
+          !decoded.roles?.includes('SOCIETY_PARTNER')
+        );
+      } catch (e) {
+        isStaff = false;
+      }
+    }
+    return this.warehousesService.findAll(isStaff);
   }
 
   @ApiOperation({ summary: 'Get warehouse details by ID or Code' })
@@ -33,7 +50,14 @@ export class WarehousesController {
     if (authHeader && typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
       try {
         const decoded = this.jwtService.verify(authHeader.split(' ')[1]);
-        isStaff = decoded?.type === 'EMPLOYEE';
+        isStaff = Boolean(
+          decoded &&
+          (decoded.type === 'EMPLOYEE' ||
+           decoded.role === 'SUPER_ADMIN' ||
+           decoded.role === 'ADMIN' ||
+           (Array.isArray(decoded.roles) && decoded.roles.some((r: string) => ['SUPER_ADMIN', 'WAREHOUSE_MANAGER', 'WAREHOUSE_STAFF', 'ADMIN', 'PROCUREMENT_OFFICER', 'SALES_OFFICER'].includes(r)))) &&
+          !decoded.roles?.includes('SOCIETY_PARTNER')
+        );
       } catch (e) {}
     }
     return this.warehousesService.findOne(id, isStaff);

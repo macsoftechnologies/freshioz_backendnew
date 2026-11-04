@@ -127,8 +127,8 @@ export class OrdersService {
           where: { OR: [{ id: item.productId }, { uuid: item.productId }, { name: item.name }] },
         });
 
-        if (!product) {
-          throw new BadRequestException(`Product '${item.name || item.productId}' is currently unavailable in the catalog.`);
+        if (!product || product.status !== 'ACTIVE') {
+          throw new BadRequestException(`Product '${product?.name || item.name || item.productId}' is currently off-season or unavailable.`);
         }
 
         // Use DB product price if found (checking DailyPriceHistory for deliveryDate first)

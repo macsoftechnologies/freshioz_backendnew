@@ -174,7 +174,9 @@ export class StoreService {
       updatedAt: w.updatedAt,
     }));
 
-    const formattedProducts = products.map((p: any) => ({
+    const formattedProducts = products
+      .filter((p: any) => isStaffOrAdmin || p.status === 'ACTIVE')
+      .map((p: any) => ({
       ...p,
       category: p.category?.name || p.categoryId || 'VEGETABLES',
       categoryId: p.categoryId || p.category?.id || 'VEGETABLES',

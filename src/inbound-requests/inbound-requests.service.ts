@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { formatDateIST, formatTimeIST } from '../common/date-utils';
 
@@ -15,6 +15,9 @@ export class InboundRequestsService {
 
     const formattedLeads = leads.map(l => ({
       ...l,
+      requesterName: l.contactName,
+      requesterPhone: l.contactPhone,
+      estimatedFlats: l.flatCount,
       createdDateIST: formatDateIST(l.createdAt),
       createdTimeIST: formatTimeIST(l.createdAt),
     }));
@@ -27,15 +30,28 @@ export class InboundRequestsService {
 
   async create(body: any) {
     const { id, societyName, contactName, contactPhone, contactRole, flatCount, clusterZone, address } = body;
+    const resolvedContactName = (contactName || body.requesterName || '').trim();
+    const cleanPhone = (contactPhone || body.requesterPhone || '').toString().replace(/\D/g, '').trim();
+
+    if (!societyName || !societyName.trim()) {
+      throw new BadRequestException('Society / apartment name is required');
+    }
+    if (!resolvedContactName || resolvedContactName.length < 2) {
+      throw new BadRequestException('Requester contact name is mandatory (minimum 2 characters)');
+    }
+    if (!cleanPhone || cleanPhone.length !== 10) {
+      throw new BadRequestException('A valid 10-digit mobile phone number is strictly mandatory');
+    }
+
     const newLead = await this.prisma.inboundLead.create({
       data: {
         id: id || `FRZ_LEAD_${Date.now()}`,
-        societyName,
-        contactName,
-        contactPhone,
-        contactRole: contactRole || 'Resident',
-        flatCount: flatCount ? parseInt(flatCount) : null,
-        clusterZone: clusterZone || 'Bangalore East',
+        societyName: societyName.trim(),
+        contactName: resolvedContactName,
+        contactPhone: cleanPhone,
+        contactRole: contactRole || body.societyType || 'Resident',
+        flatCount: flatCount ? parseInt(flatCount) : (body.estimatedFlats ? parseInt(body.estimatedFlats) : 150),
+        clusterZone: clusterZone || body.city || 'Bangalore East',
         address: address || null,
         status: 'NEW_LEAD',
       },
@@ -43,6 +59,9 @@ export class InboundRequestsService {
 
     return {
       ...newLead,
+      requesterName: newLead.contactName,
+      requesterPhone: newLead.contactPhone,
+      estimatedFlats: newLead.flatCount,
       createdDateIST: formatDateIST(newLead.createdAt),
       createdTimeIST: formatTimeIST(newLead.createdAt),
     };

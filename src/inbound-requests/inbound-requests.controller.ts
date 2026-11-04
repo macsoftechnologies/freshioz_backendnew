@@ -15,7 +15,7 @@ export class InboundRequestsController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('SUPER_ADMIN', 'SALES_OFFICER')
+  @Roles('SUPER_ADMIN', 'SALES_OFFICER', 'WAREHOUSE_MANAGER')
   @ApiOperation({ summary: 'List all community onboarding leads with unread badge counter (Sales/Admin only)' })
   @ApiResponse({ status: 200, type: InboundLeadsResponseSchema })
   @Get()

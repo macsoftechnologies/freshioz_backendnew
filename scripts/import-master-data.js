@@ -74,3 +74,4 @@ importData()
   .finally(async () => {
     await prisma.$disconnect();
   });
+

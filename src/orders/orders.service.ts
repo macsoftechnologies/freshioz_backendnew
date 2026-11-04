@@ -444,6 +444,9 @@ export class OrdersService {
       if (dto.codReceivedMode) {
         updateData.codReceivedMode = dto.codReceivedMode;
       }
+      if (dto.razorpayPaymentId) {
+        updateData.razorpayPaymentId = dto.razorpayPaymentId;
+      }
 
       // ATOMIC CONCURRENCY CHECK FOR DELIVERED:
       // Prevents race conditions where an order is concurrently cancelled while being delivered

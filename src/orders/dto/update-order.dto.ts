@@ -35,4 +35,9 @@ export class UpdateOrderStatusDto {
   @IsOptional()
   @IsString()
   codReceivedMode?: string;
+
+  @ApiPropertyOptional({ example: 'pay_ABC1234567' })
+  @IsOptional()
+  @IsString()
+  razorpayPaymentId?: string;
 }

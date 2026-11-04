@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Body, Req, Headers, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Body, Req, Headers, Param, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { PaymentsService } from './payments.service';
 import { UpdatePaymentSettingsDto } from './dto/update-payment-settings.dto';
@@ -51,6 +51,22 @@ export class PaymentsController {
   @ApiOperation({ summary: 'Verify Razorpay cryptographic signature and commit confirmed order as PAID' })
   async verifyPayment(@Body() body: VerifyRazorpayPaymentDto) {
     return this.paymentsService.verifyAndCreateOrder(body);
+  }
+
+  @ApiBearerAuth('JWT-auth')
+  @UseGuards(JwtAuthGuard)
+  @Post('orders/:id/dynamic-qr')
+  @ApiOperation({ summary: 'Generate dynamic Razorpay/UPI QR code for doorstep COD order collection' })
+  async generateOrderDynamicQr(@Param('id') id: string) {
+    return this.paymentsService.createOrderDynamicQr(id);
+  }
+
+  @ApiBearerAuth('JWT-auth')
+  @UseGuards(JwtAuthGuard)
+  @Get('orders/:id/dynamic-qr')
+  @ApiOperation({ summary: 'Get dynamic Razorpay/UPI QR code for doorstep COD order collection' })
+  async getOrderDynamicQr(@Param('id') id: string) {
+    return this.paymentsService.createOrderDynamicQr(id);
   }
 
   @Post('razorpay/webhook')

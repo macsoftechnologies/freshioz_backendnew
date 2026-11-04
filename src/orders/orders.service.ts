@@ -10,14 +10,32 @@ export class OrdersService {
 
   async findAll(query?: { status?: string; societyId?: string; phone?: string; warehouseId?: string }) {
     const where: any = {};
+    const andClauses: any[] = [];
+
     if (query?.status) where.status = query.status;
     if (query?.societyId) where.societyId = query.societyId;
-    if (query?.warehouseId && query.warehouseId !== 'ALL') where.warehouseId = query.warehouseId;
+    if (query?.warehouseId && query.warehouseId !== 'ALL') {
+      andClauses.push({
+        OR: [
+          { warehouseId: query.warehouseId },
+          { warehouseCode: query.warehouseId },
+          { warehouse: { code: query.warehouseId } },
+          { warehouse: { id: query.warehouseId } },
+          { society: { warehouseId: query.warehouseId } },
+        ],
+      });
+    }
     if (query?.phone) {
-      where.OR = [
-        { userPhone: query.phone },
-        { userId: query.phone },
-      ];
+      andClauses.push({
+        OR: [
+          { userPhone: query.phone },
+          { userId: query.phone },
+        ],
+      });
+    }
+
+    if (andClauses.length > 0) {
+      where.AND = andClauses;
     }
 
     const orders = await this.prisma.order.findMany({

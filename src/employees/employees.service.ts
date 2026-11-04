@@ -30,24 +30,28 @@ export class EmployeesService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll(warehouseId?: string) {
+    const warehouses = await this.prisma.warehouse.findMany({
+      select: { id: true, uuid: true, code: true, name: true },
+    });
+
     const where: any = {};
     if (warehouseId && warehouseId !== 'ALL') {
-      where.assignedWarehouseId = warehouseId;
+      const wh = warehouses.find(w => w.id === warehouseId || w.code === warehouseId);
+      const matchedIds = [warehouseId];
+      if (wh?.id && !matchedIds.includes(wh.id)) matchedIds.push(wh.id);
+      if (wh?.code && !matchedIds.includes(wh.code)) matchedIds.push(wh.code);
+
+      where.assignedWarehouseId = { in: matchedIds };
       where.NOT = {
         roles: { has: 'SUPER_ADMIN' }
       };
     }
 
-    const [employees, warehouses] = await Promise.all([
-      this.prisma.employee.findMany({
-        where,
-        select: EMPLOYEE_SELECT_FIELDS,
-        orderBy: { createdAt: 'desc' },
-      }),
-      this.prisma.warehouse.findMany({
-        select: { id: true, uuid: true, code: true, name: true },
-      }),
-    ]);
+    const employees = await this.prisma.employee.findMany({
+      where,
+      select: EMPLOYEE_SELECT_FIELDS,
+      orderBy: { createdAt: 'desc' },
+    });
 
     const whMap = new Map<string, any>();
     warehouses.forEach(w => {

@@ -10,7 +10,14 @@ export class ProcurementService {
   async findAll(warehouseId?: string) {
     const where: any = {};
     if (warehouseId && warehouseId !== 'ALL') {
-      where.destinationWarehouseId = warehouseId;
+      const wh = await this.prisma.warehouse.findFirst({
+        where: { OR: [{ id: warehouseId }, { code: warehouseId }] }
+      });
+      const validTargets = [warehouseId];
+      if (wh?.id && !validTargets.includes(wh.id)) validTargets.push(wh.id);
+      if (wh?.code && !validTargets.includes(wh.code)) validTargets.push(wh.code);
+
+      where.destinationWarehouseId = { in: validTargets };
     }
 
     const bills = await this.prisma.procurementBill.findMany({

@@ -29,9 +29,18 @@ const EMPLOYEE_SELECT_FIELDS = {
 export class EmployeesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll() {
+  async findAll(warehouseId?: string) {
+    const where: any = {};
+    if (warehouseId && warehouseId !== 'ALL') {
+      where.assignedWarehouseId = warehouseId;
+      where.NOT = {
+        roles: { has: 'SUPER_ADMIN' }
+      };
+    }
+
     const [employees, warehouses] = await Promise.all([
       this.prisma.employee.findMany({
+        where,
         select: EMPLOYEE_SELECT_FIELDS,
         orderBy: { createdAt: 'desc' },
       }),

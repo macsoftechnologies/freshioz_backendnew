@@ -7,8 +7,14 @@ import { toISTDateString, toISTTimeString, toISTFullString } from '../common/dat
 export class ProcurementService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll() {
+  async findAll(warehouseId?: string) {
+    const where: any = {};
+    if (warehouseId && warehouseId !== 'ALL') {
+      where.destinationWarehouseId = warehouseId;
+    }
+
     const bills = await this.prisma.procurementBill.findMany({
+      where,
       orderBy: { createdAt: 'desc' },
       include: {
         vendor: true,

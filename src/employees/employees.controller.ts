@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Param, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Param, Body, UseGuards, Req } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { EmployeesService } from './employees.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
@@ -11,16 +11,19 @@ import { Roles } from '../auth/roles.decorator';
 @ApiTags('Employees')
 @ApiBearerAuth('JWT-auth')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('SUPER_ADMIN')
+@Roles('SUPER_ADMIN', 'WAREHOUSE_MANAGER')
 @Controller('employees')
 export class EmployeesController {
   constructor(private readonly employeesService: EmployeesService) {}
 
-  @ApiOperation({ summary: 'List all employees and operations roles (Super Admin only)' })
+  @ApiOperation({ summary: 'List employees and operations roles' })
   @ApiResponse({ status: 200, type: [EmployeeSchema] })
   @Get()
-  async findAll() {
-    return this.employeesService.findAll();
+  async findAll(@Req() req: any) {
+    const user = req.user;
+    const isSuperAdmin = user?.roles?.includes('SUPER_ADMIN') || user?.role === 'SUPER_ADMIN';
+    const warehouseId = isSuperAdmin ? undefined : user?.assignedWarehouseId;
+    return this.employeesService.findAll(warehouseId);
   }
 
   @ApiOperation({ summary: 'Get employee details by ID' })

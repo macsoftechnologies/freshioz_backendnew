@@ -4,38 +4,44 @@ export declare class InboundRequestsService {
     constructor(prisma: PrismaService);
     findAll(): Promise<{
         leads: {
+            requesterName: string;
+            requesterPhone: string;
+            estimatedFlats: number;
             createdDateIST: string;
             createdTimeIST: string;
             id: string;
             uuid: string;
             societyName: string;
+            status: string;
+            createdAt: Date;
+            updatedAt: Date;
+            address: string | null;
             contactName: string;
             contactPhone: string;
             contactRole: string | null;
             flatCount: number | null;
             clusterZone: string | null;
-            address: string | null;
-            status: string;
-            createdAt: Date;
-            updatedAt: Date;
         }[];
         unreadCount: number;
     }>;
     create(body: any): Promise<{
+        requesterName: string;
+        requesterPhone: string;
+        estimatedFlats: number;
         createdDateIST: string;
         createdTimeIST: string;
         id: string;
         uuid: string;
         societyName: string;
+        status: string;
+        createdAt: Date;
+        updatedAt: Date;
+        address: string | null;
         contactName: string;
         contactPhone: string;
         contactRole: string | null;
         flatCount: number | null;
         clusterZone: string | null;
-        address: string | null;
-        status: string;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     updateStatus(id: string, status: string): Promise<{
         createdDateIST: string;
@@ -43,14 +49,14 @@ export declare class InboundRequestsService {
         id: string;
         uuid: string;
         societyName: string;
+        status: string;
+        createdAt: Date;
+        updatedAt: Date;
+        address: string | null;
         contactName: string;
         contactPhone: string;
         contactRole: string | null;
         flatCount: number | null;
         clusterZone: string | null;
-        address: string | null;
-        status: string;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
 }

@@ -20,7 +20,15 @@ let InventoryService = class InventoryService {
     async findAll(warehouseId) {
         const where = {};
         if (warehouseId && warehouseId !== 'ALL') {
-            where.warehouseId = warehouseId;
+            const wh = await this.prisma.warehouse.findFirst({
+                where: { OR: [{ id: warehouseId }, { code: warehouseId }] }
+            });
+            const validIds = [warehouseId];
+            if (wh?.id && !validIds.includes(wh.id))
+                validIds.push(wh.id);
+            if (wh?.code && !validIds.includes(wh.code))
+                validIds.push(wh.code);
+            where.warehouseId = { in: validIds };
         }
         const items = await this.prisma.warehouseInventory.findMany({
             where,

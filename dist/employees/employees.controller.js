@@ -26,8 +26,11 @@ let EmployeesController = class EmployeesController {
     constructor(employeesService) {
         this.employeesService = employeesService;
     }
-    async findAll() {
-        return this.employeesService.findAll();
+    async findAll(req) {
+        const user = req.user;
+        const isSuperAdmin = user?.roles?.includes('SUPER_ADMIN') || user?.role === 'SUPER_ADMIN';
+        const warehouseId = isSuperAdmin ? undefined : user?.assignedWarehouseId;
+        return this.employeesService.findAll(warehouseId);
     }
     async findOne(id) {
         return this.employeesService.findOne(id);
@@ -44,11 +47,12 @@ let EmployeesController = class EmployeesController {
 };
 exports.EmployeesController = EmployeesController;
 __decorate([
-    (0, swagger_1.ApiOperation)({ summary: 'List all employees and operations roles (Super Admin only)' }),
+    (0, swagger_1.ApiOperation)({ summary: 'List employees and operations roles' }),
     (0, swagger_1.ApiResponse)({ status: 200, type: [employee_schema_1.EmployeeSchema] }),
     (0, common_1.Get)(),
+    __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], EmployeesController.prototype, "findAll", null);
 __decorate([
@@ -90,7 +94,7 @@ exports.EmployeesController = EmployeesController = __decorate([
     (0, swagger_1.ApiTags)('Employees'),
     (0, swagger_1.ApiBearerAuth)('JWT-auth'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    (0, roles_decorator_1.Roles)('SUPER_ADMIN'),
+    (0, roles_decorator_1.Roles)('SUPER_ADMIN', 'WAREHOUSE_MANAGER', 'WAREHOUSE_STAFF'),
     (0, common_1.Controller)('employees'),
     __metadata("design:paramtypes", [employees_service_1.EmployeesService])
 ], EmployeesController);

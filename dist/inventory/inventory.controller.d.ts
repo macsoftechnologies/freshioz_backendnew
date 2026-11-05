@@ -3,7 +3,7 @@ import { AdjustStockDto } from './dto/adjust-stock.dto';
 export declare class InventoryController {
     private readonly inventoryService;
     constructor(inventoryService: InventoryService);
-    findAll(warehouseId?: string): Promise<{
+    findAll(req: any, warehouseId?: string): Promise<{
         id: string;
         warehouseId: string;
         warehouseName: string;

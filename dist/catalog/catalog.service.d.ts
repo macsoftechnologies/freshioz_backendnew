@@ -5,17 +5,17 @@ export declare class CatalogService {
     constructor(prisma: PrismaService);
     getPublicCatalog(targetDate?: string): Promise<{
         categories: {
-            description: string;
-            name: string;
             id: string;
+            name: string;
+            description: string;
             slug: string;
             icon: string;
             sortOrder: number;
         }[];
         units: {
-            description: string;
-            name: string;
             id: string;
+            name: string;
+            description: string;
             label: string;
             isBulk: boolean;
         }[];
@@ -27,11 +27,11 @@ export declare class CatalogService {
             bulkDiscountPercent: any;
             gstPercent: any;
             hasCustomDailyPrice: boolean;
-            name: string;
             id: string;
             status: string;
-            tags: string[];
             desc: string;
+            name: string;
+            tags: string[];
             kannadaName: string;
             categoryId: string;
             retailUnit: string;
@@ -42,21 +42,21 @@ export declare class CatalogService {
             inStock: boolean;
         }[];
         societies: {
-            type: string;
-            name: string;
             id: string;
+            warehouseId: string;
             status: string;
+            name: string;
+            type: string;
             address: string;
             imageUrl: string;
             lat: number;
             lng: number;
-            warehouseId: string;
             deliveryMode: string;
         }[];
         warehouses: {
-            name: string;
             id: string;
             status: string;
+            name: string;
             lat: number;
             lng: number;
             code: string;

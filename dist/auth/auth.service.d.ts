@@ -25,6 +25,24 @@ export declare class AuthService {
             roles: any[];
             assignedWarehouseId: any;
             warehouseId: any;
+            assignedLocationName: string;
+            type: string;
+        };
+    } | {
+        success: boolean;
+        token: string;
+        tokenType: string;
+        expiresIn: string;
+        type: string;
+        user: {
+            id: string;
+            uuid: string;
+            name: string;
+            email: string;
+            phone: string;
+            roles: string[];
+            assignedWarehouseId: string;
+            warehouseId: string;
             type: string;
         };
     } | {

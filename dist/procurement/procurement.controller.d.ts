@@ -3,7 +3,7 @@ import { CreateProcurementBillDto } from './dto/create-procurement-bill.dto';
 export declare class ProcurementController {
     private readonly procurementService;
     constructor(procurementService: ProcurementService);
-    findAll(): Promise<{
+    findAll(req: any, warehouseId?: string): Promise<{
         deliveryDate: string;
         procuredAtFormatted: string;
         procuredAtTime: string;
@@ -11,18 +11,18 @@ export declare class ProcurementController {
         vendor: {
             id: string;
             uuid: string;
-            name: string;
-            lat: number | null;
-            lng: number | null;
             status: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
+            lat: number | null;
+            lng: number | null;
             bankName: string | null;
             accountHolder: string | null;
             accountNumber: string | null;
             ifscCode: string | null;
-            phone: string;
             category: string;
+            phone: string;
             mandiLocation: string;
             upiId: string | null;
         };
@@ -53,18 +53,18 @@ export declare class ProcurementController {
         vendor: {
             id: string;
             uuid: string;
-            name: string;
-            lat: number | null;
-            lng: number | null;
             status: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
+            lat: number | null;
+            lng: number | null;
             bankName: string | null;
             accountHolder: string | null;
             accountNumber: string | null;
             ifscCode: string | null;
-            phone: string;
             category: string;
+            phone: string;
             mandiLocation: string;
             upiId: string | null;
         };

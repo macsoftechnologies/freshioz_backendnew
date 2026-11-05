@@ -204,6 +204,9 @@ export class SocietiesService {
       accountHolder,
       accountNumber,
       ifscCode,
+      createdById,
+      salesRepName,
+      salesRepPhone,
     } = body;
 
     // Check duplicate society name
@@ -236,6 +239,9 @@ export class SocietiesService {
         accountHolder: accountHolder || null,
         accountNumber: accountNumber || null,
         ifscCode: ifscCode || null,
+        createdById: createdById || null,
+        salesRepName: salesRepName || null,
+        salesRepPhone: salesRepPhone || null,
       },
       include: { warehouse: true },
     });
@@ -275,6 +281,9 @@ export class SocietiesService {
         ...(data.accountHolder !== undefined && { accountHolder: data.accountHolder }),
         ...(data.accountNumber !== undefined && { accountNumber: data.accountNumber }),
         ...(data.ifscCode !== undefined && { ifscCode: data.ifscCode }),
+        ...(data.createdById !== undefined && { createdById: data.createdById }),
+        ...(data.salesRepName !== undefined && { salesRepName: data.salesRepName }),
+        ...(data.salesRepPhone !== undefined && { salesRepPhone: data.salesRepPhone }),
       },
       include: { warehouse: true },
     });

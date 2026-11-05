@@ -25,8 +25,12 @@ let InventoryController = class InventoryController {
     constructor(inventoryService) {
         this.inventoryService = inventoryService;
     }
-    findAll(warehouseId) {
-        return this.inventoryService.findAll(warehouseId);
+    findAll(req, warehouseId) {
+        const user = req.user;
+        const isSuperAdmin = user?.roles?.includes('SUPER_ADMIN') || user?.role === 'SUPER_ADMIN';
+        const staffWarehouseId = user?.assignedWarehouseId || user?.warehouseId;
+        const effectiveWarehouseId = !isSuperAdmin ? (staffWarehouseId || warehouseId) : warehouseId;
+        return this.inventoryService.findAll(effectiveWarehouseId);
     }
     adjustStock(dto) {
         return this.inventoryService.adjustStock(dto);
@@ -41,9 +45,10 @@ __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Get current inventory across warehouses' }),
     (0, swagger_1.ApiQuery)({ name: 'warehouseId', required: false, description: 'Filter by specific warehouse' }),
     (0, swagger_1.ApiResponse)({ status: 200, type: [inventory_schema_1.InventoryItemResponseDto] }),
-    __param(0, (0, common_1.Query)('warehouseId')),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Query)('warehouseId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], InventoryController.prototype, "findAll", null);
 __decorate([

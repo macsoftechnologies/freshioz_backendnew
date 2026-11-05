@@ -42,7 +42,7 @@ export class AuthService {
           throw new UnauthorizedException('This employee account has been deactivated');
         }
         const isValid = await this.comparePassword(password, employee.password);
-        if (isValid || password === 'admin123' || password === 'admin' || password === 'freshioz2026') {
+        if (isValid) {
           const employeeRoles = Array.isArray(employee.roles) ? [...employee.roles] : [];
           if (employeeRoles.includes('WAREHOUSE_MANAGER') && !employeeRoles.includes('PROCUREMENT_OFFICER')) {
             employeeRoles.push('PROCUREMENT_OFFICER');

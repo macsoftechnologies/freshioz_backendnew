@@ -173,6 +173,75 @@ let PaymentsService = PaymentsService_1 = class PaymentsService {
         };
         return this.ordersService.create(enrichedPayload);
     }
+    async createOrderDynamicQr(orderId) {
+        const order = await this.prisma.order.findUnique({
+            where: { id: orderId },
+            include: { society: true },
+        });
+        if (!order) {
+            throw new common_1.NotFoundException(`Order #${orderId} not found`);
+        }
+        const amountInRupees = order.totalAmount || 0;
+        const amountInPaise = Math.round(amountInRupees * 100);
+        let qrId = null;
+        let imageUrl = null;
+        let paymentUrl = null;
+        let gatewaySource = 'STANDARD_UPI';
+        try {
+            const setting = await this.getOrCreateSettings();
+            const isLive = setting.activeMode === 'LIVE';
+            const keyId = isLive ? setting.liveKeyId : setting.testKeyId;
+            const keySecret = isLive ? setting.liveKeySecret : setting.testKeySecret;
+            if (setting.razorpayEnabled && keyId && keySecret) {
+                const razorpay = new Razorpay({
+                    key_id: keyId.trim(),
+                    key_secret: keySecret.trim(),
+                });
+                const rzpQr = await razorpay.qrCode.create({
+                    type: 'upi_qr',
+                    name: `Freshioz #${order.id.slice(-6).toUpperCase()}`,
+                    usage: 'single_use',
+                    fixed_amount: true,
+                    payment_amount: amountInPaise,
+                    description: `Fresh Produce Order #${order.id}`,
+                    notes: {
+                        orderId: order.id,
+                        societyName: order.society?.name || 'Freshioz Society',
+                        flatNo: order.flatNo || '',
+                    },
+                });
+                if (rzpQr && (rzpQr.image_url || rzpQr.id)) {
+                    qrId = rzpQr.id;
+                    imageUrl = rzpQr.image_url || null;
+                    paymentUrl = rzpQr.payment_url || null;
+                    gatewaySource = 'RAZORPAY_DYNAMIC_QR';
+                }
+            }
+        }
+        catch (err) {
+            this.logger.warn(`Razorpay QR Code API attempt failed, falling back to direct NPCI UPI QR: ${err?.message || err}`);
+        }
+        const upiId = 'freshioz@icici';
+        const payeeName = 'Freshioz Produce';
+        const transactionNote = `Freshioz Order ${order.id.slice(-6).toUpperCase()}`;
+        const standardUpiString = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&am=${amountInRupees}&cu=INR&tn=${encodeURIComponent(transactionNote)}`;
+        if (!imageUrl) {
+            imageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=280x280&margin=10&data=${encodeURIComponent(standardUpiString)}`;
+        }
+        return {
+            orderId: order.id,
+            amount: amountInRupees,
+            currency: 'INR',
+            qrId,
+            imageUrl,
+            paymentUrl: paymentUrl || standardUpiString,
+            upiString: standardUpiString,
+            gatewaySource,
+            societyName: order.society?.name || 'Society Drop Desk',
+            flatNo: order.flatNo || '',
+            paymentStatus: order.paymentStatus,
+        };
+    }
     async handleWebhook(body, signature) {
         const setting = await this.getOrCreateSettings();
         const webhookSecret = setting.webhookSecret || (setting.activeMode === 'LIVE' ? setting.liveKeySecret : setting.testKeySecret);
@@ -193,11 +262,31 @@ let PaymentsService = PaymentsService_1 = class PaymentsService {
             }
         }
         const event = body?.event;
-        if (event === 'payment.captured' || event === 'order.paid') {
+        if (event === 'payment.captured' || event === 'order.paid' || event === 'qr_code.credited') {
             const payment = body?.payload?.payment?.entity;
+            const qrEntity = body?.payload?.qr_code?.entity;
             const rzpOrderId = payment?.order_id;
             const rzpPaymentId = payment?.id;
-            if (rzpOrderId) {
+            const targetOrderId = payment?.notes?.orderId || qrEntity?.notes?.orderId;
+            if (targetOrderId) {
+                const existingOrder = await this.prisma.order.findUnique({
+                    where: { id: targetOrderId },
+                });
+                if (existingOrder && existingOrder.paymentStatus !== 'PAID') {
+                    await this.prisma.order.update({
+                        where: { id: existingOrder.id },
+                        data: {
+                            paymentStatus: 'PAID',
+                            razorpayPaymentId: rzpPaymentId || existingOrder.razorpayPaymentId,
+                            codCollectedAmount: payment?.amount ? payment.amount / 100 : existingOrder.totalAmount,
+                            codReceivedMode: 'UPI_QR',
+                            codCollectedAt: new Date(),
+                        },
+                    });
+                    this.logger.log(`Webhook auto-reconciled COD order #${existingOrder.id} to PAID via UPI QR`);
+                }
+            }
+            else if (rzpOrderId) {
                 const existingOrder = await this.prisma.order.findFirst({
                     where: { razorpayOrderId: rzpOrderId },
                 });

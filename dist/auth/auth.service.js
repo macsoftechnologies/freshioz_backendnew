@@ -45,10 +45,57 @@ let AuthService = class AuthService {
                     throw new common_1.UnauthorizedException('This employee account has been deactivated');
                 }
                 const isValid = await this.comparePassword(password, employee.password);
-                if (isValid || password === 'admin123' || password === 'admin' || password === 'freshioz2026') {
+                if (isValid) {
                     const employeeRoles = Array.isArray(employee.roles) ? [...employee.roles] : [];
                     if (employeeRoles.includes('WAREHOUSE_MANAGER') && !employeeRoles.includes('PROCUREMENT_OFFICER')) {
                         employeeRoles.push('PROCUREMENT_OFFICER');
+                    }
+                    let assignedLocationName = 'All Hubs & Warehouses (Citywide)';
+                    let effectiveWarehouseId = employee.assignedWarehouseId;
+                    const isSuperAdminUser = employeeRoles.includes('SUPER_ADMIN');
+                    if (!isSuperAdminUser) {
+                        let wh = null;
+                        if (effectiveWarehouseId && effectiveWarehouseId !== 'ALL') {
+                            wh = await this.prisma.warehouse.findFirst({
+                                where: {
+                                    OR: [
+                                        { id: effectiveWarehouseId },
+                                        { uuid: effectiveWarehouseId },
+                                        { code: effectiveWarehouseId },
+                                    ],
+                                },
+                            });
+                        }
+                        if (!wh) {
+                            wh = await this.prisma.warehouse.findFirst({
+                                where: { status: 'ACTIVE' },
+                                orderBy: { code: 'asc' },
+                            });
+                            if (wh) {
+                                await this.prisma.employee.update({
+                                    where: { id: employee.id },
+                                    data: { assignedWarehouseId: wh.id },
+                                }).catch(() => { });
+                            }
+                        }
+                        if (wh) {
+                            effectiveWarehouseId = wh.id;
+                            assignedLocationName = wh.name;
+                        }
+                    }
+                    else if (effectiveWarehouseId && effectiveWarehouseId !== 'ALL') {
+                        const wh = await this.prisma.warehouse.findFirst({
+                            where: {
+                                OR: [
+                                    { id: effectiveWarehouseId },
+                                    { uuid: effectiveWarehouseId },
+                                    { code: effectiveWarehouseId },
+                                ],
+                            },
+                            select: { name: true },
+                        });
+                        if (wh)
+                            assignedLocationName = wh.name;
                     }
                     const userPayload = {
                         id: employee.id,
@@ -57,8 +104,9 @@ let AuthService = class AuthService {
                         email: employee.email,
                         phone: employee.phone,
                         roles: employeeRoles,
-                        assignedWarehouseId: employee.assignedWarehouseId,
-                        warehouseId: employee.assignedWarehouseId,
+                        assignedWarehouseId: effectiveWarehouseId,
+                        warehouseId: effectiveWarehouseId,
+                        assignedLocationName,
                         type: 'EMPLOYEE',
                     };
                     const token = this.jwtService.sign(userPayload);

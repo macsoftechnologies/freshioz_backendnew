@@ -41,6 +41,12 @@ let PaymentsController = class PaymentsController {
     async verifyPayment(body) {
         return this.paymentsService.verifyAndCreateOrder(body);
     }
+    async generateOrderDynamicQr(id) {
+        return this.paymentsService.createOrderDynamicQr(id);
+    }
+    async getOrderDynamicQr(id) {
+        return this.paymentsService.createOrderDynamicQr(id);
+    }
     async handleWebhook(body, signature) {
         return this.paymentsService.handleWebhook(body, signature || '');
     }
@@ -95,6 +101,26 @@ __decorate([
     __metadata("design:paramtypes", [verify_razorpay_payment_dto_1.VerifyRazorpayPaymentDto]),
     __metadata("design:returntype", Promise)
 ], PaymentsController.prototype, "verifyPayment", null);
+__decorate([
+    (0, swagger_1.ApiBearerAuth)('JWT-auth'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Post)('orders/:id/dynamic-qr'),
+    (0, swagger_1.ApiOperation)({ summary: 'Generate dynamic Razorpay/UPI QR code for doorstep COD order collection' }),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], PaymentsController.prototype, "generateOrderDynamicQr", null);
+__decorate([
+    (0, swagger_1.ApiBearerAuth)('JWT-auth'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Get)('orders/:id/dynamic-qr'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get dynamic Razorpay/UPI QR code for doorstep COD order collection' }),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], PaymentsController.prototype, "getOrderDynamicQr", null);
 __decorate([
     (0, common_1.Post)('razorpay/webhook'),
     (0, swagger_1.ApiOperation)({ summary: 'Asynchronous webhook receiver for Razorpay payment notifications' }),

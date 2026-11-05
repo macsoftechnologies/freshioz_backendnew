@@ -170,6 +170,9 @@ model Society {
   accountNumber        String?
   ifscCode             String?
   branch               String?
+  createdById          String?
+  salesRepName         String?
+  salesRepPhone        String?
   createdAt            DateTime   @default(now())
   updatedAt            DateTime   @updatedAt
 
@@ -241,6 +244,13 @@ model Order {
   razorpayOrderId        String?
   razorpayPaymentId      String?
   societyCommissionEarned Float      @default(0.0)
+  deliveryLotId          String?
+  deliveryPartnerId      String?
+  deliveryPartnerName    String?
+  deliveryPartnerPhone   String?
+  vehicleNumber          String?
+  dispatchedAt           DateTime?
+  dispatchedBy           String?
   deliveredAt            DateTime?
   cancelledReason        String?
   cancelledAt            DateTime?
@@ -461,3 +471,4 @@ model PaymentSetting {
 
   @@map("payment_settings")
 }
+

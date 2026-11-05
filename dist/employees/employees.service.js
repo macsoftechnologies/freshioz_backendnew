@@ -38,10 +38,50 @@ let EmployeesService = class EmployeesService {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    async findAll() {
-        return this.prisma.employee.findMany({
+    async findAll(warehouseId) {
+        const warehouses = await this.prisma.warehouse.findMany({
+            select: { id: true, uuid: true, code: true, name: true },
+        });
+        const where = {};
+        if (warehouseId && warehouseId !== 'ALL') {
+            const wh = warehouses.find(w => w.id === warehouseId || w.code === warehouseId);
+            const matchedIds = [warehouseId];
+            if (wh?.id && !matchedIds.includes(wh.id))
+                matchedIds.push(wh.id);
+            if (wh?.code && !matchedIds.includes(wh.code))
+                matchedIds.push(wh.code);
+            where.assignedWarehouseId = { in: matchedIds };
+            where.NOT = {
+                roles: { has: 'SUPER_ADMIN' }
+            };
+        }
+        const employees = await this.prisma.employee.findMany({
+            where,
             select: EMPLOYEE_SELECT_FIELDS,
             orderBy: { createdAt: 'desc' },
+        });
+        const whMap = new Map();
+        warehouses.forEach(w => {
+            whMap.set(w.id, w);
+            whMap.set(w.uuid, w);
+            if (w.code)
+                whMap.set(w.code, w);
+        });
+        return employees.map(emp => {
+            const wh = emp.assignedWarehouseId && emp.assignedWarehouseId !== 'ALL'
+                ? whMap.get(emp.assignedWarehouseId)
+                : null;
+            const assignedLocationName = wh
+                ? wh.name
+                : (emp.assignedWarehouseId === 'ALL' || !emp.assignedWarehouseId
+                    ? 'All Hubs & Warehouses (Citywide)'
+                    : emp.assignedWarehouseId);
+            return {
+                ...emp,
+                assignedWarehouse: wh || null,
+                assignedWarehouseName: assignedLocationName,
+                assignedLocationName,
+            };
         });
     }
     async findOne(idOrUuid) {
@@ -53,7 +93,30 @@ let EmployeesService = class EmployeesService {
         });
         if (!emp)
             throw new common_1.NotFoundException(`Employee #${idOrUuid} not found`);
-        return emp;
+        if (emp.assignedWarehouseId && emp.assignedWarehouseId !== 'ALL') {
+            const wh = await this.prisma.warehouse.findFirst({
+                where: {
+                    OR: [
+                        { id: emp.assignedWarehouseId },
+                        { uuid: emp.assignedWarehouseId },
+                        { code: emp.assignedWarehouseId },
+                    ],
+                },
+                select: { id: true, uuid: true, code: true, name: true },
+            });
+            return {
+                ...emp,
+                assignedWarehouse: wh || null,
+                assignedWarehouseName: wh ? wh.name : emp.assignedWarehouseId,
+                assignedLocationName: wh ? wh.name : emp.assignedWarehouseId,
+            };
+        }
+        return {
+            ...emp,
+            assignedWarehouse: null,
+            assignedWarehouseName: 'All Hubs & Warehouses (Citywide)',
+            assignedLocationName: 'All Hubs & Warehouses (Citywide)',
+        };
     }
     async create(body) {
         const { id, name, phone, email, password, roles, assignedWarehouseId, status } = body;
@@ -79,6 +142,19 @@ let EmployeesService = class EmployeesService {
         }
         const rawPassword = password || 'Freshioz@123';
         const hashedPassword = await bcrypt.hash(rawPassword, 10);
+        let targetWhId = assignedWarehouseId;
+        if (!rawRoles.includes('SUPER_ADMIN')) {
+            if (!targetWhId || targetWhId === 'ALL') {
+                const defaultWh = await this.prisma.warehouse.findFirst({
+                    where: { status: 'ACTIVE' },
+                    orderBy: { code: 'asc' },
+                });
+                targetWhId = defaultWh?.id || defaultWh?.code;
+            }
+        }
+        else {
+            targetWhId = targetWhId || 'ALL';
+        }
         return this.prisma.employee.create({
             data: {
                 id: id || `FRZ_EMP_${Date.now()}`,
@@ -87,7 +163,7 @@ let EmployeesService = class EmployeesService {
                 email: email.trim().toLowerCase(),
                 password: hashedPassword,
                 roles: rawRoles,
-                assignedWarehouseId: assignedWarehouseId || 'ALL',
+                assignedWarehouseId: targetWhId,
                 status: status || 'ACTIVE',
             },
             select: EMPLOYEE_SELECT_FIELDS,
@@ -153,8 +229,20 @@ let EmployeesService = class EmployeesService {
             updateData.email = data.email.trim().toLowerCase();
         if (data.roles)
             updateData.roles = Array.isArray(data.roles) ? data.roles : [data.roles];
-        if (data.assignedWarehouseId !== undefined)
-            updateData.assignedWarehouseId = data.assignedWarehouseId;
+        if (data.assignedWarehouseId !== undefined || data.roles) {
+            const effectiveRoles = updateData.roles || existing.roles;
+            let targetWhId = data.assignedWarehouseId !== undefined ? data.assignedWarehouseId : existing.assignedWarehouseId;
+            if (!effectiveRoles.includes('SUPER_ADMIN')) {
+                if (!targetWhId || targetWhId === 'ALL') {
+                    const defaultWh = await this.prisma.warehouse.findFirst({
+                        where: { status: 'ACTIVE' },
+                        orderBy: { code: 'asc' },
+                    });
+                    targetWhId = defaultWh?.id || defaultWh?.code;
+                }
+            }
+            updateData.assignedWarehouseId = targetWhId;
+        }
         if (data.status)
             updateData.status = data.status;
         if (data.password) {

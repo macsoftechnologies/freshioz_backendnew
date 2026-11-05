@@ -19,17 +19,32 @@ let OrdersService = class OrdersService {
     }
     async findAll(query) {
         const where = {};
+        const andClauses = [];
         if (query?.status)
             where.status = query.status;
         if (query?.societyId)
             where.societyId = query.societyId;
-        if (query?.warehouseId && query.warehouseId !== 'ALL')
-            where.warehouseId = query.warehouseId;
+        if (query?.warehouseId && query.warehouseId !== 'ALL') {
+            andClauses.push({
+                OR: [
+                    { warehouseId: query.warehouseId },
+                    { warehouseCode: query.warehouseId },
+                    { warehouse: { code: query.warehouseId } },
+                    { warehouse: { id: query.warehouseId } },
+                    { society: { warehouseId: query.warehouseId } },
+                ],
+            });
+        }
         if (query?.phone) {
-            where.OR = [
-                { userPhone: query.phone },
-                { userId: query.phone },
-            ];
+            andClauses.push({
+                OR: [
+                    { userPhone: query.phone },
+                    { userId: query.phone },
+                ],
+            });
+        }
+        if (andClauses.length > 0) {
+            where.AND = andClauses;
         }
         const orders = await this.prisma.order.findMany({
             where,
@@ -120,8 +135,8 @@ let OrdersService = class OrdersService {
                 const product = await tx.product.findFirst({
                     where: { OR: [{ id: item.productId }, { uuid: item.productId }, { name: item.name }] },
                 });
-                if (!product) {
-                    throw new common_1.BadRequestException(`Product '${item.name || item.productId}' is currently unavailable in the catalog.`);
+                if (!product || product.status !== 'ACTIVE') {
+                    throw new common_1.BadRequestException(`Product '${product?.name || item.name || item.productId}' is currently off-season or unavailable.`);
                 }
                 let unitPrice = product ? product.retailPrice : (Number(item.price) || 0);
                 let bulkMinQty = product ? product.bulkMinQty : 0;
@@ -387,6 +402,34 @@ let OrdersService = class OrdersService {
             }
             if (dto.codReceivedMode) {
                 updateData.codReceivedMode = dto.codReceivedMode;
+            }
+            if (dto.razorpayPaymentId) {
+                updateData.razorpayPaymentId = dto.razorpayPaymentId;
+            }
+            if (dto.deliveryLotId) {
+                updateData.deliveryLotId = dto.deliveryLotId;
+            }
+            if (dto.deliveryPartnerId) {
+                updateData.deliveryPartnerId = dto.deliveryPartnerId;
+            }
+            if (dto.deliveryPartnerName) {
+                updateData.deliveryPartnerName = dto.deliveryPartnerName;
+            }
+            if (dto.deliveryPartnerPhone) {
+                updateData.deliveryPartnerPhone = dto.deliveryPartnerPhone;
+            }
+            if (dto.vehicleNumber) {
+                updateData.vehicleNumber = dto.vehicleNumber;
+            }
+            if (dto.dispatchedBy) {
+                updateData.dispatchedBy = dto.dispatchedBy;
+            }
+            if (dto.status === 'OUT_FOR_DELIVERY') {
+                updateData.dispatchedAt = new Date();
+            }
+            if (dto.status === 'CANCELLED') {
+                updateData.cancelledAt = new Date();
+                updateData.cancelledReason = dto.reason || dto.cancelledReason || 'Cancelled at delivery doorstep';
             }
             if (dto.status === 'DELIVERED') {
                 updateData.deliveredAt = new Date();

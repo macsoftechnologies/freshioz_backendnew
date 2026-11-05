@@ -32,9 +32,11 @@ let StoreService = class StoreService {
     }
     async getCombinedStore(currentUser) {
         const isStaffOrAdmin = Boolean(currentUser &&
-            currentUser.type === 'EMPLOYEE' &&
-            Array.isArray(currentUser.roles) &&
-            !currentUser.roles.includes('SOCIETY_PARTNER'));
+            (currentUser.type === 'EMPLOYEE' ||
+                currentUser.role === 'SUPER_ADMIN' ||
+                currentUser.role === 'ADMIN' ||
+                (Array.isArray(currentUser.roles) && currentUser.roles.some((r) => ['SUPER_ADMIN', 'WAREHOUSE_MANAGER', 'WAREHOUSE_STAFF', 'ADMIN', 'PROCUREMENT_OFFICER', 'SALES_OFFICER'].includes(r)))) &&
+            !currentUser.roles?.includes('SOCIETY_PARTNER'));
         const isPartner = Boolean(currentUser && (currentUser.type === 'PARTNER' || currentUser.roles?.includes('SOCIETY_PARTNER')));
         const partnerSocietyId = isPartner ? (currentUser.societyId || currentUser.id) : null;
         let warehouses = [];
@@ -163,7 +165,9 @@ let StoreService = class StoreService {
             createdAt: w.createdAt,
             updatedAt: w.updatedAt,
         }));
-        const formattedProducts = products.map((p) => ({
+        const formattedProducts = products
+            .filter((p) => isStaffOrAdmin || p.status === 'ACTIVE')
+            .map((p) => ({
             ...p,
             category: p.category?.name || p.categoryId || 'VEGETABLES',
             categoryId: p.categoryId || p.category?.id || 'VEGETABLES',
@@ -854,10 +858,10 @@ let StoreService = class StoreService {
                                     where: { id: r.id },
                                     update: {
                                         societyName: r.societyName,
-                                        contactName: r.contactName || r.name || 'Resident',
-                                        contactPhone: r.contactPhone || r.phone || '9999999999',
+                                        contactName: r.contactName || r.requesterName || r.name || 'Resident',
+                                        contactPhone: r.contactPhone || r.requesterPhone || r.phone || '',
                                         contactRole: r.contactRole || r.role || 'Resident',
-                                        flatCount: parseInt(r.flatCount || r.flats) || 50,
+                                        flatCount: parseInt(r.flatCount || r.estimatedFlats || r.flats) || 50,
                                         clusterZone: r.clusterZone || r.zone || 'Bengaluru',
                                         address: r.address || '',
                                         status: r.status || 'NEW_LEAD',
@@ -865,10 +869,10 @@ let StoreService = class StoreService {
                                     create: {
                                         id: r.id,
                                         societyName: r.societyName,
-                                        contactName: r.contactName || r.name || 'Resident',
-                                        contactPhone: r.contactPhone || r.phone || '9999999999',
+                                        contactName: r.contactName || r.requesterName || r.name || 'Resident',
+                                        contactPhone: r.contactPhone || r.requesterPhone || r.phone || '',
                                         contactRole: r.contactRole || r.role || 'Resident',
-                                        flatCount: parseInt(r.flatCount || r.flats) || 50,
+                                        flatCount: parseInt(r.flatCount || r.estimatedFlats || r.flats) || 50,
                                         clusterZone: r.clusterZone || r.zone || 'Bengaluru',
                                         address: r.address || '',
                                         status: r.status || 'NEW_LEAD',

@@ -11,7 +11,7 @@ import { Roles } from '../auth/roles.decorator';
 @ApiTags('Employees')
 @ApiBearerAuth('JWT-auth')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('SUPER_ADMIN', 'WAREHOUSE_MANAGER')
+@Roles('SUPER_ADMIN', 'WAREHOUSE_MANAGER', 'WAREHOUSE_STAFF')
 @Controller('employees')
 export class EmployeesController {
   constructor(private readonly employeesService: EmployeesService) {}

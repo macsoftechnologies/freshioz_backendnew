@@ -42,6 +42,7 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: true }),
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], UpdateOrderStatusDto.prototype, "codSettledToHub", void 0);
 __decorate([
@@ -56,4 +57,58 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateOrderStatusDto.prototype, "codReceivedMode", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'pay_ABC1234567' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateOrderStatusDto.prototype, "razorpayPaymentId", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'Resident not available / Door locked' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateOrderStatusDto.prototype, "reason", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'Resident not available / Door locked' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateOrderStatusDto.prototype, "cancelledReason", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'FRZ_LOT_101' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateOrderStatusDto.prototype, "deliveryLotId", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'FRZ_EMP_105' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateOrderStatusDto.prototype, "deliveryPartnerId", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'Ravi Kumar' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateOrderStatusDto.prototype, "deliveryPartnerName", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: '9876543216' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateOrderStatusDto.prototype, "deliveryPartnerPhone", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'KA-04-E-5581' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateOrderStatusDto.prototype, "vehicleNumber", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'Warehouse Dispatch Lead' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateOrderStatusDto.prototype, "dispatchedBy", void 0);
 //# sourceMappingURL=update-order.dto.js.map

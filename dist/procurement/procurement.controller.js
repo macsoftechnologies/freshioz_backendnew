@@ -25,8 +25,12 @@ let ProcurementController = class ProcurementController {
     constructor(procurementService) {
         this.procurementService = procurementService;
     }
-    findAll() {
-        return this.procurementService.findAll();
+    findAll(req, warehouseId) {
+        const user = req.user;
+        const isSuperAdmin = user?.roles?.includes('SUPER_ADMIN') || user?.role === 'SUPER_ADMIN';
+        const staffWarehouseId = user?.assignedWarehouseId || user?.warehouseId;
+        const effectiveWarehouseId = !isSuperAdmin ? (staffWarehouseId || warehouseId) : warehouseId;
+        return this.procurementService.findAll(effectiveWarehouseId);
     }
     findOne(id) {
         return this.procurementService.findOne(id);
@@ -45,9 +49,12 @@ __decorate([
     (0, roles_decorator_1.Roles)('SUPER_ADMIN', 'PROCUREMENT_OFFICER', 'WAREHOUSE_MANAGER'),
     (0, common_1.Get)(),
     (0, swagger_1.ApiOperation)({ summary: 'List all APMC Mandi procurement bills' }),
+    (0, swagger_1.ApiQuery)({ name: 'warehouseId', required: false }),
     (0, swagger_1.ApiResponse)({ status: 200, type: [procurement_bill_schema_1.ProcurementBillResponseDto] }),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Query)('warehouseId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], ProcurementController.prototype, "findAll", null);
 __decorate([

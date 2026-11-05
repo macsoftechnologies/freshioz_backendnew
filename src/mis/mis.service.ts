@@ -138,11 +138,17 @@ export class MisService {
     end: Date = new Date(),
     monthlyOrders: any[] = [],
   ) {
+    // Segregate active and cancelled orders
+    const activeOrders = orders.filter((o) => o.status !== 'CANCELLED');
+    const cancelledOrders = orders.filter((o) => o.status === 'CANCELLED');
+    const cancelledOrdersCount = cancelledOrders.length;
+    const cancelledRevenue = cancelledOrders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+
     let totalGrossRevenue = 0;
     let totalBulkSavings = 0;
     let totalDeliveryFees = 0;
     let totalNetRevenue = 0;
-    let totalOrdersCount = orders.length;
+    let totalOrdersCount = activeOrders.length;
 
     let prepaidOnlineUpi = 0;
     let codCashCollected = 0;
@@ -157,8 +163,8 @@ export class MisService {
     const productSalesMap = new Map<string, any>();
     const societyOrdersMap = new Map<string, any>();
 
-    // Process actual orders from database
-    orders.forEach((ord) => {
+    // Process ONLY active orders from database (Cancelled orders are refunded and not dispatched)
+    activeOrders.forEach((ord) => {
       totalGrossRevenue += ord.subtotal || 0;
       totalBulkSavings += ord.bulkSavings || 0;
       totalDeliveryFees += ord.deliveryFee || 0;
@@ -435,6 +441,8 @@ export class MisService {
         bulkDiscountSavings: Math.round(totalBulkSavings),
         deliveryFeesCollected: Math.round(totalDeliveryFees),
         totalOrdersCount,
+        cancelledOrdersCount,
+        cancelledRevenue: Math.round(cancelledRevenue),
         totalProduceDispatchedKg: Math.round(totalVolumeKg),
         
         totalMandiOutflow: Math.round(totalMandiOutflow),
@@ -454,8 +462,9 @@ export class MisService {
         cashSettledToHubVault: Math.round(codSettledToVault),
         cashInTransitWithRiders: Math.round(codInTransitWithRiders),
       },
-            warehouseBreakdown: masterWarehouses.map((w) => {
-        const whOrders = orders.filter((o) => o.warehouseId === w.id);
+      warehouseBreakdown: masterWarehouses.map((w) => {
+        const whOrders = activeOrders.filter((o) => o.warehouseId === w.id);
+        const whCancelledOrders = cancelledOrders.filter((o) => o.warehouseId === w.id);
         const whBills = procurementBills.filter((b) => b.destinationWarehouseId === w.id);
         const whRevenue = whOrders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
         const whProcured = whBills.reduce((sum, b) => sum + (b.totalAmountPaid || 0), 0);
@@ -464,9 +473,10 @@ export class MisService {
           return sum + items.reduce((iSum: number, it: any) => iSum + (it.qty || 0), 0);
         }, 0);
         const whOrdersCount = whOrders.length;
+        const whCancelledCount = whCancelledOrders.length;
         const whSocietiesCount = masterSocieties.filter((s) => s.warehouseId === w.id).length;
         const margin = whRevenue > 0 ? Math.round(whRevenue - whProcured) : 0;
-        const marginPct = whRevenue > 0 ? Number(((margin / whRevenue) * 100).toFixed(1)) : 0;
+        const marginPercent = whRevenue > 0 ? Number(((margin / whRevenue) * 100).toFixed(1)) : 0;
 
         return {
           id: w.id,
@@ -476,12 +486,13 @@ export class MisService {
           cutoffTime: w.cutoffTime || '21:00',
           capacityTons: w.capacityTons || 40,
           orderCount: whOrdersCount,
+          cancelledCount: whCancelledCount,
           revenue: Math.round(whRevenue),
           procurementSpend: Math.round(whProcured),
           volumeDispatchedKg: Math.round(whVolume),
           societiesCount: whSocietiesCount,
           marginSpread: margin,
-          marginPercent: marginPct,
+          marginPercent: marginPercent,
         };
       }),
       monthlySeries: (() => {
@@ -495,6 +506,7 @@ export class MisService {
           const monthEnd = new Date(year, monthIdx + 1, 0, 23, 59, 59, 999);
 
           const mOrders = (monthlyOrders || []).filter((o) => {
+            if (o.status === 'CANCELLED') return false;
             const oDate = new Date(o.createdAt);
             return oDate >= monthStart && oDate <= monthEnd;
           });

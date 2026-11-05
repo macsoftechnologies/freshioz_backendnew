@@ -17,4 +17,7 @@ export declare class CreateSocietyDto {
     accountHolder?: string;
     accountNumber?: string;
     ifscCode?: string;
+    createdById?: string;
+    salesRepName?: string;
+    salesRepPhone?: string;
 }

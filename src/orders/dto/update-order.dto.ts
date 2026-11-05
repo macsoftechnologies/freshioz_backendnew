@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, IsNumber } from 'class-validator';
+import { IsOptional, IsString, IsNumber, IsBoolean } from 'class-validator';
 
 export class UpdateOrderStatusDto {
   @ApiPropertyOptional({ example: 'DELIVERED', enum: ['CONFIRMED', 'PACKED', 'DISPATCHED', 'DELIVERED', 'CANCELLED'] })
@@ -24,6 +24,7 @@ export class UpdateOrderStatusDto {
 
   @ApiPropertyOptional({ example: true })
   @IsOptional()
+  @IsBoolean()
   codSettledToHub?: boolean;
 
   @ApiPropertyOptional({ example: 'Hub Cashier Desk' })
@@ -40,4 +41,46 @@ export class UpdateOrderStatusDto {
   @IsOptional()
   @IsString()
   razorpayPaymentId?: string;
+
+  @ApiPropertyOptional({ example: 'Resident not available / Door locked' })
+  @IsOptional()
+  @IsString()
+  reason?: string;
+
+  @ApiPropertyOptional({ example: 'Resident not available / Door locked' })
+  @IsOptional()
+  @IsString()
+  cancelledReason?: string;
+
+  @ApiPropertyOptional({ example: 'FRZ_LOT_101' })
+  @IsOptional()
+  @IsString()
+  deliveryLotId?: string;
+
+  @ApiPropertyOptional({ example: 'FRZ_EMP_105' })
+  @IsOptional()
+  @IsString()
+  deliveryPartnerId?: string;
+
+  @ApiPropertyOptional({ example: 'Ravi Kumar' })
+  @IsOptional()
+  @IsString()
+  deliveryPartnerName?: string;
+
+  @ApiPropertyOptional({ example: '9876543216' })
+  @IsOptional()
+  @IsString()
+  deliveryPartnerPhone?: string;
+
+  @ApiPropertyOptional({ example: 'KA-04-E-5581' })
+  @IsOptional()
+  @IsString()
+  vehicleNumber?: string;
+
+  @ApiPropertyOptional({ example: 'Warehouse Dispatch Lead' })
+  @IsOptional()
+  @IsString()
+  dispatchedBy?: string;
 }
+
+

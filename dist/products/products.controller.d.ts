@@ -7,10 +7,10 @@ export declare class ProductsController {
     findAll(): Promise<({
         category: {
             id: string;
-            name: string;
             status: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
             description: string | null;
             slug: string;
             icon: string;
@@ -19,11 +19,12 @@ export declare class ProductsController {
     } & {
         id: string;
         uuid: string;
-        name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
         desc: string | null;
+        name: string;
+        bulkDiscountPercent: number;
         tags: string[];
         kannadaName: string | null;
         categoryId: string;
@@ -31,7 +32,6 @@ export declare class ProductsController {
         retailPrice: number;
         retailMarketPrice: number;
         bulkMinQty: number;
-        bulkDiscountPercent: number;
         origin: string | null;
         shelfLife: string | null;
         image: string;
@@ -42,10 +42,10 @@ export declare class ProductsController {
     findOne(id: string): Promise<{
         category: {
             id: string;
-            name: string;
             status: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
             description: string | null;
             slug: string;
             icon: string;
@@ -54,11 +54,12 @@ export declare class ProductsController {
     } & {
         id: string;
         uuid: string;
-        name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
         desc: string | null;
+        name: string;
+        bulkDiscountPercent: number;
         tags: string[];
         kannadaName: string | null;
         categoryId: string;
@@ -66,7 +67,6 @@ export declare class ProductsController {
         retailPrice: number;
         retailMarketPrice: number;
         bulkMinQty: number;
-        bulkDiscountPercent: number;
         origin: string | null;
         shelfLife: string | null;
         image: string;
@@ -77,10 +77,10 @@ export declare class ProductsController {
     create(body: CreateProductDto): Promise<{
         category: {
             id: string;
-            name: string;
             status: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
             description: string | null;
             slug: string;
             icon: string;
@@ -89,11 +89,12 @@ export declare class ProductsController {
     } & {
         id: string;
         uuid: string;
-        name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
         desc: string | null;
+        name: string;
+        bulkDiscountPercent: number;
         tags: string[];
         kannadaName: string | null;
         categoryId: string;
@@ -101,7 +102,6 @@ export declare class ProductsController {
         retailPrice: number;
         retailMarketPrice: number;
         bulkMinQty: number;
-        bulkDiscountPercent: number;
         origin: string | null;
         shelfLife: string | null;
         image: string;
@@ -112,10 +112,10 @@ export declare class ProductsController {
     updateWithParam(id: string, body: UpdateProductDto): Promise<{
         category: {
             id: string;
-            name: string;
             status: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
             description: string | null;
             slug: string;
             icon: string;
@@ -124,11 +124,12 @@ export declare class ProductsController {
     } & {
         id: string;
         uuid: string;
-        name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
         desc: string | null;
+        name: string;
+        bulkDiscountPercent: number;
         tags: string[];
         kannadaName: string | null;
         categoryId: string;
@@ -136,7 +137,6 @@ export declare class ProductsController {
         retailPrice: number;
         retailMarketPrice: number;
         bulkMinQty: number;
-        bulkDiscountPercent: number;
         origin: string | null;
         shelfLife: string | null;
         image: string;
@@ -147,10 +147,10 @@ export declare class ProductsController {
     update(body: UpdateProductDto): Promise<{
         category: {
             id: string;
-            name: string;
             status: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
             description: string | null;
             slug: string;
             icon: string;
@@ -159,11 +159,12 @@ export declare class ProductsController {
     } & {
         id: string;
         uuid: string;
-        name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
         desc: string | null;
+        name: string;
+        bulkDiscountPercent: number;
         tags: string[];
         kannadaName: string | null;
         categoryId: string;
@@ -171,7 +172,6 @@ export declare class ProductsController {
         retailPrice: number;
         retailMarketPrice: number;
         bulkMinQty: number;
-        bulkDiscountPercent: number;
         origin: string | null;
         shelfLife: string | null;
         image: string;
@@ -182,11 +182,12 @@ export declare class ProductsController {
     delete(id: string): Promise<{
         id: string;
         uuid: string;
-        name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
         desc: string | null;
+        name: string;
+        bulkDiscountPercent: number;
         tags: string[];
         kannadaName: string | null;
         categoryId: string;
@@ -194,7 +195,6 @@ export declare class ProductsController {
         retailPrice: number;
         retailMarketPrice: number;
         bulkMinQty: number;
-        bulkDiscountPercent: number;
         origin: string | null;
         shelfLife: string | null;
         image: string;

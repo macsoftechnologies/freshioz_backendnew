@@ -24,6 +24,9 @@ let InboundRequestsService = class InboundRequestsService {
         const unreadCount = leads.filter(l => l.status === 'NEW_LEAD').length;
         const formattedLeads = leads.map(l => ({
             ...l,
+            requesterName: l.contactName,
+            requesterPhone: l.contactPhone,
+            estimatedFlats: l.flatCount,
             createdDateIST: (0, date_utils_1.formatDateIST)(l.createdAt),
             createdTimeIST: (0, date_utils_1.formatTimeIST)(l.createdAt),
         }));
@@ -34,21 +37,35 @@ let InboundRequestsService = class InboundRequestsService {
     }
     async create(body) {
         const { id, societyName, contactName, contactPhone, contactRole, flatCount, clusterZone, address } = body;
+        const resolvedContactName = (contactName || body.requesterName || '').trim();
+        const cleanPhone = (contactPhone || body.requesterPhone || '').toString().replace(/\D/g, '').trim();
+        if (!societyName || !societyName.trim()) {
+            throw new common_1.BadRequestException('Society / apartment name is required');
+        }
+        if (!resolvedContactName || resolvedContactName.length < 2) {
+            throw new common_1.BadRequestException('Requester contact name is mandatory (minimum 2 characters)');
+        }
+        if (!cleanPhone || cleanPhone.length !== 10) {
+            throw new common_1.BadRequestException('A valid 10-digit mobile phone number is strictly mandatory');
+        }
         const newLead = await this.prisma.inboundLead.create({
             data: {
                 id: id || `FRZ_LEAD_${Date.now()}`,
-                societyName,
-                contactName,
-                contactPhone,
-                contactRole: contactRole || 'Resident',
-                flatCount: flatCount ? parseInt(flatCount) : null,
-                clusterZone: clusterZone || 'Bangalore East',
+                societyName: societyName.trim(),
+                contactName: resolvedContactName,
+                contactPhone: cleanPhone,
+                contactRole: contactRole || body.societyType || 'Resident',
+                flatCount: flatCount ? parseInt(flatCount) : (body.estimatedFlats ? parseInt(body.estimatedFlats) : 150),
+                clusterZone: clusterZone || body.city || 'Bangalore East',
                 address: address || null,
                 status: 'NEW_LEAD',
             },
         });
         return {
             ...newLead,
+            requesterName: newLead.contactName,
+            requesterPhone: newLead.contactPhone,
+            estimatedFlats: newLead.flatCount,
             createdDateIST: (0, date_utils_1.formatDateIST)(newLead.createdAt),
             createdTimeIST: (0, date_utils_1.formatTimeIST)(newLead.createdAt),
         };

@@ -28,8 +28,24 @@ let WarehousesController = class WarehousesController {
         this.warehousesService = warehousesService;
         this.jwtService = jwtService;
     }
-    async findAll() {
-        return this.warehousesService.findAll();
+    async findAll(req) {
+        let isStaff = false;
+        const authHeader = req?.headers?.['authorization'] || req?.headers?.['Authorization'];
+        if (authHeader && typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
+            try {
+                const decoded = this.jwtService.verify(authHeader.split(' ')[1]);
+                isStaff = Boolean(decoded &&
+                    (decoded.type === 'EMPLOYEE' ||
+                        decoded.role === 'SUPER_ADMIN' ||
+                        decoded.role === 'ADMIN' ||
+                        (Array.isArray(decoded.roles) && decoded.roles.some((r) => ['SUPER_ADMIN', 'WAREHOUSE_MANAGER', 'WAREHOUSE_STAFF', 'ADMIN', 'PROCUREMENT_OFFICER', 'SALES_OFFICER'].includes(r)))) &&
+                    !decoded.roles?.includes('SOCIETY_PARTNER'));
+            }
+            catch (e) {
+                isStaff = false;
+            }
+        }
+        return this.warehousesService.findAll(isStaff);
     }
     async findOne(req, id) {
         let isStaff = false;
@@ -37,7 +53,12 @@ let WarehousesController = class WarehousesController {
         if (authHeader && typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
             try {
                 const decoded = this.jwtService.verify(authHeader.split(' ')[1]);
-                isStaff = decoded?.type === 'EMPLOYEE';
+                isStaff = Boolean(decoded &&
+                    (decoded.type === 'EMPLOYEE' ||
+                        decoded.role === 'SUPER_ADMIN' ||
+                        decoded.role === 'ADMIN' ||
+                        (Array.isArray(decoded.roles) && decoded.roles.some((r) => ['SUPER_ADMIN', 'WAREHOUSE_MANAGER', 'WAREHOUSE_STAFF', 'ADMIN', 'PROCUREMENT_OFFICER', 'SALES_OFFICER'].includes(r)))) &&
+                    !decoded.roles?.includes('SOCIETY_PARTNER'));
             }
             catch (e) { }
         }
@@ -61,8 +82,9 @@ __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'List all fulfillment warehouse hubs' }),
     (0, swagger_1.ApiResponse)({ status: 200, type: [warehouse_schema_1.WarehouseSchema] }),
     (0, common_1.Get)(),
+    __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], WarehousesController.prototype, "findAll", null);
 __decorate([

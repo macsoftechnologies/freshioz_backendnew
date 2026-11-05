@@ -174,7 +174,7 @@ let SocietiesService = class SocietiesService {
         });
     }
     async create(body) {
-        const { id, name, type, address, imageUrl, lat, lng, warehouseId, secretaryName, secretaryPhone, totalFloors, totalUnits, deliveryMode, status, commissionType, commissionValue, bankName, accountHolder, accountNumber, ifscCode, } = body;
+        const { id, name, type, address, imageUrl, lat, lng, warehouseId, secretaryName, secretaryPhone, totalFloors, totalUnits, deliveryMode, status, commissionType, commissionValue, bankName, accountHolder, accountNumber, ifscCode, createdById, salesRepName, salesRepPhone, } = body;
         const existing = await this.prisma.society.findFirst({
             where: { name: { equals: name.trim(), mode: 'insensitive' } },
         });
@@ -203,6 +203,9 @@ let SocietiesService = class SocietiesService {
                 accountHolder: accountHolder || null,
                 accountNumber: accountNumber || null,
                 ifscCode: ifscCode || null,
+                createdById: createdById || null,
+                salesRepName: salesRepName || null,
+                salesRepPhone: salesRepPhone || null,
             },
             include: { warehouse: true },
         });
@@ -240,6 +243,9 @@ let SocietiesService = class SocietiesService {
                 ...(data.accountHolder !== undefined && { accountHolder: data.accountHolder }),
                 ...(data.accountNumber !== undefined && { accountNumber: data.accountNumber }),
                 ...(data.ifscCode !== undefined && { ifscCode: data.ifscCode }),
+                ...(data.createdById !== undefined && { createdById: data.createdById }),
+                ...(data.salesRepName !== undefined && { salesRepName: data.salesRepName }),
+                ...(data.salesRepPhone !== undefined && { salesRepPhone: data.salesRepPhone }),
             },
             include: { warehouse: true },
         });

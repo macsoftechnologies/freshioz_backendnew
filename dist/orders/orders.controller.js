@@ -39,7 +39,7 @@ let OrdersController = class OrdersController {
         }
         const isSuperAdmin = user?.roles?.includes('SUPER_ADMIN') || user?.role === 'SUPER_ADMIN';
         const staffWarehouseId = user?.assignedWarehouseId || user?.warehouseId;
-        const effectiveWarehouseId = (!isSuperAdmin && staffWarehouseId && staffWarehouseId !== 'ALL') ? staffWarehouseId : warehouseId;
+        const effectiveWarehouseId = !isSuperAdmin ? (staffWarehouseId || warehouseId) : warehouseId;
         return this.ordersService.findAll({ status, societyId, phone, warehouseId: effectiveWarehouseId });
     }
     async findOne(req, id) {

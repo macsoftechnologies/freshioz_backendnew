@@ -6,4 +6,13 @@ export declare class UpdateOrderStatusDto {
     codSettledToHub?: boolean;
     codSettledBy?: string;
     codReceivedMode?: string;
+    razorpayPaymentId?: string;
+    reason?: string;
+    cancelledReason?: string;
+    deliveryLotId?: string;
+    deliveryPartnerId?: string;
+    deliveryPartnerName?: string;
+    deliveryPartnerPhone?: string;
+    vehicleNumber?: string;
+    dispatchedBy?: string;
 }

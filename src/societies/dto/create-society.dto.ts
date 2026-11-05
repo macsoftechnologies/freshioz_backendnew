@@ -91,4 +91,19 @@ export class CreateSocietyDto {
   @IsOptional()
   @IsString()
   ifscCode?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  createdById?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  salesRepName?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  salesRepPhone?: string;
 }

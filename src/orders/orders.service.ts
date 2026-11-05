@@ -22,7 +22,6 @@ export class OrdersService {
           { warehouse: { code: query.warehouseId } },
           { warehouse: { id: query.warehouseId } },
           { society: { warehouseId: query.warehouseId } },
-          { warehouseId: null },
         ],
       });
     }
@@ -466,6 +465,31 @@ export class OrdersService {
       if (dto.razorpayPaymentId) {
         updateData.razorpayPaymentId = dto.razorpayPaymentId;
       }
+      if (dto.deliveryLotId) {
+        updateData.deliveryLotId = dto.deliveryLotId;
+      }
+      if (dto.deliveryPartnerId) {
+        updateData.deliveryPartnerId = dto.deliveryPartnerId;
+      }
+      if (dto.deliveryPartnerName) {
+        updateData.deliveryPartnerName = dto.deliveryPartnerName;
+      }
+      if (dto.deliveryPartnerPhone) {
+        updateData.deliveryPartnerPhone = dto.deliveryPartnerPhone;
+      }
+      if (dto.vehicleNumber) {
+        updateData.vehicleNumber = dto.vehicleNumber;
+      }
+      if (dto.dispatchedBy) {
+        updateData.dispatchedBy = dto.dispatchedBy;
+      }
+      if (dto.status === 'OUT_FOR_DELIVERY') {
+        updateData.dispatchedAt = new Date();
+      }
+      if (dto.status === 'CANCELLED') {
+        updateData.cancelledAt = new Date();
+        updateData.cancelledReason = dto.reason || dto.cancelledReason || 'Cancelled at delivery doorstep';
+      }
 
       // ATOMIC CONCURRENCY CHECK FOR DELIVERED:
       // Prevents race conditions where an order is concurrently cancelled while being delivered
@@ -664,3 +688,4 @@ export class OrdersService {
     });
   }
 }
+

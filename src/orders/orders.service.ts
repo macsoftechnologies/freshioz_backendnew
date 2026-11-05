@@ -22,6 +22,7 @@ export class OrdersService {
           { warehouse: { code: query.warehouseId } },
           { warehouse: { id: query.warehouseId } },
           { society: { warehouseId: query.warehouseId } },
+          { warehouseId: null },
         ],
       });
     }

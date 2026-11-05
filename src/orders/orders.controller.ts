@@ -43,10 +43,10 @@ export class OrdersController {
       const partnerSocId = user.societyId || user.id;
       return this.ordersService.findAll({ status, societyId: partnerSocId, phone, warehouseId });
     }
-    // 3. For internal staff: if user has an assigned warehouse and is not Super Admin, scope by warehouseId
+    // 3. For internal staff: if user is not Super Admin, scope strictly to staff warehouse
     const isSuperAdmin = user?.roles?.includes('SUPER_ADMIN') || user?.role === 'SUPER_ADMIN';
     const staffWarehouseId = user?.assignedWarehouseId || user?.warehouseId;
-    const effectiveWarehouseId = (!isSuperAdmin && staffWarehouseId && staffWarehouseId !== 'ALL') ? staffWarehouseId : warehouseId;
+    const effectiveWarehouseId = !isSuperAdmin ? (staffWarehouseId || warehouseId) : warehouseId;
 
     return this.ordersService.findAll({ status, societyId, phone, warehouseId: effectiveWarehouseId });
   }

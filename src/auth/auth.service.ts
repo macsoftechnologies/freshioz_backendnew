@@ -49,13 +49,46 @@ export class AuthService {
           }
 
           let assignedLocationName = 'All Hubs & Warehouses (Citywide)';
-          if (employee.assignedWarehouseId && employee.assignedWarehouseId !== 'ALL') {
+          let effectiveWarehouseId = employee.assignedWarehouseId;
+
+          const isSuperAdminUser = employeeRoles.includes('SUPER_ADMIN');
+          if (!isSuperAdminUser) {
+            let wh: any = null;
+            if (effectiveWarehouseId && effectiveWarehouseId !== 'ALL') {
+              wh = await this.prisma.warehouse.findFirst({
+                where: {
+                  OR: [
+                    { id: effectiveWarehouseId },
+                    { uuid: effectiveWarehouseId },
+                    { code: effectiveWarehouseId },
+                  ],
+                },
+              });
+            }
+            if (!wh) {
+              wh = await this.prisma.warehouse.findFirst({
+                where: { status: 'ACTIVE' },
+                orderBy: { code: 'asc' },
+              });
+              if (wh) {
+                // Permanently link non-super admin employee to default active warehouse
+                await this.prisma.employee.update({
+                  where: { id: employee.id },
+                  data: { assignedWarehouseId: wh.id },
+                }).catch(() => {});
+              }
+            }
+            if (wh) {
+              effectiveWarehouseId = wh.id;
+              assignedLocationName = wh.name;
+            }
+          } else if (effectiveWarehouseId && effectiveWarehouseId !== 'ALL') {
             const wh = await this.prisma.warehouse.findFirst({
               where: {
                 OR: [
-                  { id: employee.assignedWarehouseId },
-                  { uuid: employee.assignedWarehouseId },
-                  { code: employee.assignedWarehouseId },
+                  { id: effectiveWarehouseId },
+                  { uuid: effectiveWarehouseId },
+                  { code: effectiveWarehouseId },
                 ],
               },
               select: { name: true },
@@ -70,8 +103,8 @@ export class AuthService {
             email: employee.email,
             phone: employee.phone,
             roles: employeeRoles,
-            assignedWarehouseId: employee.assignedWarehouseId,
-            warehouseId: employee.assignedWarehouseId,
+            assignedWarehouseId: effectiveWarehouseId,
+            warehouseId: effectiveWarehouseId,
             assignedLocationName,
             type: 'EMPLOYEE',
           };

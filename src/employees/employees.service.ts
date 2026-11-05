@@ -145,6 +145,19 @@ export class EmployeesService {
     const rawPassword = password || 'Freshioz@123';
     const hashedPassword = await bcrypt.hash(rawPassword, 10);
 
+    let targetWhId = assignedWarehouseId;
+    if (!rawRoles.includes('SUPER_ADMIN')) {
+      if (!targetWhId || targetWhId === 'ALL') {
+        const defaultWh = await this.prisma.warehouse.findFirst({
+          where: { status: 'ACTIVE' },
+          orderBy: { code: 'asc' },
+        });
+        targetWhId = defaultWh?.id || defaultWh?.code;
+      }
+    } else {
+      targetWhId = targetWhId || 'ALL';
+    }
+
     return this.prisma.employee.create({
       data: {
         id: id || `FRZ_EMP_${Date.now()}`,
@@ -153,7 +166,7 @@ export class EmployeesService {
         email: email.trim().toLowerCase(),
         password: hashedPassword,
         roles: rawRoles,
-        assignedWarehouseId: assignedWarehouseId || 'ALL',
+        assignedWarehouseId: targetWhId,
         status: status || 'ACTIVE',
       },
       select: EMPLOYEE_SELECT_FIELDS,
@@ -225,7 +238,22 @@ export class EmployeesService {
     if (data.phone) updateData.phone = data.phone.trim();
     if (data.email) updateData.email = data.email.trim().toLowerCase();
     if (data.roles) updateData.roles = Array.isArray(data.roles) ? data.roles : [data.roles];
-    if (data.assignedWarehouseId !== undefined) updateData.assignedWarehouseId = data.assignedWarehouseId;
+    
+    if (data.assignedWarehouseId !== undefined || data.roles) {
+      const effectiveRoles = updateData.roles || existing.roles;
+      let targetWhId = data.assignedWarehouseId !== undefined ? data.assignedWarehouseId : existing.assignedWarehouseId;
+      if (!effectiveRoles.includes('SUPER_ADMIN')) {
+        if (!targetWhId || targetWhId === 'ALL') {
+          const defaultWh = await this.prisma.warehouse.findFirst({
+            where: { status: 'ACTIVE' },
+            orderBy: { code: 'asc' },
+          });
+          targetWhId = defaultWh?.id || defaultWh?.code;
+        }
+      }
+      updateData.assignedWarehouseId = targetWhId;
+    }
+
     if (data.status) updateData.status = data.status;
 
     if (data.password) {

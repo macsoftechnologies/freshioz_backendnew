@@ -23,7 +23,7 @@ export class ProcurementController {
     const user = req.user;
     const isSuperAdmin = user?.roles?.includes('SUPER_ADMIN') || user?.role === 'SUPER_ADMIN';
     const staffWarehouseId = user?.assignedWarehouseId || user?.warehouseId;
-    const effectiveWarehouseId = (!isSuperAdmin && staffWarehouseId && staffWarehouseId !== 'ALL') ? staffWarehouseId : warehouseId;
+    const effectiveWarehouseId = !isSuperAdmin ? (staffWarehouseId || warehouseId) : warehouseId;
     return this.procurementService.findAll(effectiveWarehouseId);
   }
 

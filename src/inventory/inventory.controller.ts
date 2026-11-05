@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, UseGuards, Req } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { InventoryService } from './inventory.service';
 import { AdjustStockDto } from './dto/adjust-stock.dto';
@@ -19,8 +19,12 @@ export class InventoryController {
   @ApiOperation({ summary: 'Get current inventory across warehouses' })
   @ApiQuery({ name: 'warehouseId', required: false, description: 'Filter by specific warehouse' })
   @ApiResponse({ status: 200, type: [InventoryItemResponseDto] })
-  findAll(@Query('warehouseId') warehouseId?: string) {
-    return this.inventoryService.findAll(warehouseId);
+  findAll(@Req() req: any, @Query('warehouseId') warehouseId?: string) {
+    const user = req.user;
+    const isSuperAdmin = user?.roles?.includes('SUPER_ADMIN') || user?.role === 'SUPER_ADMIN';
+    const staffWarehouseId = user?.assignedWarehouseId || user?.warehouseId;
+    const effectiveWarehouseId = !isSuperAdmin ? (staffWarehouseId || warehouseId) : warehouseId;
+    return this.inventoryService.findAll(effectiveWarehouseId);
   }
 
   @ApiBearerAuth()

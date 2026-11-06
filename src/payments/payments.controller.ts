@@ -31,6 +31,41 @@ export class PaymentsController {
     return this.paymentsService.updateSettings(body, req.user);
   }
 
+  // ==========================================
+  // FRESHCOINS LOYALTY SETTINGS & WALLET
+  // ==========================================
+  @ApiBearerAuth('JWT-auth')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN')
+  @Get('fresh-coins/settings')
+  @ApiOperation({ summary: 'Get FreshCoins loyalty configuration (Super Admin only)' })
+  async getFreshCoinsSettings() {
+    return this.paymentsService.getFreshCoinsSettings();
+  }
+
+  @ApiBearerAuth('JWT-auth')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN')
+  @Put('fresh-coins/settings')
+  @ApiOperation({ summary: 'Update FreshCoins loyalty configuration (Super Admin only)' })
+  async updateFreshCoinsSettings(@Req() req: any, @Body() body: any) {
+    return this.paymentsService.updateFreshCoinsSettings(body, req.user);
+  }
+
+  @Get('fresh-coins/public-config')
+  @ApiOperation({ summary: 'Public FreshCoins configuration for cart & checkout calculations' })
+  async getFreshCoinsPublicConfig() {
+    return this.paymentsService.getFreshCoinsPublicConfig();
+  }
+
+  @ApiBearerAuth('JWT-auth')
+  @UseGuards(JwtAuthGuard)
+  @Get('fresh-coins/my-wallet')
+  @ApiOperation({ summary: 'Get customer FreshCoins balance and ledger history' })
+  async getMyFreshCoinsWallet(@Req() req: any) {
+    return this.paymentsService.getCustomerFreshCoinsWallet(req.user);
+  }
+
   @Get('razorpay/public-config')
   @ApiOperation({ summary: 'Get public payment gateway configuration for checkout (Client-safe, no secrets)' })
   async getPublicConfig() {
@@ -78,4 +113,3 @@ export class PaymentsController {
     return this.paymentsService.handleWebhook(body, signature || '');
   }
 }
-

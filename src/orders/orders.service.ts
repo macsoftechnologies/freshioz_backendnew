@@ -312,8 +312,47 @@ export class OrdersService {
         }
       }
 
+      // 5.2 SERVER-SIDE FRESHCOINS REDEMPTION VERIFICATION
+      let appliedFreshCoinsUsed = 0;
+      let appliedFreshCoinsDiscount = 0;
+
+      if (dto.freshCoinsUsed && Number(dto.freshCoinsUsed) > 0) {
+        const rawCoins = Number(dto.freshCoinsUsed);
+        const coinsSetting = await tx.freshCoinsSetting.findUnique({
+          where: { id: 'COINS_CONFIG' },
+        });
+
+        if (!coinsSetting || !coinsSetting.isEnabled) {
+          throw new BadRequestException('FreshCoins loyalty program is currently not active.');
+        }
+
+        if (itemsNetTotal < coinsSetting.minOrderValue) {
+          throw new BadRequestException(
+            `Minimum order value of ₹${coinsSetting.minOrderValue} required to redeem FreshCoins.`,
+          );
+        }
+
+        const maxRedeemRupees = itemsNetTotal * (coinsSetting.maxRedemptionPercent / 100);
+        const maxRedeemCoins = Math.floor(maxRedeemRupees / coinsSetting.coinRupeeValue);
+
+        const currentCoinsBalance = user?.freshCoinsBalance || 0;
+        if (rawCoins > currentCoinsBalance) {
+          throw new BadRequestException(`Insufficient FreshCoins balance. Available: ${currentCoinsBalance} coins.`);
+        }
+
+        appliedFreshCoinsUsed = Math.min(rawCoins, maxRedeemCoins, currentCoinsBalance);
+        appliedFreshCoinsDiscount = Number((appliedFreshCoinsUsed * coinsSetting.coinRupeeValue).toFixed(2));
+
+        if (appliedFreshCoinsUsed > 0) {
+          await tx.user.update({
+            where: { id: user.id },
+            data: { freshCoinsBalance: { decrement: appliedFreshCoinsUsed } },
+          });
+        }
+      }
+
       const calculatedTotalAmount = Number(
-        Math.max(0, itemsNetTotal + deliveryFee + gstAmount - appliedDiscountAmount).toFixed(2)
+        Math.max(0, itemsNetTotal + deliveryFee + gstAmount - appliedDiscountAmount - appliedFreshCoinsDiscount).toFixed(2)
       );
 
       // Calculate accrued society commission (To be credited upon DELIVERED status)
@@ -371,6 +410,8 @@ export class OrdersService {
           bulkSavings: calculatedBulkSavings,
           deliveryFee,
           gstAmount,
+          freshCoinsUsed: appliedFreshCoinsUsed,
+          freshCoinsDiscount: appliedFreshCoinsDiscount,
           totalAmount: calculatedTotalAmount,
           deliveryDate: serverCalculatedDeliveryDate,
           deliverySlot: dto.deliverySlot || 'Morning Fresh Slot (06:30 AM - 08:30 AM)',
@@ -417,6 +458,20 @@ export class OrdersService {
             data: { status: 'REDEEMED' },
           });
         }
+      }
+
+      // 7. Atomic FreshCoins ledger entry
+      if (appliedFreshCoinsUsed > 0) {
+        await tx.freshCoinsLedger.create({
+          data: {
+            userId: user.phone,
+            orderId: created.id,
+            type: 'REDEEMED',
+            coins: -appliedFreshCoinsUsed,
+            rupeeValue: appliedFreshCoinsDiscount,
+            description: `Redeemed ${appliedFreshCoinsUsed} FreshCoins on Order #${created.id}`,
+          },
+        });
       }
 
       return {
@@ -489,12 +544,53 @@ export class OrdersService {
       if (dto.status === 'CANCELLED') {
         updateData.cancelledAt = new Date();
         updateData.cancelledReason = dto.reason || dto.cancelledReason || 'Cancelled at delivery doorstep';
+
+        // Auto-refund any FreshCoins used on this order
+        if (existing.freshCoinsUsed && existing.freshCoinsUsed > 0) {
+          const alreadyRefunded = await tx.freshCoinsLedger.findFirst({
+            where: { orderId: existing.id, type: 'REFUNDED' },
+          });
+          if (!alreadyRefunded) {
+            await tx.user.updateMany({
+              where: { OR: [{ phone: existing.userPhone }, { id: existing.userId }] },
+              data: { freshCoinsBalance: { increment: existing.freshCoinsUsed } },
+            });
+            await tx.freshCoinsLedger.create({
+              data: {
+                userId: existing.userPhone,
+                orderId: existing.id,
+                type: 'REFUNDED',
+                coins: existing.freshCoinsUsed,
+                rupeeValue: existing.freshCoinsDiscount || 0,
+                description: `Refunded ${existing.freshCoinsUsed} FreshCoins for cancelled Order #${existing.id}`,
+              },
+            });
+          }
+        }
       }
 
       // ATOMIC CONCURRENCY CHECK FOR DELIVERED:
       // Prevents race conditions where an order is concurrently cancelled while being delivered
       if (dto.status === 'DELIVERED') {
         updateData.deliveredAt = new Date();
+
+        // Calculate FreshCoins cashback to credit
+        let coinsToEarn = 0;
+        let activeCoinRupeeVal = 1.0;
+        const coinsSetting = await tx.freshCoinsSetting.findUnique({
+          where: { id: 'COINS_CONFIG' },
+        });
+
+        if (coinsSetting && coinsSetting.isEnabled && (!existing.freshCoinsEarned || existing.freshCoinsEarned === 0)) {
+          activeCoinRupeeVal = coinsSetting.coinRupeeValue || 1.0;
+          const eligibleSubtotal = Math.max(0, existing.subtotal - (existing.bulkSavings || 0) - (existing.freshCoinsDiscount || 0));
+          if (eligibleSubtotal >= coinsSetting.minOrderValue) {
+            coinsToEarn = Number(((eligibleSubtotal * (coinsSetting.earningRatePercent / 100))).toFixed(2));
+            if (coinsToEarn > 0) {
+              updateData.freshCoinsEarned = coinsToEarn;
+            }
+          }
+        }
 
         const updateResult = await tx.order.updateMany({
           where: {
@@ -506,6 +602,27 @@ export class OrdersService {
 
         if (updateResult.count === 0) {
           throw new ConflictException('Cannot mark order as delivered because it was concurrently cancelled or already delivered.');
+        }
+
+        // Credit FreshCoins to customer wallet
+        if (coinsToEarn > 0) {
+          await tx.user.updateMany({
+            where: { OR: [{ phone: existing.userPhone }, { id: existing.userId }] },
+            data: {
+              freshCoinsBalance: { increment: coinsToEarn },
+              lifetimeCoinsEarned: { increment: coinsToEarn },
+            },
+          });
+          await tx.freshCoinsLedger.create({
+            data: {
+              userId: existing.userPhone,
+              orderId: existing.id,
+              type: 'EARNED',
+              coins: coinsToEarn,
+              rupeeValue: Number((coinsToEarn * activeCoinRupeeVal).toFixed(2)),
+              description: `Earned ${coinsToEarn} FreshCoins on delivered Order #${existing.id}`,
+            },
+          });
         }
 
         // Credit society earnings exactly once when status becomes DELIVERED
@@ -601,6 +718,29 @@ export class OrdersService {
             orderId: null,
           },
         });
+      }
+
+      // Refund redeemed FreshCoins
+      if (existing.freshCoinsUsed && existing.freshCoinsUsed > 0) {
+        const alreadyRefunded = await tx.freshCoinsLedger.findFirst({
+          where: { orderId: existing.id, type: 'REFUNDED' },
+        });
+        if (!alreadyRefunded) {
+          await tx.user.updateMany({
+            where: { OR: [{ phone: existing.userPhone }, { id: existing.userId }] },
+            data: { freshCoinsBalance: { increment: existing.freshCoinsUsed } },
+          });
+          await tx.freshCoinsLedger.create({
+            data: {
+              userId: existing.userPhone,
+              orderId: existing.id,
+              type: 'REFUNDED',
+              coins: existing.freshCoinsUsed,
+              rupeeValue: existing.freshCoinsDiscount || 0,
+              description: `Refunded ${existing.freshCoinsUsed} FreshCoins for cancelled Order #${existing.id}`,
+            },
+          });
+        }
       }
 
       // Restore reserved warehouse stock

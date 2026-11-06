@@ -105,6 +105,9 @@ export declare class OrdersService {
         razorpayOrderId: string | null;
         razorpayPaymentId: string | null;
         societyCommissionEarned: number;
+        freshCoinsUsed: number;
+        freshCoinsDiscount: number;
+        freshCoinsEarned: number;
         deliveryLotId: string | null;
         deliveryPartnerId: string | null;
         deliveryPartnerName: string | null;
@@ -215,6 +218,9 @@ export declare class OrdersService {
         razorpayOrderId: string | null;
         razorpayPaymentId: string | null;
         societyCommissionEarned: number;
+        freshCoinsUsed: number;
+        freshCoinsDiscount: number;
+        freshCoinsEarned: number;
         deliveryLotId: string | null;
         deliveryPartnerId: string | null;
         deliveryPartnerName: string | null;
@@ -325,6 +331,9 @@ export declare class OrdersService {
         razorpayOrderId: string | null;
         razorpayPaymentId: string | null;
         societyCommissionEarned: number;
+        freshCoinsUsed: number;
+        freshCoinsDiscount: number;
+        freshCoinsEarned: number;
         deliveryLotId: string | null;
         deliveryPartnerId: string | null;
         deliveryPartnerName: string | null;
@@ -418,6 +427,9 @@ export declare class OrdersService {
         razorpayOrderId: string | null;
         razorpayPaymentId: string | null;
         societyCommissionEarned: number;
+        freshCoinsUsed: number;
+        freshCoinsDiscount: number;
+        freshCoinsEarned: number;
         deliveryLotId: string | null;
         deliveryPartnerId: string | null;
         deliveryPartnerName: string | null;
@@ -511,6 +523,9 @@ export declare class OrdersService {
         razorpayOrderId: string | null;
         razorpayPaymentId: string | null;
         societyCommissionEarned: number;
+        freshCoinsUsed: number;
+        freshCoinsDiscount: number;
+        freshCoinsEarned: number;
         deliveryLotId: string | null;
         deliveryPartnerId: string | null;
         deliveryPartnerName: string | null;
@@ -604,6 +619,9 @@ export declare class OrdersService {
         razorpayOrderId: string | null;
         razorpayPaymentId: string | null;
         societyCommissionEarned: number;
+        freshCoinsUsed: number;
+        freshCoinsDiscount: number;
+        freshCoinsEarned: number;
         deliveryLotId: string | null;
         deliveryPartnerId: string | null;
         deliveryPartnerName: string | null;

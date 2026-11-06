@@ -149,6 +149,9 @@ export declare class PaymentsService {
         razorpayOrderId: string | null;
         razorpayPaymentId: string | null;
         societyCommissionEarned: number;
+        freshCoinsUsed: number;
+        freshCoinsDiscount: number;
+        freshCoinsEarned: number;
         deliveryLotId: string | null;
         deliveryPartnerId: string | null;
         deliveryPartnerName: string | null;
@@ -178,5 +181,65 @@ export declare class PaymentsService {
     }>;
     handleWebhook(body: any, signature: string): Promise<{
         status: string;
+    }>;
+    getOrCreateFreshCoinsSettings(): Promise<{
+        id: string;
+        updatedAt: Date;
+        updatedBy: string | null;
+        isEnabled: boolean;
+        earningRatePercent: number;
+        coinRupeeValue: number;
+        maxRedemptionPercent: number;
+        minOrderValue: number;
+    }>;
+    getFreshCoinsSettings(): Promise<{
+        id: string;
+        updatedAt: Date;
+        updatedBy: string | null;
+        isEnabled: boolean;
+        earningRatePercent: number;
+        coinRupeeValue: number;
+        maxRedemptionPercent: number;
+        minOrderValue: number;
+    }>;
+    updateFreshCoinsSettings(dto: any, user: any): Promise<{
+        id: string;
+        updatedAt: Date;
+        updatedBy: string | null;
+        isEnabled: boolean;
+        earningRatePercent: number;
+        coinRupeeValue: number;
+        maxRedemptionPercent: number;
+        minOrderValue: number;
+    }>;
+    getFreshCoinsPublicConfig(): Promise<{
+        isEnabled: boolean;
+        earningRatePercent: number;
+        coinRupeeValue: number;
+        maxRedemptionPercent: number;
+        minOrderValue: number;
+    }>;
+    getCustomerFreshCoinsWallet(user: any): Promise<{
+        balance: number;
+        rupeeValue: number;
+        lifetimeEarned: number;
+        setting: {
+            isEnabled: boolean;
+            coinRupeeValue: number;
+            maxRedemptionPercent: number;
+            minOrderValue: number;
+            earningRatePercent: number;
+        };
+        history: {
+            id: string;
+            uuid: string;
+            userId: string;
+            createdAt: Date;
+            type: string;
+            orderId: string | null;
+            coins: number;
+            rupeeValue: number;
+            description: string | null;
+        }[];
     }>;
 }

@@ -32,6 +32,18 @@ let PaymentsController = class PaymentsController {
     async updateSettings(req, body) {
         return this.paymentsService.updateSettings(body, req.user);
     }
+    async getFreshCoinsSettings() {
+        return this.paymentsService.getFreshCoinsSettings();
+    }
+    async updateFreshCoinsSettings(req, body) {
+        return this.paymentsService.updateFreshCoinsSettings(body, req.user);
+    }
+    async getFreshCoinsPublicConfig() {
+        return this.paymentsService.getFreshCoinsPublicConfig();
+    }
+    async getMyFreshCoinsWallet(req) {
+        return this.paymentsService.getCustomerFreshCoinsWallet(req.user);
+    }
     async getPublicConfig() {
         return this.paymentsService.getPublicConfig();
     }
@@ -74,6 +86,45 @@ __decorate([
     __metadata("design:paramtypes", [Object, update_payment_settings_dto_1.UpdatePaymentSettingsDto]),
     __metadata("design:returntype", Promise)
 ], PaymentsController.prototype, "updateSettings", null);
+__decorate([
+    (0, swagger_1.ApiBearerAuth)('JWT-auth'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('SUPER_ADMIN'),
+    (0, common_1.Get)('fresh-coins/settings'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get FreshCoins loyalty configuration (Super Admin only)' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], PaymentsController.prototype, "getFreshCoinsSettings", null);
+__decorate([
+    (0, swagger_1.ApiBearerAuth)('JWT-auth'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('SUPER_ADMIN'),
+    (0, common_1.Put)('fresh-coins/settings'),
+    (0, swagger_1.ApiOperation)({ summary: 'Update FreshCoins loyalty configuration (Super Admin only)' }),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], PaymentsController.prototype, "updateFreshCoinsSettings", null);
+__decorate([
+    (0, common_1.Get)('fresh-coins/public-config'),
+    (0, swagger_1.ApiOperation)({ summary: 'Public FreshCoins configuration for cart & checkout calculations' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], PaymentsController.prototype, "getFreshCoinsPublicConfig", null);
+__decorate([
+    (0, swagger_1.ApiBearerAuth)('JWT-auth'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Get)('fresh-coins/my-wallet'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get customer FreshCoins balance and ledger history' }),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], PaymentsController.prototype, "getMyFreshCoinsWallet", null);
 __decorate([
     (0, common_1.Get)('razorpay/public-config'),
     (0, swagger_1.ApiOperation)({ summary: 'Get public payment gateway configuration for checkout (Client-safe, no secrets)' }),

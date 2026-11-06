@@ -304,6 +304,78 @@ let PaymentsService = PaymentsService_1 = class PaymentsService {
         }
         return { status: 'OK' };
     }
+    async getOrCreateFreshCoinsSettings() {
+        let setting = await this.prisma.freshCoinsSetting.findUnique({
+            where: { id: 'COINS_CONFIG' },
+        });
+        if (!setting) {
+            setting = await this.prisma.freshCoinsSetting.create({
+                data: {
+                    id: 'COINS_CONFIG',
+                    isEnabled: true,
+                    earningRatePercent: 5.0,
+                    coinRupeeValue: 1.0,
+                    maxRedemptionPercent: 25.0,
+                    minOrderValue: 100.0,
+                },
+            });
+        }
+        return setting;
+    }
+    async getFreshCoinsSettings() {
+        return this.getOrCreateFreshCoinsSettings();
+    }
+    async updateFreshCoinsSettings(dto, user) {
+        await this.getOrCreateFreshCoinsSettings();
+        return this.prisma.freshCoinsSetting.update({
+            where: { id: 'COINS_CONFIG' },
+            data: {
+                isEnabled: dto.isEnabled !== undefined ? Boolean(dto.isEnabled) : true,
+                earningRatePercent: dto.earningRatePercent !== undefined ? Number(dto.earningRatePercent) : 5.0,
+                coinRupeeValue: dto.coinRupeeValue !== undefined ? Number(dto.coinRupeeValue) : 1.0,
+                maxRedemptionPercent: dto.maxRedemptionPercent !== undefined ? Number(dto.maxRedemptionPercent) : 25.0,
+                minOrderValue: dto.minOrderValue !== undefined ? Number(dto.minOrderValue) : 100.0,
+                updatedBy: user?.name || user?.email || 'Super Admin',
+            },
+        });
+    }
+    async getFreshCoinsPublicConfig() {
+        const setting = await this.getOrCreateFreshCoinsSettings();
+        return {
+            isEnabled: setting.isEnabled,
+            earningRatePercent: setting.earningRatePercent,
+            coinRupeeValue: setting.coinRupeeValue,
+            maxRedemptionPercent: setting.maxRedemptionPercent,
+            minOrderValue: setting.minOrderValue,
+        };
+    }
+    async getCustomerFreshCoinsWallet(user) {
+        const phone = user?.phone || user?.id;
+        const userRecord = await this.prisma.user.findFirst({
+            where: { OR: [{ phone }, { id: phone }] },
+        });
+        const balance = userRecord?.freshCoinsBalance || 0;
+        const lifetimeEarned = userRecord?.lifetimeCoinsEarned || 0;
+        const history = await this.prisma.freshCoinsLedger.findMany({
+            where: { userId: phone },
+            orderBy: { createdAt: 'desc' },
+            take: 50,
+        });
+        const setting = await this.getOrCreateFreshCoinsSettings();
+        return {
+            balance,
+            rupeeValue: Number((balance * setting.coinRupeeValue).toFixed(2)),
+            lifetimeEarned,
+            setting: {
+                isEnabled: setting.isEnabled,
+                coinRupeeValue: setting.coinRupeeValue,
+                maxRedemptionPercent: setting.maxRedemptionPercent,
+                minOrderValue: setting.minOrderValue,
+                earningRatePercent: setting.earningRatePercent,
+            },
+            history,
+        };
+    }
 };
 exports.PaymentsService = PaymentsService;
 exports.PaymentsService = PaymentsService = PaymentsService_1 = __decorate([

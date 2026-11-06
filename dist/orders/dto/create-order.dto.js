@@ -208,6 +208,18 @@ __decorate([
     __metadata("design:type", Number)
 ], CreateOrderDto.prototype, "discountAmount", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 25 }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], CreateOrderDto.prototype, "freshCoinsUsed", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 25 }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], CreateOrderDto.prototype, "freshCoinsDiscount", void 0);
+__decorate([
     (0, swagger_1.ApiProperty)({ type: [CreateOrderItemDto] }),
     (0, class_validator_1.IsArray)(),
     (0, class_validator_1.ValidateNested)({ each: true }),

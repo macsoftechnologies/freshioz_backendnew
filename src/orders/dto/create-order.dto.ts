@@ -162,6 +162,16 @@ export class CreateOrderDto {
   @IsNumber()
   discountAmount?: number;
 
+  @ApiPropertyOptional({ example: 25 })
+  @IsOptional()
+  @IsNumber()
+  freshCoinsUsed?: number;
+
+  @ApiPropertyOptional({ example: 25 })
+  @IsOptional()
+  @IsNumber()
+  freshCoinsDiscount?: number;
+
   @ApiProperty({ type: [CreateOrderItemDto] })
   @IsArray()
   @ValidateNested({ each: true })

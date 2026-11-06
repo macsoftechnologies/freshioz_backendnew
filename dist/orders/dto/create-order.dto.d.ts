@@ -32,5 +32,7 @@ export declare class CreateOrderDto {
     razorpayPaymentId?: string;
     discountCode?: string;
     discountAmount?: number;
+    freshCoinsUsed?: number;
+    freshCoinsDiscount?: number;
     items: CreateOrderItemDto[];
 }

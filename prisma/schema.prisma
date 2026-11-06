@@ -198,6 +198,8 @@ model User {
   society        Society? @relation(fields: [societyId], references: [id])
   flatNo         String?
   status         String   @default("ACTIVE_VERIFIED")
+  freshCoinsBalance  Float @default(0.0)
+  lifetimeCoinsEarned Float @default(0.0)
   registeredAt   DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -244,6 +246,9 @@ model Order {
   razorpayOrderId        String?
   razorpayPaymentId      String?
   societyCommissionEarned Float      @default(0.0)
+  freshCoinsUsed         Float       @default(0.0)
+  freshCoinsDiscount     Float       @default(0.0)
+  freshCoinsEarned       Float       @default(0.0)
   deliveryLotId          String?
   deliveryPartnerId      String?
   deliveryPartnerName    String?
@@ -470,5 +475,37 @@ model PaymentSetting {
   updatedBy             String?
 
   @@map("payment_settings")
+}
+
+// ----------------------------------------------------
+// 13. FRESHCOINS LOYALTY & REWARDS CONFIGURATION
+// ----------------------------------------------------
+model FreshCoinsSetting {
+  id                   String   @id @default("COINS_CONFIG")
+  isEnabled            Boolean  @default(true)
+  earningRatePercent   Float    @default(5.0)   // e.g. 5% of order subtotal
+  coinRupeeValue       Float    @default(1.0)   // 1 coin = ₹1.00
+  maxRedemptionPercent Float    @default(25.0)  // max 25% of subtotal can be paid by coins
+  minOrderValue        Float    @default(100.0) // minimum order required to use coins
+  updatedAt            DateTime @updatedAt
+  updatedBy            String?
+
+  @@map("fresh_coins_settings")
+}
+
+model FreshCoinsLedger {
+  id          String   @id @default(uuid())
+  uuid        String   @unique @default(uuid())
+  userId      String   // user phone or id
+  orderId     String?
+  type        String   // EARNED | REDEEMED | REFUNDED | ADMIN_ADJUSTMENT
+  coins       Float
+  rupeeValue  Float
+  description String?
+  createdAt   DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([orderId])
+  @@map("fresh_coins_ledgers")
 }
 

@@ -319,40 +319,42 @@ export class MisService {
         ? Math.round(sales.revenue - (sales.soldQty * sourcingRate))
         : 0;
 
-      let velocity = 'CORE_STAPLE';
-      if (marginPct >= 35 && sales.soldQty >= 20) velocity = 'STAR_CASH_COW';
-      else if (marginPct >= 35) velocity = 'HIGH_MARGIN_NICHE';
-      else if (marginPct < 18) velocity = 'WATCHLIST_BLEEDER';
+      const totalPurchaseCost = Math.round(sourcedQty * sourcingRate);
+      const wastageQtyKg = Math.max(0, Number((sourcedQty - sales.soldQty).toFixed(1)));
 
       return {
         id: p.id,
         uuid: p.uuid,
         name: p.name,
         kannadaName: p.kannadaName || '',
-        category: p.category?.name || 'Fresh Vegetables',
+        category: p.category?.name || 'Fresh Produce',
         categoryId: p.categoryId,
         unit: p.retailUnit || '1 kg',
         retailPrice: p.retailPrice,
         retailMarketPrice: p.retailMarketPrice,
+        boughtQtyKg: Number(sourcedQty.toFixed(1)),
         soldQtyKg: Number(sales.soldQty.toFixed(1)),
-        sourcedQtyKg: Number(sourcedQty),
+        sourcedQtyKg: Number(sourcedQty.toFixed(1)),
+        purchaseRatePerKg: sourcingRate,
         sourcingRatePerKg: sourcingRate,
         sellingRatePerKg: Number(sellingRate.toFixed(2)),
+        purchaseCost: totalPurchaseCost,
         marginSpreadPerKg,
         marginPercent: marginPct,
         revenue: Math.round(sales.revenue),
         netProfitContribution: totalProfitContribution,
+        wastageQtyKg,
         orderCount: sales.orderCount || 0,
-        origin: p.origin || 'APMC Mandi Yard',
+        origin: p.origin || 'Direct Farm Intake',
         shelfLife: p.shelfLife || '3-5 Days',
         bulkMinQty: p.bulkMinQty || 0,
         bulkDiscountPercent: p.bulkDiscountPercent || 0,
         gstPercent: p.gstPercent || 0,
         inStock: p.inStock,
-        badge: p.badge || 'Harvested Today at Dawn',
+        badge: p.badge || 'Fresh Harvest',
         status: p.status,
         image: p.image || '',
-        velocity,
+        velocity: marginPct >= 30 ? 'HEALTHY_MARGIN' : (marginPct >= 15 ? 'STANDARD_MARGIN' : 'LOW_MARGIN'),
       };
     }).sort((a, b) => b.revenue - a.revenue || b.marginPercent - a.marginPercent);
 
@@ -461,6 +463,9 @@ export class MisService {
         doorstepCashCollected: Math.round(codCashCollected),
         cashSettledToHubVault: Math.round(codSettledToVault),
         cashInTransitWithRiders: Math.round(codInTransitWithRiders),
+
+        wholesalePurchasesTotal: Math.round(totalMandiOutflow),
+        cogsTotal: Math.round(totalCogs),
       },
       warehouseBreakdown: masterWarehouses.map((w) => {
         const whOrders = activeOrders.filter((o) => o.warehouseId === w.id);
@@ -552,6 +557,23 @@ export class MisService {
       },
       productEconomics: productEconomicsList,
       riderCashLedger: riderLedger,
+      cancelledOrdersList: cancelledOrders.map((o) => {
+        const [reasonText, photoProof] = (o.cancelledReason || '').split(' [PROOF_PHOTO]');
+        return {
+          id: o.id,
+          uuid: o.uuid,
+          createdAt: o.createdAt,
+          cancelledAt: o.cancelledAt,
+          reasonText: reasonText || 'Doorstep Delivery Exception / Refusal',
+          photoProof: photoProof || null,
+          totalAmount: o.totalAmount || 0,
+          societyName: o.societyName || 'N/A',
+          flatNo: o.flatNo || 'N/A',
+          userPhone: o.userPhone || 'N/A',
+          dispatchedToRiderName: o.dispatchedToRiderName || o.codCollectedBy || 'Field Driver',
+          items: Array.isArray(o.items) ? o.items : [],
+        };
+      }),
     };
   }
 

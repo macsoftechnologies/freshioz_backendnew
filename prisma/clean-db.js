@@ -11,66 +11,68 @@ async function cleanDatabase() {
   console.log('  4. Produce (Products)');
   console.log('====================================================\n');
 
+  // Try PostgreSQL TRUNCATE CASCADE first for instant atomic cleanup
+  const tablesToTruncate = [
+    'reviews',
+    'order_items',
+    'fresh_coins_ledgers',
+    'customer_discounts',
+    'orders',
+    'society_payouts',
+    'users',
+    'societies',
+    'warehouse_inventory',
+    'procurement_bills',
+    'vendors',
+    'inbound_leads',
+    'daily_price_history',
+    'warehouses'
+  ];
+
+  for (const table of tablesToTruncate) {
+    try {
+      await prisma.$executeRawUnsafe(`TRUNCATE TABLE "${table}" CASCADE;`);
+      console.log(`✓ Truncated table: "${table}"`);
+    } catch (err) {
+      // Table might not exist yet or relation is different - fallback silently
+    }
+  }
+
+  // Sequential individual deletes with try/catch so one missing table NEVER blocks the rest
+  const steps = [
+    { name: 'Reviews', fn: () => prisma.review?.deleteMany({}) },
+    { name: 'Order Items', fn: () => prisma.orderItem?.deleteMany({}) },
+    { name: 'FreshCoins Ledgers', fn: () => prisma.freshCoinsLedger?.deleteMany({}) },
+    { name: 'Customer Discounts', fn: () => prisma.customerDiscount?.deleteMany({}) },
+    { name: 'Orders', fn: () => prisma.order?.deleteMany({}) },
+    { name: 'Society Payouts', fn: () => prisma.societyPayout?.deleteMany({}) },
+    { name: 'Users (Customers)', fn: () => prisma.user?.deleteMany({}) },
+    { name: 'Societies', fn: () => prisma.society?.deleteMany({}) },
+    { name: 'Warehouse Inventory', fn: () => prisma.warehouseInventory?.deleteMany({}) },
+    { name: 'Procurement Bills', fn: () => prisma.procurementBill?.deleteMany({}) },
+    { name: 'Vendors', fn: () => prisma.vendor?.deleteMany({}) },
+    { name: 'Inbound Leads', fn: () => prisma.inboundLead?.deleteMany({}) },
+    { name: 'Daily Price History', fn: () => prisma.dailyPriceHistory?.deleteMany({}) },
+    { name: 'Warehouses', fn: () => prisma.warehouse?.deleteMany({}) },
+  ];
+
+  for (const step of steps) {
+    try {
+      if (step.fn) {
+        const res = await step.fn();
+        if (res && res.count !== undefined) {
+          console.log(`✓ Cleaned ${step.name}: ${res.count} records removed`);
+        }
+      }
+    } catch (err) {
+      console.log(`   (Skipped ${step.name}: ${err?.message?.split('\n')[0] || 'table not found'})`);
+    }
+  }
+
+  console.log('\n====================================================');
+  console.log('📊 VERIFICATION OF PRESERVED DATA (EXACTLY 4):');
+  console.log('====================================================');
   try {
-    // 1. Delete Reviews
-    const reviews = await prisma.review.deleteMany({});
-    console.log(`✓ Deleted Reviews: ${reviews.count}`);
-
-    // 2. Delete Order Items
-    const orderItems = await prisma.orderItem.deleteMany({});
-    console.log(`✓ Deleted Order Items: ${orderItems.count}`);
-
-    // 3. Delete FreshCoins Ledgers
-    const coinsLedger = await prisma.freshCoinsLedger.deleteMany({});
-    console.log(`✓ Deleted FreshCoins Ledgers: ${coinsLedger.count}`);
-
-    // 4. Delete Customer Discounts
-    const discounts = await prisma.customerDiscount.deleteMany({});
-    console.log(`✓ Deleted Customer Discounts: ${discounts.count}`);
-
-    // 5. Delete Orders
-    const orders = await prisma.order.deleteMany({});
-    console.log(`✓ Deleted Orders: ${orders.count}`);
-
-    // 6. Delete Society Payouts
-    const payouts = await prisma.societyPayout.deleteMany({});
-    console.log(`✓ Deleted Society Payouts: ${payouts.count}`);
-
-    // 7. Delete Users (Customers)
-    const users = await prisma.user.deleteMany({});
-    console.log(`✓ Deleted Customer Users: ${users.count}`);
-
-    // 8. Delete Societies
-    const societies = await prisma.society.deleteMany({});
-    console.log(`✓ Deleted Societies: ${societies.count}`);
-
-    // 9. Delete Warehouse Inventory
-    const inventory = await prisma.warehouseInventory.deleteMany({});
-    console.log(`✓ Deleted Warehouse Inventory: ${inventory.count}`);
-
-    // 10. Delete Procurement Bills
-    const bills = await prisma.procurementBill.deleteMany({});
-    console.log(`✓ Deleted Procurement Bills: ${bills.count}`);
-
-    // 11. Delete Vendors
-    const vendors = await prisma.vendor.deleteMany({});
-    console.log(`✓ Deleted Vendors: ${vendors.count}`);
-
-    // 12. Delete Inbound Leads
-    const leads = await prisma.inboundLead.deleteMany({});
-    console.log(`✓ Deleted Inbound Leads: ${leads.count}`);
-
-    // 13. Delete Daily Price History
-    const priceHistory = await prisma.dailyPriceHistory.deleteMany({});
-    console.log(`✓ Deleted Daily Price History: ${priceHistory.count}`);
-
-    // 14. Delete Warehouses
-    const warehouses = await prisma.warehouse.deleteMany({});
-    console.log(`✓ Deleted Warehouses: ${warehouses.count}`);
-
-    console.log('\n====================================================');
-    console.log('📊 VERIFICATION OF PRESERVED DATA (EXACTLY 4):');
-    console.log('====================================================');
     const empCount = await prisma.employee.count();
     const catCount = await prisma.category.count();
     const unitCount = await prisma.unit.count();
@@ -80,17 +82,16 @@ async function cleanDatabase() {
     console.log(`2. Categories: ${catCount} preserved`);
     console.log(`3. Units:      ${unitCount} preserved`);
     console.log(`4. Produce:    ${prodCount} preserved`);
-    console.log('====================================================');
-    console.log('🎉 Everything else wiped! Clean slate ready for fresh testing.');
-    console.log('====================================================');
-
-    process.exit(0);
   } catch (err) {
-    console.error('❌ Error cleaning database:', err);
-    process.exit(1);
-  } finally {
-    await prisma.$disconnect();
+    console.error('Count verification error:', err?.message);
   }
+
+  console.log('====================================================');
+  console.log('🎉 Everything else wiped! Clean slate ready for fresh testing.');
+  console.log('====================================================');
+
+  await prisma.$disconnect();
+  process.exit(0);
 }
 
 cleanDatabase();

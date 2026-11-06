@@ -55,6 +55,22 @@ export declare class PaymentsController {
         maxRedemptionPercent: number;
         minOrderValue: number;
     }>;
+    getDeliverySettings(): Promise<{
+        id: string;
+        updatedAt: Date;
+        baseFee: number;
+        freeDeliveryThreshold: number;
+        enableFreeDelivery: boolean;
+        updatedBy: string | null;
+    }>;
+    updateDeliverySettings(req: any, body: any): Promise<{
+        id: string;
+        updatedAt: Date;
+        baseFee: number;
+        freeDeliveryThreshold: number;
+        enableFreeDelivery: boolean;
+        updatedBy: string | null;
+    }>;
     getFreshCoinsPublicConfig(): Promise<{
         isEnabled: boolean;
         earningRatePercent: number;

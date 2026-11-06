@@ -136,7 +136,7 @@ let CatalogService = CatalogService_1 = class CatalogService {
                     }),
                     societies,
                     warehouses,
-                    deliveryConfig: delivery_constants_1.DELIVERY_CONFIG,
+                    deliveryConfig: await this.getDeliveryConfig(),
                     activeDeliveryDate: dateObj.toISOString().slice(0, 10),
                     syncedAt: new Date().toISOString(),
                 };
@@ -518,6 +518,23 @@ let CatalogService = CatalogService_1 = class CatalogService {
             activeDeliveryDate: dateObj.toISOString().slice(0, 10),
             syncedAt: new Date().toISOString(),
         };
+    }
+    async getDeliveryConfig() {
+        try {
+            const setting = await this.prisma.deliverySetting.findUnique({
+                where: { id: 'DELIVERY_CONFIG' },
+            });
+            if (setting) {
+                return {
+                    baseFee: setting.baseFee,
+                    freeDeliveryThreshold: setting.freeDeliveryThreshold,
+                    enableFreeDelivery: setting.enableFreeDelivery,
+                };
+            }
+        }
+        catch (e) {
+        }
+        return delivery_constants_1.DELIVERY_CONFIG;
     }
 };
 exports.CatalogService = CatalogService;

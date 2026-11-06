@@ -509,3 +509,18 @@ model FreshCoinsLedger {
   @@map("fresh_coins_ledgers")
 }
 
+// ----------------------------------------------------
+// 14. DYNAMIC DELIVERY FEE & SHIPPING POLICY
+// ----------------------------------------------------
+model DeliverySetting {
+  id                    String   @id @default("DELIVERY_CONFIG")
+  baseFee               Float    @default(25.0)
+  freeDeliveryThreshold Float    @default(299.0)
+  enableFreeDelivery    Boolean  @default(true)
+  updatedAt             DateTime @updatedAt
+  updatedBy             String?
+
+  @@map("delivery_settings")
+}
+
+

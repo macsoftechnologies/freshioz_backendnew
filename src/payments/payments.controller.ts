@@ -52,6 +52,27 @@ export class PaymentsController {
     return this.paymentsService.updateFreshCoinsSettings(body, req.user);
   }
 
+  // ==========================================
+  // DYNAMIC DELIVERY SETTINGS (ADMIN CONTROLLED)
+  // ==========================================
+  @ApiBearerAuth('JWT-auth')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN')
+  @Get('delivery/settings')
+  @ApiOperation({ summary: 'Get current delivery fee and free delivery thresholds (Super Admin only)' })
+  async getDeliverySettings() {
+    return this.paymentsService.getDeliverySettings();
+  }
+
+  @ApiBearerAuth('JWT-auth')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN')
+  @Put('delivery/settings')
+  @ApiOperation({ summary: 'Update delivery fee and free delivery thresholds (Super Admin only)' })
+  async updateDeliverySettings(@Req() req: any, @Body() body: any) {
+    return this.paymentsService.updateDeliverySettings(body, req.user);
+  }
+
   @Get('fresh-coins/public-config')
   @ApiOperation({ summary: 'Public FreshCoins configuration for cart & checkout calculations' })
   async getFreshCoinsPublicConfig() {

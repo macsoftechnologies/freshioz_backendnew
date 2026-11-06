@@ -38,6 +38,12 @@ let PaymentsController = class PaymentsController {
     async updateFreshCoinsSettings(req, body) {
         return this.paymentsService.updateFreshCoinsSettings(body, req.user);
     }
+    async getDeliverySettings() {
+        return this.paymentsService.getDeliverySettings();
+    }
+    async updateDeliverySettings(req, body) {
+        return this.paymentsService.updateDeliverySettings(body, req.user);
+    }
     async getFreshCoinsPublicConfig() {
         return this.paymentsService.getFreshCoinsPublicConfig();
     }
@@ -108,6 +114,28 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], PaymentsController.prototype, "updateFreshCoinsSettings", null);
+__decorate([
+    (0, swagger_1.ApiBearerAuth)('JWT-auth'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('SUPER_ADMIN'),
+    (0, common_1.Get)('delivery/settings'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get current delivery fee and free delivery thresholds (Super Admin only)' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], PaymentsController.prototype, "getDeliverySettings", null);
+__decorate([
+    (0, swagger_1.ApiBearerAuth)('JWT-auth'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('SUPER_ADMIN'),
+    (0, common_1.Put)('delivery/settings'),
+    (0, swagger_1.ApiOperation)({ summary: 'Update delivery fee and free delivery thresholds (Super Admin only)' }),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], PaymentsController.prototype, "updateDeliverySettings", null);
 __decorate([
     (0, common_1.Get)('fresh-coins/public-config'),
     (0, swagger_1.ApiOperation)({ summary: 'Public FreshCoins configuration for cart & checkout calculations' }),

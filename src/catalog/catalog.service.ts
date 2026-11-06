@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { DELIVERY_CONFIG } from './delivery.constants';
+import { DELIVERY_CONFIG, DeliveryConfig } from './delivery.constants';
 
 function parseTargetDeliveryDateRange(dateStr?: string) {
   if (dateStr) {
@@ -133,7 +133,7 @@ export class CatalogService {
           }),
           societies,
           warehouses,
-          deliveryConfig: DELIVERY_CONFIG,
+          deliveryConfig: await this.getDeliveryConfig(),
           activeDeliveryDate: dateObj.toISOString().slice(0, 10),
           syncedAt: new Date().toISOString(),
         };
@@ -521,5 +521,23 @@ export class CatalogService {
       activeDeliveryDate: dateObj.toISOString().slice(0, 10),
       syncedAt: new Date().toISOString(),
     };
+  }
+
+  async getDeliveryConfig(): Promise<DeliveryConfig> {
+    try {
+      const setting = await this.prisma.deliverySetting.findUnique({
+        where: { id: 'DELIVERY_CONFIG' },
+      });
+      if (setting) {
+        return {
+          baseFee: setting.baseFee,
+          freeDeliveryThreshold: setting.freeDeliveryThreshold,
+          enableFreeDelivery: setting.enableFreeDelivery,
+        };
+      }
+    } catch (e) {
+      // Graceful fallback to static configuration
+    }
+    return DELIVERY_CONFIG;
   }
 }

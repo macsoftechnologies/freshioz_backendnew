@@ -471,4 +471,43 @@ export class PaymentsService {
       history,
     };
   }
+
+  // ==========================================
+  // DYNAMIC DELIVERY SETTINGS & SHIPPING POLICY
+  // ==========================================
+  async getOrCreateDeliverySettings() {
+    let setting = await this.prisma.deliverySetting.findUnique({
+      where: { id: 'DELIVERY_CONFIG' },
+    });
+
+    if (!setting) {
+      setting = await this.prisma.deliverySetting.create({
+        data: {
+          id: 'DELIVERY_CONFIG',
+          baseFee: 25.0,
+          freeDeliveryThreshold: 299.0,
+          enableFreeDelivery: true,
+        },
+      });
+    }
+
+    return setting;
+  }
+
+  async getDeliverySettings() {
+    return this.getOrCreateDeliverySettings();
+  }
+
+  async updateDeliverySettings(dto: any, user: any) {
+    await this.getOrCreateDeliverySettings();
+    return this.prisma.deliverySetting.update({
+      where: { id: 'DELIVERY_CONFIG' },
+      data: {
+        baseFee: dto.baseFee !== undefined ? Math.max(0, Number(dto.baseFee)) : 25.0,
+        freeDeliveryThreshold: dto.freeDeliveryThreshold !== undefined ? Math.max(0, Number(dto.freeDeliveryThreshold)) : 299.0,
+        enableFreeDelivery: dto.enableFreeDelivery !== undefined ? Boolean(dto.enableFreeDelivery) : true,
+        updatedBy: user?.name || user?.email || 'Super Admin',
+      },
+    });
+  }
 }

@@ -1,4 +1,5 @@
 import { PrismaService } from '../prisma/prisma.service';
+import { DeliveryConfig } from './delivery.constants';
 export declare class CatalogService {
     private readonly prisma;
     private readonly logger;
@@ -7,9 +8,9 @@ export declare class CatalogService {
         categories: {
             id: string;
             name: string;
-            description: string;
             slug: string;
             icon: string;
+            description: string;
             sortOrder: number;
         }[];
         units: {
@@ -28,10 +29,9 @@ export declare class CatalogService {
             gstPercent: any;
             hasCustomDailyPrice: boolean;
             id: string;
+            name: string;
             status: string;
             desc: string;
-            name: string;
-            tags: string[];
             kannadaName: string;
             categoryId: string;
             retailUnit: string;
@@ -39,24 +39,25 @@ export declare class CatalogService {
             shelfLife: string;
             image: string;
             badge: string;
+            tags: string[];
             inStock: boolean;
         }[];
         societies: {
             id: string;
-            warehouseId: string;
-            status: string;
             name: string;
+            status: string;
             type: string;
             address: string;
             imageUrl: string;
             lat: number;
             lng: number;
+            warehouseId: string;
             deliveryMode: string;
         }[];
         warehouses: {
             id: string;
-            status: string;
             name: string;
+            status: string;
             lat: number;
             lng: number;
             code: string;
@@ -64,9 +65,10 @@ export declare class CatalogService {
             openTime: string;
             cutoffTime: string;
         }[];
-        deliveryConfig: import("./delivery.constants").DeliveryConfig;
+        deliveryConfig: DeliveryConfig;
         activeDeliveryDate: string;
         syncedAt: string;
     }>;
     private getFallbackCatalog;
+    getDeliveryConfig(): Promise<DeliveryConfig>;
 }

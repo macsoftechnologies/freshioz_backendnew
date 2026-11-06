@@ -258,8 +258,18 @@ export class OrdersService {
       // 5. SERVER-SIDE DELIVERY FEE & GST CALCULATION
       const itemsNetTotal = Math.max(0, calculatedSubtotal - calculatedBulkSavings);
       let deliveryFee = 0;
-      if (itemsNetTotal > 0 && itemsNetTotal < 299) {
-        deliveryFee = Math.max(0, Number(dto.deliveryFee) || 25);
+
+      let deliverySetting: any = null;
+      try {
+        deliverySetting = await tx.deliverySetting.findUnique({ where: { id: 'DELIVERY_CONFIG' } });
+      } catch (e) {}
+
+      const baseFee = deliverySetting ? deliverySetting.baseFee : 25;
+      const freeThreshold = deliverySetting ? deliverySetting.freeDeliveryThreshold : 299;
+      const isFreeEnabled = deliverySetting ? deliverySetting.enableFreeDelivery : true;
+
+      if (itemsNetTotal > 0 && (!isFreeEnabled || itemsNetTotal < freeThreshold)) {
+        deliveryFee = Math.max(0, baseFee);
       } else {
         deliveryFee = 0;
       }

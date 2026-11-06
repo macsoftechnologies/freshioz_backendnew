@@ -29,7 +29,6 @@ export declare class CategoriesController {
             desc: string | null;
             name: string;
             bulkDiscountPercent: number;
-            tags: string[];
             kannadaName: string | null;
             categoryId: string;
             retailUnit: string;
@@ -40,6 +39,7 @@ export declare class CategoriesController {
             shelfLife: string | null;
             image: string;
             badge: string | null;
+            tags: string[];
             gstPercent: number;
             inStock: boolean;
         }[];

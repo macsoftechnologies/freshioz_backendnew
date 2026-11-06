@@ -242,4 +242,28 @@ export declare class PaymentsService {
             description: string | null;
         }[];
     }>;
+    getOrCreateDeliverySettings(): Promise<{
+        id: string;
+        updatedAt: Date;
+        baseFee: number;
+        freeDeliveryThreshold: number;
+        enableFreeDelivery: boolean;
+        updatedBy: string | null;
+    }>;
+    getDeliverySettings(): Promise<{
+        id: string;
+        updatedAt: Date;
+        baseFee: number;
+        freeDeliveryThreshold: number;
+        enableFreeDelivery: boolean;
+        updatedBy: string | null;
+    }>;
+    updateDeliverySettings(dto: any, user: any): Promise<{
+        id: string;
+        updatedAt: Date;
+        baseFee: number;
+        freeDeliveryThreshold: number;
+        enableFreeDelivery: boolean;
+        updatedBy: string | null;
+    }>;
 }

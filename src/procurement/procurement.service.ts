@@ -160,6 +160,20 @@ export class ProcurementService {
         }
       }
 
+      // AUTO-ADVANCE FULFILLED ORDERS: CONFIRMED / PROCURING -> AT_WAREHOUSE
+      // Once the warehouse manager procures crops at Mandi, orders arrive at the hub and unlock for warehouse packing staff.
+      if (Array.isArray(dto.fulfilledOrderIds) && dto.fulfilledOrderIds.length > 0) {
+        await tx.order.updateMany({
+          where: {
+            id: { in: dto.fulfilledOrderIds },
+            status: { in: ['CONFIRMED', 'PROCURING'] },
+          },
+          data: {
+            status: 'AT_WAREHOUSE',
+          },
+        });
+      }
+
       return {
         ...created,
         deliveryDate: toISTDateString(created.procuredAt),

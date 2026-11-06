@@ -121,6 +121,11 @@ export class CreateProcurementBillDto {
   @IsString()
   deliveryDate?: string;
 
+  @ApiPropertyOptional({ example: ['FRZ_ORD_01', 'FRZ_ORD_02'] })
+  @IsOptional()
+  @IsArray()
+  fulfilledOrderIds?: string[];
+
   @ApiProperty({ type: [ProcurementItemDto] })
   @IsArray()
   items!: ProcurementItemDto[];

@@ -30,13 +30,21 @@ export class OrdersService {
       andClauses.push({ OR: riderOr });
     }
     if (query?.warehouseId && query.warehouseId !== 'ALL') {
+      const wh = await this.prisma.warehouse.findFirst({
+        where: { OR: [{ id: query.warehouseId }, { code: query.warehouseId }, { uuid: query.warehouseId }] }
+      });
+      const validTargets = [query.warehouseId];
+      if (wh?.id && !validTargets.includes(wh.id)) validTargets.push(wh.id);
+      if (wh?.code && !validTargets.includes(wh.code)) validTargets.push(wh.code);
+      if (wh?.uuid && !validTargets.includes(wh.uuid)) validTargets.push(wh.uuid);
+
       andClauses.push({
         OR: [
-          { warehouseId: query.warehouseId },
-          { warehouseCode: query.warehouseId },
-          { warehouse: { code: query.warehouseId } },
-          { warehouse: { id: query.warehouseId } },
-          { society: { warehouseId: query.warehouseId } },
+          { warehouseId: { in: validTargets } },
+          { warehouseCode: { in: validTargets } },
+          { warehouse: { id: { in: validTargets } } },
+          { warehouse: { code: { in: validTargets } } },
+          { society: { warehouseId: { in: validTargets } } },
         ],
       });
     }
@@ -391,7 +399,7 @@ export class OrdersService {
       }
 
       // 5.2 SERVER-SIDE CUTOFF & DELIVERY DATE ASSIGNMENT (Asia/Kolkata)
-      // Determine cutoff time from warehouse (e.g. "21:00")
+      // Determine cutoff time from warehouse (e.g. "23:30" or "02:00" dawn cutoff)
       const cutoffTimeStr = warehouse?.cutoffTime || '21:00';
       const [cutoffH, cutoffM] = cutoffTimeStr.split(':').map(Number);
 
@@ -401,14 +409,24 @@ export class OrdersService {
       const currentIstHours = istTime.getUTCHours();
       const currentIstMinutes = istTime.getUTCMinutes();
 
-      const isPastCutoff = (currentIstHours > cutoffH) || (currentIstHours === cutoffH && currentIstMinutes >= cutoffM);
-
-      // Target delivery date: if before cutoff -> Tomorrow, if after cutoff -> Day after tomorrow
       const deliveryDateObj = new Date(istTime);
-      if (isPastCutoff) {
-        deliveryDateObj.setUTCDate(deliveryDateObj.getUTCDate() + 2);
+
+      if (cutoffH <= 6) {
+        // Dawn cutoff (e.g. 02:00 AM / 04:00 AM)
+        if (currentIstHours < cutoffH || (currentIstHours === cutoffH && currentIstMinutes < cutoffM)) {
+          // Late night ordering before dawn cutoff -> delivery is TODAY morning!
+        } else {
+          // After dawn cutoff -> next delivery is TOMORROW morning!
+          deliveryDateObj.setUTCDate(deliveryDateObj.getUTCDate() + 1);
+        }
       } else {
-        deliveryDateObj.setUTCDate(deliveryDateObj.getUTCDate() + 1);
+        // Standard evening cutoff (e.g. 21:00 or 23:30)
+        const isPastCutoff = (currentIstHours > cutoffH) || (currentIstHours === cutoffH && currentIstMinutes >= cutoffM);
+        if (isPastCutoff) {
+          deliveryDateObj.setUTCDate(deliveryDateObj.getUTCDate() + 2);
+        } else {
+          deliveryDateObj.setUTCDate(deliveryDateObj.getUTCDate() + 1);
+        }
       }
 
       const dDay = String(deliveryDateObj.getUTCDate()).padStart(2, '0');

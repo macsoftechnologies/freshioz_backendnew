@@ -5,12 +5,46 @@ import { PrismaService } from '../prisma/prisma.service';
 export class WarehousesService {
   constructor(private readonly prisma: PrismaService) {}
 
+  resolveWarehouseSlots(warehouse: any) {
+    if (warehouse?.slots) {
+      try {
+        const parsed = typeof warehouse.slots === 'string' ? JSON.parse(warehouse.slots) : warehouse.slots;
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (e) {}
+    }
+
+    return [
+      {
+        id: 'SLOT_DAWN',
+        label: 'Early Dawn Drop (05:30 AM - 07:00 AM)',
+        timeWindow: '05:30 AM - 07:00 AM',
+        desc: 'Security desk / gate drop before morning commute',
+        enabled: true,
+      },
+      {
+        id: 'SLOT_MORNING',
+        label: 'Morning Fresh Slot (07:00 AM - 08:30 AM)',
+        timeWindow: '07:00 AM - 08:30 AM',
+        desc: 'Doorstep delivery fresh from dawn harvest',
+        enabled: true,
+      },
+      {
+        id: 'SLOT_EVENING',
+        label: 'Evening Fresh Run (05:30 PM - 07:30 PM)',
+        timeWindow: '05:30 PM - 07:30 PM',
+        desc: 'Fresh batch delivery for evening dinner prep',
+        enabled: true,
+      },
+    ];
+  }
+
   async findAll(isStaff = false) {
     const list = await this.prisma.warehouse.findMany({
       orderBy: { createdAt: 'asc' },
     });
     return list.map(w => ({
       ...w,
+      slots: this.resolveWarehouseSlots(w),
       managerPhone: (isStaff && w.managerPhone) ? w.managerPhone : (w.managerPhone ? '••••' + w.managerPhone.slice(-4) : null),
     }));
   }
@@ -45,6 +79,7 @@ export class WarehousesService {
 
     return {
       ...warehouse,
+      slots: this.resolveWarehouseSlots(warehouse),
       societies: sanitizedSocieties,
       managerPhone: (isStaff && warehouse.managerPhone)
         ? warehouse.managerPhone

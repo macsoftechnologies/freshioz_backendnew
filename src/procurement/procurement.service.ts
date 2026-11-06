@@ -172,6 +172,16 @@ export class ProcurementService {
             status: 'AT_WAREHOUSE',
           },
         });
+      } else {
+        // Fallback: When procurement bill is recorded, automatically advance all pending customer orders to AT_WAREHOUSE
+        await tx.order.updateMany({
+          where: {
+            status: { in: ['CONFIRMED', 'PROCURING'] },
+          },
+          data: {
+            status: 'AT_WAREHOUSE',
+          },
+        });
       }
 
       return {

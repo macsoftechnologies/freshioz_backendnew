@@ -43,8 +43,15 @@ export class OrdersController {
       const partnerSocId = user.societyId || user.id;
       return this.ordersService.findAll({ status, societyId: partnerSocId, phone, warehouseId });
     }
-    // 3. For internal staff: if user is not Super Admin, scope strictly to staff warehouse
+    // 3. Delivery Executives: view all orders dispatched to them or in their operational run
     const isSuperAdmin = user?.roles?.includes('SUPER_ADMIN') || user?.role === 'SUPER_ADMIN';
+    const isDeliveryExecutive = user?.roles?.includes('DELIVERY_EXECUTIVE') || user?.role === 'DELIVERY_EXECUTIVE';
+
+    if (isDeliveryExecutive) {
+      return this.ordersService.findAll({ status, societyId, phone, warehouseId: warehouseId || undefined, deliveryPartnerId: user?.id, deliveryPartnerPhone: user?.phone });
+    }
+
+    // 4. Warehouse & Hub Staff: scope to assigned warehouse if configured
     const staffWarehouseId = user?.assignedWarehouseId || user?.warehouseId;
     const effectiveWarehouseId = !isSuperAdmin ? (staffWarehouseId || warehouseId) : warehouseId;
 

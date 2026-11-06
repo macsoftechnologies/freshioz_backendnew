@@ -3,14 +3,12 @@ const prisma = new PrismaClient();
 
 async function cleanDatabase() {
   console.log('====================================================');
-  console.log('🚀 FRESHIOZ COMPLETE DATABASE CLEANUP');
-  console.log('PRESERVING:');
-  console.log('  1. Employees (All Admin / Staff logins)');
+  console.log('🚀 FRESHIOZ COMPLETE DATABASE RESET');
+  console.log('PRESERVING STRICTLY ONLY:');
+  console.log('  1. Employees');
   console.log('  2. Categories');
   console.log('  3. Units');
-  console.log('  4. Warehouses');
-  console.log('  5. Products Catalog');
-  console.log('  6. System Configuration (Payment, Coins, Delivery Settings)');
+  console.log('  4. Produce (Products)');
   console.log('====================================================\n');
 
   try {
@@ -66,22 +64,24 @@ async function cleanDatabase() {
     const priceHistory = await prisma.dailyPriceHistory.deleteMany({});
     console.log(`✓ Deleted Daily Price History: ${priceHistory.count}`);
 
+    // 14. Delete Warehouses
+    const warehouses = await prisma.warehouse.deleteMany({});
+    console.log(`✓ Deleted Warehouses: ${warehouses.count}`);
+
     console.log('\n====================================================');
-    console.log('📊 VERIFICATION OF PRESERVED DATA:');
+    console.log('📊 VERIFICATION OF PRESERVED DATA (EXACTLY 4):');
     console.log('====================================================');
     const empCount = await prisma.employee.count();
     const catCount = await prisma.category.count();
     const unitCount = await prisma.unit.count();
-    const whCount = await prisma.warehouse.count();
     const prodCount = await prisma.product.count();
 
-    console.log(`• Employees:  ${empCount} preserved`);
-    console.log(`• Categories: ${catCount} preserved`);
-    console.log(`• Units:      ${unitCount} preserved`);
-    console.log(`• Warehouses: ${whCount} preserved`);
-    console.log(`• Products:   ${prodCount} preserved`);
+    console.log(`1. Employees:  ${empCount} preserved`);
+    console.log(`2. Categories: ${catCount} preserved`);
+    console.log(`3. Units:      ${unitCount} preserved`);
+    console.log(`4. Produce:    ${prodCount} preserved`);
     console.log('====================================================');
-    console.log('🎉 Database is freshly cleaned and ready for testing!');
+    console.log('🎉 Everything else wiped! Clean slate ready for fresh testing.');
     console.log('====================================================');
 
     process.exit(0);

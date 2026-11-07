@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { DELIVERY_CONFIG, DeliveryConfig } from './delivery.constants';
+import { readWarehouseSlotsConfig, getDefaultWarehouseSlots } from '../warehouses/warehouses.service';
 
 function parseTargetDeliveryDateRange(dateStr?: string) {
   if (dateStr) {
@@ -50,6 +51,18 @@ export class CatalogService {
   private readonly logger = new Logger(CatalogService.name);
 
   constructor(private readonly prisma: PrismaService) {}
+
+  resolveWarehouseSlots(warehouse: any) {
+    const config = readWarehouseSlotsConfig();
+    const customSlots = (warehouse && (config[warehouse.id] || config[warehouse.code])) || warehouse?.slots;
+    if (customSlots) {
+      try {
+        const parsed = typeof customSlots === 'string' ? JSON.parse(customSlots) : customSlots;
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (e) {}
+    }
+    return getDefaultWarehouseSlots();
+  }
 
   async getPublicCatalog(targetDate?: string) {
     const { start, end, dateObj } = parseTargetDeliveryDateRange(targetDate);
@@ -132,7 +145,10 @@ export class CatalogService {
             };
           }),
           societies,
-          warehouses,
+          warehouses: warehouses.map(w => ({
+            ...w,
+            slots: this.resolveWarehouseSlots(w),
+          })),
           deliveryConfig: await this.getDeliveryConfig(),
           activeDeliveryDate: dateObj.toISOString().slice(0, 10),
           syncedAt: new Date().toISOString(),

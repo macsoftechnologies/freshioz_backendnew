@@ -1,41 +1,68 @@
 import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import * as fs from 'fs';
+import * as path from 'path';
+
+const SLOTS_FILE = path.join(process.cwd(), 'uploads', 'warehouse-slots.json');
+
+export function readWarehouseSlotsConfig(): Record<string, any[]> {
+  try {
+    if (fs.existsSync(SLOTS_FILE)) {
+      return JSON.parse(fs.readFileSync(SLOTS_FILE, 'utf8'));
+    }
+  } catch (e) {}
+  return {};
+}
+
+export function writeWarehouseSlotsConfig(config: Record<string, any[]>) {
+  try {
+    const dir = path.dirname(SLOTS_FILE);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(SLOTS_FILE, JSON.stringify(config, null, 2), 'utf8');
+  } catch (e) {}
+}
+
+export function getDefaultWarehouseSlots() {
+  return [
+    {
+      id: 'SLOT_DAWN',
+      label: 'Early Dawn Drop (05:30 AM - 07:00 AM)',
+      timeWindow: '05:30 AM - 07:00 AM',
+      desc: 'Security desk / gate drop before morning commute',
+      enabled: true,
+    },
+    {
+      id: 'SLOT_MORNING',
+      label: 'Morning Fresh Slot (07:00 AM - 08:30 AM)',
+      timeWindow: '07:00 AM - 08:30 AM',
+      desc: 'Doorstep delivery fresh from dawn harvest',
+      enabled: true,
+    },
+    {
+      id: 'SLOT_EVENING',
+      label: 'Evening Fresh Run (05:30 PM - 07:30 PM)',
+      timeWindow: '05:30 PM - 07:30 PM',
+      desc: 'Fresh batch delivery for evening dinner prep',
+      enabled: true,
+    },
+  ];
+}
 
 @Injectable()
 export class WarehousesService {
   constructor(private readonly prisma: PrismaService) {}
 
   resolveWarehouseSlots(warehouse: any) {
-    if (warehouse?.slots) {
+    const config = readWarehouseSlotsConfig();
+    const customSlots = (warehouse && (config[warehouse.id] || config[warehouse.code])) || warehouse?.slots;
+    if (customSlots) {
       try {
-        const parsed = typeof warehouse.slots === 'string' ? JSON.parse(warehouse.slots) : warehouse.slots;
+        const parsed = typeof customSlots === 'string' ? JSON.parse(customSlots) : customSlots;
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       } catch (e) {}
     }
 
-    return [
-      {
-        id: 'SLOT_DAWN',
-        label: 'Early Dawn Drop (05:30 AM - 07:00 AM)',
-        timeWindow: '05:30 AM - 07:00 AM',
-        desc: 'Security desk / gate drop before morning commute',
-        enabled: true,
-      },
-      {
-        id: 'SLOT_MORNING',
-        label: 'Morning Fresh Slot (07:00 AM - 08:30 AM)',
-        timeWindow: '07:00 AM - 08:30 AM',
-        desc: 'Doorstep delivery fresh from dawn harvest',
-        enabled: true,
-      },
-      {
-        id: 'SLOT_EVENING',
-        label: 'Evening Fresh Run (05:30 PM - 07:30 PM)',
-        timeWindow: '05:30 PM - 07:30 PM',
-        desc: 'Fresh batch delivery for evening dinner prep',
-        enabled: true,
-      },
-    ];
+    return getDefaultWarehouseSlots();
   }
 
   async findAll(isStaff = false) {
@@ -110,7 +137,7 @@ export class WarehousesService {
       throw new ConflictException(`Warehouse "${name}" already exists`);
     }
 
-    return this.prisma.warehouse.create({
+    const created = await this.prisma.warehouse.create({
       data: {
         id: id || `FRZ_WH_${Date.now()}`,
         code: warehouseCode,
@@ -126,6 +153,18 @@ export class WarehousesService {
         status: status || 'ACTIVE',
       },
     });
+
+    if (body.slots && Array.isArray(body.slots)) {
+      const config = readWarehouseSlotsConfig();
+      config[created.id] = body.slots;
+      config[created.code] = body.slots;
+      writeWarehouseSlotsConfig(config);
+    }
+
+    return {
+      ...created,
+      slots: this.resolveWarehouseSlots(created),
+    };
   }
 
   async update(id: string, data: any) {
@@ -134,7 +173,7 @@ export class WarehousesService {
     });
     if (!existing) throw new NotFoundException('Warehouse not found');
 
-    return this.prisma.warehouse.update({
+    const updated = await this.prisma.warehouse.update({
       where: { id: existing.id },
       data: {
         ...(data.name && { name: data.name }),
@@ -149,6 +188,18 @@ export class WarehousesService {
         ...(data.status && { status: data.status }),
       },
     });
+
+    if (data.slots && Array.isArray(data.slots)) {
+      const config = readWarehouseSlotsConfig();
+      config[updated.id] = data.slots;
+      config[updated.code] = data.slots;
+      writeWarehouseSlotsConfig(config);
+    }
+
+    return {
+      ...updated,
+      slots: this.resolveWarehouseSlots(updated),
+    };
   }
 
   async delete(id: string) {

@@ -1,6 +1,7 @@
 import { Injectable, InternalServerErrorException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { toISTFullString } from '../common/date-utils';
+import { readWarehouseSlotsConfig, writeWarehouseSlotsConfig, getDefaultWarehouseSlots } from '../warehouses/warehouses.service';
 
 const EMPLOYEE_PUBLIC_FIELDS = {
   id: true,
@@ -19,6 +20,18 @@ const EMPLOYEE_PUBLIC_FIELDS = {
 @Injectable()
 export class StoreService {
   constructor(private readonly prisma: PrismaService) {}
+
+  resolveWarehouseSlots(warehouse: any) {
+    const config = readWarehouseSlotsConfig();
+    const customSlots = (warehouse && (config[warehouse.id] || config[warehouse.code])) || warehouse?.slots;
+    if (customSlots) {
+      try {
+        const parsed = typeof customSlots === 'string' ? JSON.parse(customSlots) : customSlots;
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (e) {}
+    }
+    return getDefaultWarehouseSlots();
+  }
 
   async getCombinedStore(currentUser?: any) {
     const isStaffOrAdmin = Boolean(
@@ -165,6 +178,7 @@ export class StoreService {
       openTime: w.openTime,
       cutoffTime: w.cutoffTime,
       status: w.status,
+      slots: this.resolveWarehouseSlots(w),
       managerPhone: (isStaffOrAdmin && w.managerPhone) ? w.managerPhone : (w.managerPhone ? `••••${w.managerPhone.slice(-4)}` : null),
       ...(isStaffOrAdmin && {
         capacityTons: w.capacityTons,
@@ -460,6 +474,11 @@ export class StoreService {
                   location: w.location || w.address || 'Bengaluru Hub',
                   lat: w.lat ? parseFloat(w.lat) : null,
                   lng: w.lng ? parseFloat(w.lng) : null,
+                  openTime: w.openTime || undefined,
+                  cutoffTime: w.cutoffTime || undefined,
+                  capacityTons: w.capacityTons ? parseFloat(w.capacityTons) : undefined,
+                  managerName: w.managerName || undefined,
+                  managerPhone: (w.managerPhone && !String(w.managerPhone).includes('••••')) ? w.managerPhone : undefined,
                   status: w.status || 'ACTIVE',
                 },
                 create: {
@@ -469,9 +488,21 @@ export class StoreService {
                   location: w.location || w.address || 'Bengaluru Hub',
                   lat: w.lat ? parseFloat(w.lat) : null,
                   lng: w.lng ? parseFloat(w.lng) : null,
+                  openTime: w.openTime || '05:00',
+                  cutoffTime: w.cutoffTime || '23:30',
+                  capacityTons: w.capacityTons ? parseFloat(w.capacityTons) : 40,
+                  managerName: w.managerName || null,
+                  managerPhone: w.managerPhone || null,
                   status: w.status || 'ACTIVE',
                 },
               });
+
+              if (w.slots && Array.isArray(w.slots)) {
+                const config = readWarehouseSlotsConfig();
+                config[w.id] = w.slots;
+                if (w.code) config[w.code] = w.slots;
+                writeWarehouseSlotsConfig(config);
+              }
             }
           } else {
             skipped.push('warehouses');

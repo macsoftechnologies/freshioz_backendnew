@@ -36,15 +36,26 @@ export class EmployeesService {
 
     const where: any = {};
     if (warehouseId && warehouseId !== 'ALL') {
-      const wh = warehouses.find(w => w.id === warehouseId || w.code === warehouseId);
-      const matchedIds = [warehouseId];
+      const wh = warehouses.find(w => w.id === warehouseId || w.code === warehouseId || w.uuid === warehouseId);
+      const matchedIds = [warehouseId, 'ALL'];
       if (wh?.id && !matchedIds.includes(wh.id)) matchedIds.push(wh.id);
+      if (wh?.uuid && !matchedIds.includes(wh.uuid)) matchedIds.push(wh.uuid);
       if (wh?.code && !matchedIds.includes(wh.code)) matchedIds.push(wh.code);
 
-      where.assignedWarehouseId = { in: matchedIds };
-      where.NOT = {
-        roles: { has: 'SUPER_ADMIN' }
-      };
+      where.AND = [
+        {
+          OR: [
+            { assignedWarehouseId: { in: matchedIds } },
+            { assignedWarehouseId: null },
+            { roles: { has: 'DELIVERY_EXECUTIVE' } }
+          ]
+        },
+        {
+          NOT: {
+            roles: { has: 'SUPER_ADMIN' }
+          }
+        }
+      ];
     }
 
     const employees = await this.prisma.employee.findMany({

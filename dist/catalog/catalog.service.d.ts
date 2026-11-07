@@ -4,7 +4,72 @@ export declare class CatalogService {
     private readonly prisma;
     private readonly logger;
     constructor(prisma: PrismaService);
+    resolveWarehouseSlots(warehouse: any): any[];
     getPublicCatalog(targetDate?: string): Promise<{
+        categories: {
+            id: string;
+            name: string;
+            slug: string;
+            icon: string;
+            description: string;
+            sortOrder: number;
+        }[];
+        units: {
+            id: string;
+            name: string;
+            label: string;
+            isBulk: boolean;
+            description: string;
+        }[];
+        products: {
+            id: string;
+            name: string;
+            kannadaName: string;
+            categoryId: string;
+            category: string;
+            retailUnit: string;
+            retailPrice: number;
+            retailMarketPrice: number;
+            bulkMinQty: number;
+            bulkDiscountPercent: number;
+            origin: string;
+            shelfLife: string;
+            desc: string;
+            image: string;
+            badge: string;
+            tags: string[];
+            gstPercent: number;
+            status: string;
+            inStock: boolean;
+            hasCustomDailyPrice: boolean;
+        }[];
+        societies: {
+            id: string;
+            name: string;
+            type: string;
+            address: string;
+            imageUrl: string;
+            lat: number;
+            lng: number;
+            warehouseId: string;
+            deliveryMode: string;
+            status: string;
+        }[];
+        warehouses: {
+            id: string;
+            code: string;
+            name: string;
+            location: string;
+            lat: number;
+            lng: number;
+            openTime: string;
+            cutoffTime: string;
+            status: string;
+        }[];
+        deliveryConfig: DeliveryConfig;
+        activeDeliveryDate: string;
+        syncedAt: string;
+    } | {
         categories: {
             id: string;
             name: string;
@@ -45,25 +110,26 @@ export declare class CatalogService {
         societies: {
             id: string;
             name: string;
+            lat: number;
+            lng: number;
             status: string;
             type: string;
             address: string;
             imageUrl: string;
-            lat: number;
-            lng: number;
             warehouseId: string;
             deliveryMode: string;
         }[];
         warehouses: {
+            slots: any[];
             id: string;
+            code: string;
             name: string;
-            status: string;
+            location: string;
             lat: number;
             lng: number;
-            code: string;
-            location: string;
             openTime: string;
             cutoffTime: string;
+            status: string;
         }[];
         deliveryConfig: DeliveryConfig;
         activeDeliveryDate: string;

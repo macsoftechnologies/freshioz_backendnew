@@ -14,6 +14,7 @@ exports.CatalogService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const delivery_constants_1 = require("./delivery.constants");
+const warehouses_service_1 = require("../warehouses/warehouses.service");
 function parseTargetDeliveryDateRange(dateStr) {
     if (dateStr) {
         let year, month, day;
@@ -57,6 +58,19 @@ let CatalogService = CatalogService_1 = class CatalogService {
     constructor(prisma) {
         this.prisma = prisma;
         this.logger = new common_1.Logger(CatalogService_1.name);
+    }
+    resolveWarehouseSlots(warehouse) {
+        const config = (0, warehouses_service_1.readWarehouseSlotsConfig)();
+        const customSlots = (warehouse && (config[warehouse.id] || config[warehouse.code])) || warehouse?.slots;
+        if (customSlots) {
+            try {
+                const parsed = typeof customSlots === 'string' ? JSON.parse(customSlots) : customSlots;
+                if (Array.isArray(parsed) && parsed.length > 0)
+                    return parsed;
+            }
+            catch (e) { }
+        }
+        return (0, warehouses_service_1.getDefaultWarehouseSlots)();
     }
     async getPublicCatalog(targetDate) {
         const { start, end, dateObj } = parseTargetDeliveryDateRange(targetDate);
@@ -135,7 +149,10 @@ let CatalogService = CatalogService_1 = class CatalogService {
                         };
                     }),
                     societies,
-                    warehouses,
+                    warehouses: warehouses.map(w => ({
+                        ...w,
+                        slots: this.resolveWarehouseSlots(w),
+                    })),
                     deliveryConfig: await this.getDeliveryConfig(),
                     activeDeliveryDate: dateObj.toISOString().slice(0, 10),
                     syncedAt: new Date().toISOString(),

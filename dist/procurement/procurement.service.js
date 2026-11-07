@@ -146,6 +146,27 @@ let ProcurementService = class ProcurementService {
                     }
                 }
             }
+            if (Array.isArray(dto.fulfilledOrderIds) && dto.fulfilledOrderIds.length > 0) {
+                await tx.order.updateMany({
+                    where: {
+                        id: { in: dto.fulfilledOrderIds },
+                        status: { in: ['CONFIRMED', 'PROCURING'] },
+                    },
+                    data: {
+                        status: 'AT_WAREHOUSE',
+                    },
+                });
+            }
+            else {
+                await tx.order.updateMany({
+                    where: {
+                        status: { in: ['CONFIRMED', 'PROCURING'] },
+                    },
+                    data: {
+                        status: 'AT_WAREHOUSE',
+                    },
+                });
+            }
             return {
                 ...created,
                 deliveryDate: (0, date_utils_1.toISTDateString)(created.procuredAt),

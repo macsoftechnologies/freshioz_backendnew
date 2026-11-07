@@ -13,6 +13,7 @@ exports.StoreService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const date_utils_1 = require("../common/date-utils");
+const warehouses_service_1 = require("../warehouses/warehouses.service");
 const EMPLOYEE_PUBLIC_FIELDS = {
     id: true,
     uuid: true,
@@ -29,6 +30,19 @@ const EMPLOYEE_PUBLIC_FIELDS = {
 let StoreService = class StoreService {
     constructor(prisma) {
         this.prisma = prisma;
+    }
+    resolveWarehouseSlots(warehouse) {
+        const config = (0, warehouses_service_1.readWarehouseSlotsConfig)();
+        const customSlots = (warehouse && (config[warehouse.id] || config[warehouse.code])) || warehouse?.slots;
+        if (customSlots) {
+            try {
+                const parsed = typeof customSlots === 'string' ? JSON.parse(customSlots) : customSlots;
+                if (Array.isArray(parsed) && parsed.length > 0)
+                    return parsed;
+            }
+            catch (e) { }
+        }
+        return (0, warehouses_service_1.getDefaultWarehouseSlots)();
     }
     async getCombinedStore(currentUser) {
         const isStaffOrAdmin = Boolean(currentUser &&
@@ -157,6 +171,7 @@ let StoreService = class StoreService {
             openTime: w.openTime,
             cutoffTime: w.cutoffTime,
             status: w.status,
+            slots: this.resolveWarehouseSlots(w),
             managerPhone: (isStaffOrAdmin && w.managerPhone) ? w.managerPhone : (w.managerPhone ? `••••${w.managerPhone.slice(-4)}` : null),
             ...(isStaffOrAdmin && {
                 capacityTons: w.capacityTons,
@@ -446,6 +461,11 @@ let StoreService = class StoreService {
                                         location: w.location || w.address || 'Bengaluru Hub',
                                         lat: w.lat ? parseFloat(w.lat) : null,
                                         lng: w.lng ? parseFloat(w.lng) : null,
+                                        openTime: w.openTime || undefined,
+                                        cutoffTime: w.cutoffTime || undefined,
+                                        capacityTons: w.capacityTons ? parseFloat(w.capacityTons) : undefined,
+                                        managerName: w.managerName || undefined,
+                                        managerPhone: (w.managerPhone && !String(w.managerPhone).includes('••••')) ? w.managerPhone : undefined,
                                         status: w.status || 'ACTIVE',
                                     },
                                     create: {
@@ -455,9 +475,21 @@ let StoreService = class StoreService {
                                         location: w.location || w.address || 'Bengaluru Hub',
                                         lat: w.lat ? parseFloat(w.lat) : null,
                                         lng: w.lng ? parseFloat(w.lng) : null,
+                                        openTime: w.openTime || '05:00',
+                                        cutoffTime: w.cutoffTime || '23:30',
+                                        capacityTons: w.capacityTons ? parseFloat(w.capacityTons) : 40,
+                                        managerName: w.managerName || null,
+                                        managerPhone: w.managerPhone || null,
                                         status: w.status || 'ACTIVE',
                                     },
                                 });
+                                if (w.slots && Array.isArray(w.slots)) {
+                                    const config = (0, warehouses_service_1.readWarehouseSlotsConfig)();
+                                    config[w.id] = w.slots;
+                                    if (w.code)
+                                        config[w.code] = w.slots;
+                                    (0, warehouses_service_1.writeWarehouseSlotsConfig)(config);
+                                }
                             }
                         }
                         else {

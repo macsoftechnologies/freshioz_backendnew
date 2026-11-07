@@ -2,6 +2,7 @@ import { PrismaService } from '../prisma/prisma.service';
 export declare class StoreService {
     private readonly prisma;
     constructor(prisma: PrismaService);
+    resolveWarehouseSlots(warehouse: any): any[];
     getCombinedStore(currentUser?: any): Promise<{
         warehouses: {
             id: string;
@@ -100,6 +101,7 @@ export declare class StoreService {
             openTime: any;
             cutoffTime: any;
             status: any;
+            slots: any[];
             managerPhone: any;
         }[];
         products: any[];

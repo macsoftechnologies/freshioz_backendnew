@@ -10,11 +10,79 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.WarehousesService = void 0;
+exports.readWarehouseSlotsConfig = readWarehouseSlotsConfig;
+exports.writeWarehouseSlotsConfig = writeWarehouseSlotsConfig;
+exports.getDefaultWarehouseSlots = getDefaultWarehouseSlots;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
+const fs = require("fs");
+const path = require("path");
+const SLOTS_FILE = path.join(process.cwd(), 'uploads', 'warehouse-slots.json');
+function readWarehouseSlotsConfig() {
+    try {
+        if (fs.existsSync(SLOTS_FILE)) {
+            return JSON.parse(fs.readFileSync(SLOTS_FILE, 'utf8'));
+        }
+    }
+    catch (e) { }
+    return {};
+}
+function writeWarehouseSlotsConfig(config) {
+    try {
+        const dir = path.dirname(SLOTS_FILE);
+        if (!fs.existsSync(dir))
+            fs.mkdirSync(dir, { recursive: true });
+        fs.writeFileSync(SLOTS_FILE, JSON.stringify(config, null, 2), 'utf8');
+    }
+    catch (e) { }
+}
+function getDefaultWarehouseSlots() {
+    return [
+        {
+            id: 'SLOT_DAWN',
+            label: 'Early Dawn Drop',
+            startTime: '05:30',
+            endTime: '07:00',
+            timeWindow: '05:30 AM – 07:00 AM',
+            desc: 'Security desk / gate drop before morning commute',
+            enabled: true,
+        },
+        {
+            id: 'SLOT_MORNING',
+            label: 'Morning Fresh Slot',
+            startTime: '07:00',
+            endTime: '08:30',
+            timeWindow: '07:00 AM – 08:30 AM',
+            desc: 'Doorstep delivery fresh from dawn harvest',
+            enabled: true,
+        },
+        {
+            id: 'SLOT_EVENING',
+            label: 'Evening Fresh Run',
+            startTime: '17:30',
+            endTime: '19:30',
+            timeWindow: '05:30 PM – 07:30 PM',
+            desc: 'Fresh batch delivery for evening dinner prep',
+            enabled: true,
+        },
+    ];
+}
 let WarehousesService = class WarehousesService {
     constructor(prisma) {
         this.prisma = prisma;
+    }
+    resolveWarehouseSlots(warehouse) {
+        const config = readWarehouseSlotsConfig();
+        const customSlots = (warehouse && (config[warehouse.id] || config[warehouse.code])) || warehouse?.slots;
+        if (customSlots) {
+            try {
+                const parsed = typeof customSlots === 'string' ? JSON.parse(customSlots) : customSlots;
+                if (Array.isArray(parsed) && parsed.length > 0)
+                    return parsed;
+            }
+            catch (e) { }
+        }
+        return getDefaultWarehouseSlots();
     }
     async findAll(isStaff = false) {
         const list = await this.prisma.warehouse.findMany({
@@ -22,6 +90,7 @@ let WarehousesService = class WarehousesService {
         });
         return list.map(w => ({
             ...w,
+            slots: this.resolveWarehouseSlots(w),
             managerPhone: (isStaff && w.managerPhone) ? w.managerPhone : (w.managerPhone ? '••••' + w.managerPhone.slice(-4) : null),
         }));
     }
@@ -54,6 +123,7 @@ let WarehousesService = class WarehousesService {
         }));
         return {
             ...warehouse,
+            slots: this.resolveWarehouseSlots(warehouse),
             societies: sanitizedSocieties,
             managerPhone: (isStaff && warehouse.managerPhone)
                 ? warehouse.managerPhone
@@ -78,7 +148,7 @@ let WarehousesService = class WarehousesService {
             }
             throw new common_1.ConflictException(`Warehouse "${name}" already exists`);
         }
-        return this.prisma.warehouse.create({
+        const created = await this.prisma.warehouse.create({
             data: {
                 id: id || `FRZ_WH_${Date.now()}`,
                 code: warehouseCode,
@@ -94,6 +164,16 @@ let WarehousesService = class WarehousesService {
                 status: status || 'ACTIVE',
             },
         });
+        if (body.slots && Array.isArray(body.slots)) {
+            const config = readWarehouseSlotsConfig();
+            config[created.id] = body.slots;
+            config[created.code] = body.slots;
+            writeWarehouseSlotsConfig(config);
+        }
+        return {
+            ...created,
+            slots: this.resolveWarehouseSlots(created),
+        };
     }
     async update(id, data) {
         const existing = await this.prisma.warehouse.findFirst({
@@ -101,7 +181,7 @@ let WarehousesService = class WarehousesService {
         });
         if (!existing)
             throw new common_1.NotFoundException('Warehouse not found');
-        return this.prisma.warehouse.update({
+        const updated = await this.prisma.warehouse.update({
             where: { id: existing.id },
             data: {
                 ...(data.name && { name: data.name }),
@@ -116,6 +196,16 @@ let WarehousesService = class WarehousesService {
                 ...(data.status && { status: data.status }),
             },
         });
+        if (data.slots && Array.isArray(data.slots)) {
+            const config = readWarehouseSlotsConfig();
+            config[updated.id] = data.slots;
+            config[updated.code] = data.slots;
+            writeWarehouseSlotsConfig(config);
+        }
+        return {
+            ...updated,
+            slots: this.resolveWarehouseSlots(updated),
+        };
     }
     async delete(id) {
         const existing = await this.prisma.warehouse.findFirst({

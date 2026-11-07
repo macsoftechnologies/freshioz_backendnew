@@ -38,6 +38,10 @@ let OrdersController = class OrdersController {
             return this.ordersService.findAll({ status, societyId: partnerSocId, phone, warehouseId });
         }
         const isSuperAdmin = user?.roles?.includes('SUPER_ADMIN') || user?.role === 'SUPER_ADMIN';
+        const isDeliveryExecutive = user?.roles?.includes('DELIVERY_EXECUTIVE') || user?.role === 'DELIVERY_EXECUTIVE';
+        if (isDeliveryExecutive) {
+            return this.ordersService.findAll({ status, societyId, phone, warehouseId: warehouseId || undefined, deliveryPartnerId: user?.id, deliveryPartnerPhone: user?.phone });
+        }
         const staffWarehouseId = user?.assignedWarehouseId || user?.warehouseId;
         const effectiveWarehouseId = !isSuperAdmin ? (staffWarehouseId || warehouseId) : warehouseId;
         return this.ordersService.findAll({ status, societyId, phone, warehouseId: effectiveWarehouseId });

@@ -103,6 +103,7 @@ export declare class StoreController {
             openTime: any;
             cutoffTime: any;
             status: any;
+            slots: any[];
             managerPhone: any;
         }[];
         products: any[];

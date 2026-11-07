@@ -10,10 +10,10 @@ export declare class EmployeesController {
         assignedLocationName: any;
         id: string;
         uuid: string;
+        name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         phone: string;
         email: string;
         roles: string[];
@@ -24,17 +24,17 @@ export declare class EmployeesController {
         assignedWarehouse: {
             id: string;
             uuid: string;
-            name: string;
             code: string;
+            name: string;
         };
         assignedWarehouseName: string;
         assignedLocationName: string;
         id: string;
         uuid: string;
+        name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         phone: string;
         email: string;
         roles: string[];
@@ -44,10 +44,10 @@ export declare class EmployeesController {
     create(body: CreateEmployeeDto): Promise<{
         id: string;
         uuid: string;
+        name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         phone: string;
         email: string;
         roles: string[];
@@ -57,10 +57,10 @@ export declare class EmployeesController {
     updateWithParam(id: string, body: any): Promise<{
         id: string;
         uuid: string;
+        name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         phone: string;
         email: string;
         roles: string[];
@@ -70,10 +70,10 @@ export declare class EmployeesController {
     update(body: UpdateEmployeeDto): Promise<{
         id: string;
         uuid: string;
+        name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         phone: string;
         email: string;
         roles: string[];

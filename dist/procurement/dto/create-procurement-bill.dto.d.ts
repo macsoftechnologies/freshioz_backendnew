@@ -23,5 +23,6 @@ export declare class CreateProcurementBillDto {
     procuredBy?: string;
     slot?: string;
     deliveryDate?: string;
+    fulfilledOrderIds?: string[];
     items: ProcurementItemDto[];
 }

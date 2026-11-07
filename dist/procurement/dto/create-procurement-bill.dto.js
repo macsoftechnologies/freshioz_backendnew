@@ -158,6 +158,12 @@ __decorate([
     __metadata("design:type", String)
 ], CreateProcurementBillDto.prototype, "deliveryDate", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: ['FRZ_ORD_01', 'FRZ_ORD_02'] }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    __metadata("design:type", Array)
+], CreateProcurementBillDto.prototype, "fulfilledOrderIds", void 0);
+__decorate([
     (0, swagger_1.ApiProperty)({ type: [ProcurementItemDto] }),
     (0, class_validator_1.IsArray)(),
     __metadata("design:type", Array)

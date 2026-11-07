@@ -92,13 +92,13 @@ export declare class PaymentsController {
         history: {
             id: string;
             uuid: string;
-            userId: string;
             createdAt: Date;
             type: string;
+            description: string | null;
+            userId: string;
             orderId: string | null;
             coins: number;
             rupeeValue: number;
-            description: string | null;
         }[];
     }>;
     getPublicConfig(): Promise<{
@@ -117,19 +117,36 @@ export declare class PaymentsController {
     verifyPayment(body: VerifyRazorpayPaymentDto): Promise<{
         orderPlacedAtFormatted: string;
         createdAtFormatted: string;
-        society: {
+        warehouse: {
             id: string;
             uuid: string;
-            warehouseId: string | null;
+            code: string;
+            name: string;
+            location: string;
+            lat: number | null;
+            lng: number | null;
+            openTime: string;
+            cutoffTime: string;
+            capacityTons: number;
+            managerName: string | null;
+            managerPhone: string | null;
             status: string;
             createdAt: Date;
             updatedAt: Date;
+        };
+        society: {
+            id: string;
+            uuid: string;
             name: string;
+            lat: number | null;
+            lng: number | null;
+            status: string;
+            createdAt: Date;
+            updatedAt: Date;
             type: string;
             address: string;
             imageUrl: string | null;
-            lat: number | null;
-            lng: number | null;
+            warehouseId: string | null;
             secretaryName: string | null;
             secretaryPhone: string | null;
             totalFloors: number | null;
@@ -148,46 +165,33 @@ export declare class PaymentsController {
             salesRepName: string | null;
             salesRepPhone: string | null;
         };
-        warehouse: {
-            id: string;
-            uuid: string;
-            status: string;
-            createdAt: Date;
-            updatedAt: Date;
-            name: string;
-            lat: number | null;
-            lng: number | null;
-            code: string;
-            location: string;
-            openTime: string;
-            cutoffTime: string;
-            capacityTons: number;
-            managerName: string | null;
-            managerPhone: string | null;
-        };
         items: {
             id: string;
-            bulkSavings: number | null;
             name: string;
-            orderId: string;
-            productId: string;
             unit: string;
+            bulkDiscountPercent: number | null;
+            productId: string;
+            bulkSavings: number | null;
+            orderId: string;
             qty: number;
             price: number;
             effectivePrice: number | null;
             totalPrice: number | null;
             isBulkApplied: boolean;
-            bulkDiscountPercent: number | null;
         }[];
         id: string;
         uuid: string;
+        status: string;
+        createdAt: Date;
+        updatedAt: Date;
+        warehouseId: string | null;
+        societyId: string | null;
+        societyName: string | null;
+        paymentMethod: string;
         userId: string;
         userName: string;
         userPhone: string;
-        societyId: string | null;
-        societyName: string | null;
         flatNo: string | null;
-        warehouseId: string | null;
         warehouseCode: string | null;
         orderType: string;
         subtotal: number;
@@ -197,8 +201,6 @@ export declare class PaymentsController {
         totalAmount: number;
         deliveryDate: string;
         deliverySlot: string;
-        status: string;
-        paymentMethod: string;
         paymentStatus: string;
         codCollectedAmount: number | null;
         codCollectedAt: Date | null;
@@ -224,8 +226,6 @@ export declare class PaymentsController {
         cancelledReason: string | null;
         cancelledAt: Date | null;
         orderPlacedAt: Date;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     generateOrderDynamicQr(id: string): Promise<{
         orderId: string;

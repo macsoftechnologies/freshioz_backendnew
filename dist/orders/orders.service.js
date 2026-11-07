@@ -24,14 +24,37 @@ let OrdersService = class OrdersService {
             where.status = query.status;
         if (query?.societyId)
             where.societyId = query.societyId;
+        if (query?.deliveryPartnerId || query?.deliveryPartnerPhone) {
+            const cleanRiderPhone = query.deliveryPartnerPhone ? query.deliveryPartnerPhone.replace(/\D/g, '').slice(-10) : '';
+            const riderOr = [];
+            if (query.deliveryPartnerId) {
+                riderOr.push({ deliveryPartnerId: query.deliveryPartnerId });
+            }
+            if (cleanRiderPhone) {
+                riderOr.push({ deliveryPartnerPhone: { contains: cleanRiderPhone } });
+            }
+            riderOr.push({ status: 'OUT_FOR_DELIVERY' });
+            riderOr.push({ status: 'PACKED' });
+            andClauses.push({ OR: riderOr });
+        }
         if (query?.warehouseId && query.warehouseId !== 'ALL') {
+            const wh = await this.prisma.warehouse.findFirst({
+                where: { OR: [{ id: query.warehouseId }, { code: query.warehouseId }, { uuid: query.warehouseId }] }
+            });
+            const validTargets = [query.warehouseId];
+            if (wh?.id && !validTargets.includes(wh.id))
+                validTargets.push(wh.id);
+            if (wh?.code && !validTargets.includes(wh.code))
+                validTargets.push(wh.code);
+            if (wh?.uuid && !validTargets.includes(wh.uuid))
+                validTargets.push(wh.uuid);
             andClauses.push({
                 OR: [
-                    { warehouseId: query.warehouseId },
-                    { warehouseCode: query.warehouseId },
-                    { warehouse: { code: query.warehouseId } },
-                    { warehouse: { id: query.warehouseId } },
-                    { society: { warehouseId: query.warehouseId } },
+                    { warehouseId: { in: validTargets } },
+                    { warehouseCode: { in: validTargets } },
+                    { warehouse: { id: { in: validTargets } } },
+                    { warehouse: { code: { in: validTargets } } },
+                    { society: { warehouseId: { in: validTargets } } },
                 ],
             });
         }
@@ -325,13 +348,22 @@ let OrdersService = class OrdersService {
             const istTime = new Date(nowUtc.getTime() + (5.5 * 60 * 60 * 1000));
             const currentIstHours = istTime.getUTCHours();
             const currentIstMinutes = istTime.getUTCMinutes();
-            const isPastCutoff = (currentIstHours > cutoffH) || (currentIstHours === cutoffH && currentIstMinutes >= cutoffM);
             const deliveryDateObj = new Date(istTime);
-            if (isPastCutoff) {
-                deliveryDateObj.setUTCDate(deliveryDateObj.getUTCDate() + 2);
+            if (cutoffH <= 6) {
+                if (currentIstHours < cutoffH || (currentIstHours === cutoffH && currentIstMinutes < cutoffM)) {
+                }
+                else {
+                    deliveryDateObj.setUTCDate(deliveryDateObj.getUTCDate() + 1);
+                }
             }
             else {
-                deliveryDateObj.setUTCDate(deliveryDateObj.getUTCDate() + 1);
+                const isPastCutoff = (currentIstHours > cutoffH) || (currentIstHours === cutoffH && currentIstMinutes >= cutoffM);
+                if (isPastCutoff) {
+                    deliveryDateObj.setUTCDate(deliveryDateObj.getUTCDate() + 2);
+                }
+                else {
+                    deliveryDateObj.setUTCDate(deliveryDateObj.getUTCDate() + 1);
+                }
             }
             const dDay = String(deliveryDateObj.getUTCDate()).padStart(2, '0');
             const dMonth = String(deliveryDateObj.getUTCMonth() + 1).padStart(2, '0');
@@ -424,7 +456,7 @@ let OrdersService = class OrdersService {
                 where: {
                     OR: [{ id: idOrUuid }, { uuid: idOrUuid }],
                 },
-                include: { society: true },
+                include: { items: true, society: true },
             });
             if (!existing) {
                 throw new common_1.NotFoundException(`Order #${idOrUuid} not found`);
@@ -476,10 +508,58 @@ let OrdersService = class OrdersService {
             }
             if (dto.status === 'OUT_FOR_DELIVERY') {
                 updateData.dispatchedAt = new Date();
+                if (existing.status !== 'OUT_FOR_DELIVERY' && existing.warehouseId && Array.isArray(existing.items)) {
+                    for (const item of existing.items) {
+                        if (!item.productId)
+                            continue;
+                        const inv = await tx.warehouseInventory.findUnique({
+                            where: {
+                                warehouseId_productId: {
+                                    warehouseId: existing.warehouseId,
+                                    productId: item.productId,
+                                },
+                            },
+                        });
+                        if (inv) {
+                            const reservedUsed = Math.min(Math.max(0, inv.reservedQty || 0), item.qty);
+                            const remainingFromCurrent = Math.max(0, item.qty - reservedUsed);
+                            await tx.warehouseInventory.update({
+                                where: {
+                                    warehouseId_productId: {
+                                        warehouseId: existing.warehouseId,
+                                        productId: item.productId,
+                                    },
+                                },
+                                data: {
+                                    reservedQty: Math.max(0, (inv.reservedQty || 0) - reservedUsed),
+                                    currentQty: Math.max(0, (inv.currentQty || 0) - remainingFromCurrent),
+                                },
+                            });
+                        }
+                    }
+                }
             }
             if (dto.status === 'CANCELLED') {
                 updateData.cancelledAt = new Date();
                 updateData.cancelledReason = dto.reason || dto.cancelledReason || 'Cancelled at delivery doorstep';
+                const isPrepaidOnline = existing.paymentStatus === 'PAID' && !String(existing.paymentMethod || '').includes('PAY_ON_DELIVERY') && existing.paymentMethod !== 'COD';
+                if (isPrepaidOnline) {
+                    updateData.paymentStatus = 'REFUNDED';
+                }
+                const appliedDiscount = await tx.customerDiscount.findFirst({
+                    where: { orderId: existing.id },
+                });
+                if (appliedDiscount) {
+                    await tx.customerDiscount.update({
+                        where: { id: appliedDiscount.id },
+                        data: {
+                            usedCount: Math.max(0, appliedDiscount.usedCount - 1),
+                            status: 'ACTIVE',
+                            redeemedAt: null,
+                            orderId: null,
+                        },
+                    });
+                }
                 if (existing.freshCoinsUsed && existing.freshCoinsUsed > 0) {
                     const alreadyRefunded = await tx.freshCoinsLedger.findFirst({
                         where: { orderId: existing.id, type: 'REFUNDED' },
@@ -499,6 +579,37 @@ let OrdersService = class OrdersService {
                                 description: `Refunded ${existing.freshCoinsUsed} FreshCoins for cancelled Order #${existing.id}`,
                             },
                         });
+                    }
+                }
+                if (existing.status !== 'OUT_FOR_DELIVERY' && existing.warehouseId && Array.isArray(existing.items)) {
+                    for (const item of existing.items) {
+                        if (!item.productId)
+                            continue;
+                        const inv = await tx.warehouseInventory.findUnique({
+                            where: {
+                                warehouseId_productId: {
+                                    warehouseId: existing.warehouseId,
+                                    productId: item.productId,
+                                },
+                            },
+                        });
+                        if (inv) {
+                            const toRestore = Math.min(Math.max(0, inv.reservedQty || 0), item.qty);
+                            if (toRestore > 0) {
+                                await tx.warehouseInventory.update({
+                                    where: {
+                                        warehouseId_productId: {
+                                            warehouseId: existing.warehouseId,
+                                            productId: item.productId,
+                                        },
+                                    },
+                                    data: {
+                                        currentQty: inv.currentQty + toRestore,
+                                        reservedQty: Math.max(0, (inv.reservedQty || 0) - toRestore),
+                                    },
+                                });
+                            }
+                        }
                     }
                 }
             }
@@ -599,6 +710,7 @@ let OrdersService = class OrdersService {
             if (existing.status === 'DELIVERED') {
                 throw new common_1.BadRequestException('Delivered orders cannot be cancelled.');
             }
+            const isPrepaidOnline = existing.paymentStatus === 'PAID' && !String(existing.paymentMethod || '').includes('PAY_ON_DELIVERY') && existing.paymentMethod !== 'COD';
             const cancelResult = await tx.order.updateMany({
                 where: {
                     id: existing.id,
@@ -606,6 +718,7 @@ let OrdersService = class OrdersService {
                 },
                 data: {
                     status: 'CANCELLED',
+                    ...(isPrepaidOnline ? { paymentStatus: 'REFUNDED' } : {}),
                     cancelledReason: reason || (isCustomer ? 'Cancelled by resident' : 'Cancelled by hub operations'),
                     cancelledAt: new Date(),
                 },
@@ -648,7 +761,7 @@ let OrdersService = class OrdersService {
                     });
                 }
             }
-            if (existing.warehouseId && Array.isArray(existing.items)) {
+            if (existing.status !== 'OUT_FOR_DELIVERY' && existing.warehouseId && Array.isArray(existing.items)) {
                 for (const item of existing.items) {
                     if (!item.productId)
                         continue;

@@ -9,10 +9,10 @@ export declare class EmployeesService {
         assignedLocationName: any;
         id: string;
         uuid: string;
+        name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         phone: string;
         email: string;
         roles: string[];
@@ -23,17 +23,17 @@ export declare class EmployeesService {
         assignedWarehouse: {
             id: string;
             uuid: string;
-            name: string;
             code: string;
+            name: string;
         };
         assignedWarehouseName: string;
         assignedLocationName: string;
         id: string;
         uuid: string;
+        name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         phone: string;
         email: string;
         roles: string[];
@@ -43,10 +43,10 @@ export declare class EmployeesService {
     create(body: any): Promise<{
         id: string;
         uuid: string;
+        name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         phone: string;
         email: string;
         roles: string[];
@@ -56,10 +56,10 @@ export declare class EmployeesService {
     update(id: string, data: any): Promise<{
         id: string;
         uuid: string;
+        name: string;
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         phone: string;
         email: string;
         roles: string[];

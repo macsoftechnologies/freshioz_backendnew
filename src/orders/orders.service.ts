@@ -531,7 +531,7 @@ export class OrdersService {
         where: {
           OR: [{ id: idOrUuid }, { uuid: idOrUuid }],
         },
-        include: { society: true },
+        include: { items: true, society: true },
       });
 
       if (!existing) {
@@ -583,10 +583,61 @@ export class OrdersService {
       }
       if (dto.status === 'OUT_FOR_DELIVERY') {
         updateData.dispatchedAt = new Date();
+
+        // Deduct dispatched produce from WarehouseInventory (consume reservedQty first, then currentQty)
+        if (existing.status !== 'OUT_FOR_DELIVERY' && existing.warehouseId && Array.isArray(existing.items)) {
+          for (const item of existing.items) {
+            if (!item.productId) continue;
+            const inv = await tx.warehouseInventory.findUnique({
+              where: {
+                warehouseId_productId: {
+                  warehouseId: existing.warehouseId,
+                  productId: item.productId,
+                },
+              },
+            });
+            if (inv) {
+              const reservedUsed = Math.min(Math.max(0, inv.reservedQty || 0), item.qty);
+              const remainingFromCurrent = Math.max(0, item.qty - reservedUsed);
+              await tx.warehouseInventory.update({
+                where: {
+                  warehouseId_productId: {
+                    warehouseId: existing.warehouseId,
+                    productId: item.productId,
+                  },
+                },
+                data: {
+                  reservedQty: Math.max(0, (inv.reservedQty || 0) - reservedUsed),
+                  currentQty: Math.max(0, (inv.currentQty || 0) - remainingFromCurrent),
+                },
+              });
+            }
+          }
+        }
       }
       if (dto.status === 'CANCELLED') {
         updateData.cancelledAt = new Date();
         updateData.cancelledReason = dto.reason || dto.cancelledReason || 'Cancelled at delivery doorstep';
+        const isPrepaidOnline = existing.paymentStatus === 'PAID' && !String(existing.paymentMethod || '').includes('PAY_ON_DELIVERY') && existing.paymentMethod !== 'COD';
+        if (isPrepaidOnline) {
+          updateData.paymentStatus = 'REFUNDED';
+        }
+
+        // Release customer discount code if one was redeemed on this order
+        const appliedDiscount = await tx.customerDiscount.findFirst({
+          where: { orderId: existing.id },
+        });
+        if (appliedDiscount) {
+          await tx.customerDiscount.update({
+            where: { id: appliedDiscount.id },
+            data: {
+              usedCount: Math.max(0, appliedDiscount.usedCount - 1),
+              status: 'ACTIVE',
+              redeemedAt: null,
+              orderId: null,
+            },
+          });
+        }
 
         // Auto-refund any FreshCoins used on this order
         if (existing.freshCoinsUsed && existing.freshCoinsUsed > 0) {
@@ -608,6 +659,39 @@ export class OrdersService {
                 description: `Refunded ${existing.freshCoinsUsed} FreshCoins for cancelled Order #${existing.id}`,
               },
             });
+          }
+        }
+
+        // Pre-dispatch cancellation (before OUT_FOR_DELIVERY): restore reserved stock to currentQty immediately.
+        // (OUT_FOR_DELIVERY cancellations are physical doorstep returns handled via 3. Quality & Returns Audit)
+        if (existing.status !== 'OUT_FOR_DELIVERY' && existing.warehouseId && Array.isArray(existing.items)) {
+          for (const item of existing.items) {
+            if (!item.productId) continue;
+            const inv = await tx.warehouseInventory.findUnique({
+              where: {
+                warehouseId_productId: {
+                  warehouseId: existing.warehouseId,
+                  productId: item.productId,
+                },
+              },
+            });
+            if (inv) {
+              const toRestore = Math.min(Math.max(0, inv.reservedQty || 0), item.qty);
+              if (toRestore > 0) {
+                await tx.warehouseInventory.update({
+                  where: {
+                    warehouseId_productId: {
+                      warehouseId: existing.warehouseId,
+                      productId: item.productId,
+                    },
+                  },
+                  data: {
+                    currentQty: inv.currentQty + toRestore,
+                    reservedQty: Math.max(0, (inv.reservedQty || 0) - toRestore),
+                  },
+                });
+              }
+            }
           }
         }
       }
@@ -731,6 +815,7 @@ export class OrdersService {
       }
 
       // ATOMIC CONCURRENCY CHECK FOR CANCELLATION:
+      const isPrepaidOnline = existing.paymentStatus === 'PAID' && !String(existing.paymentMethod || '').includes('PAY_ON_DELIVERY') && existing.paymentMethod !== 'COD';
       const cancelResult = await tx.order.updateMany({
         where: {
           id: existing.id,
@@ -738,6 +823,7 @@ export class OrdersService {
         },
         data: {
           status: 'CANCELLED',
+          ...(isPrepaidOnline ? { paymentStatus: 'REFUNDED' } : {}),
           cancelledReason: reason || (isCustomer ? 'Cancelled by resident' : 'Cancelled by hub operations'),
           cancelledAt: new Date(),
         },
@@ -786,8 +872,9 @@ export class OrdersService {
         }
       }
 
-      // Restore reserved warehouse stock
-      if (existing.warehouseId && Array.isArray(existing.items)) {
+      // Restore reserved warehouse stock only if cancelled BEFORE OUT_FOR_DELIVERY
+      // (If already OUT_FOR_DELIVERY, produce returns physically via driver and is restocked/audited in Quality & Returns Audit)
+      if (existing.status !== 'OUT_FOR_DELIVERY' && existing.warehouseId && Array.isArray(existing.items)) {
         for (const item of existing.items) {
           if (!item.productId) continue;
           const inv = await tx.warehouseInventory.findUnique({

@@ -20,13 +20,10 @@ async function cleanDatabase() {
     'orders',
     'society_payouts',
     'users',
-    'societies',
     'warehouse_inventory',
     'procurement_bills',
-    'vendors',
     'inbound_leads',
-    'daily_price_history',
-    'warehouses'
+    'daily_price_history'
   ];
 
   for (const table of tablesToTruncate) {
@@ -47,13 +44,10 @@ async function cleanDatabase() {
     { name: 'Orders', fn: () => prisma.order?.deleteMany({}) },
     { name: 'Society Payouts', fn: () => prisma.societyPayout?.deleteMany({}) },
     { name: 'Users (Customers)', fn: () => prisma.user?.deleteMany({}) },
-    { name: 'Societies', fn: () => prisma.society?.deleteMany({}) },
     { name: 'Warehouse Inventory', fn: () => prisma.warehouseInventory?.deleteMany({}) },
     { name: 'Procurement Bills', fn: () => prisma.procurementBill?.deleteMany({}) },
-    { name: 'Vendors', fn: () => prisma.vendor?.deleteMany({}) },
     { name: 'Inbound Leads', fn: () => prisma.inboundLead?.deleteMany({}) },
     { name: 'Daily Price History', fn: () => prisma.dailyPriceHistory?.deleteMany({}) },
-    { name: 'Warehouses', fn: () => prisma.warehouse?.deleteMany({}) },
   ];
 
   for (const step of steps) {

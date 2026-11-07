@@ -538,6 +538,21 @@ export class OrdersService {
         throw new NotFoundException(`Order #${idOrUuid} not found`);
       }
 
+      if (existing.status === 'DELIVERED') {
+        // If already delivered, only allow hub cashier COD cash reconciliation settlement
+        const isOnlyCashSettlement =
+          dto.codSettledToHub !== undefined &&
+          !dto.status &&
+          !dto.reason &&
+          !dto.cancelledReason &&
+          !dto.deliveryPartnerId &&
+          !dto.deliveryPartnerName;
+
+        if (!isOnlyCashSettlement) {
+          throw new BadRequestException('Order has already been delivered and verified. Delivered orders cannot be modified, cancelled, or re-assigned.');
+        }
+      }
+
       if (existing.status === 'CANCELLED') {
         throw new BadRequestException('Cannot update status of an order that has already been cancelled.');
       }

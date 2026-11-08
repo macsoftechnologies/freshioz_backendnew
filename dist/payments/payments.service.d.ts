@@ -56,36 +56,19 @@ export declare class PaymentsService {
     verifyAndCreateOrder(dto: VerifyRazorpayPaymentDto): Promise<{
         orderPlacedAtFormatted: string;
         createdAtFormatted: string;
-        warehouse: {
-            id: string;
-            uuid: string;
-            code: string;
-            name: string;
-            location: string;
-            lat: number | null;
-            lng: number | null;
-            openTime: string;
-            cutoffTime: string;
-            capacityTons: number;
-            managerName: string | null;
-            managerPhone: string | null;
-            status: string;
-            createdAt: Date;
-            updatedAt: Date;
-        };
         society: {
             id: string;
             uuid: string;
-            name: string;
-            lat: number | null;
-            lng: number | null;
+            warehouseId: string | null;
             status: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
             type: string;
             address: string;
             imageUrl: string | null;
-            warehouseId: string | null;
+            lat: number | null;
+            lng: number | null;
             secretaryName: string | null;
             secretaryPhone: string | null;
             totalFloors: number | null;
@@ -104,33 +87,46 @@ export declare class PaymentsService {
             salesRepName: string | null;
             salesRepPhone: string | null;
         };
+        warehouse: {
+            id: string;
+            uuid: string;
+            status: string;
+            createdAt: Date;
+            updatedAt: Date;
+            name: string;
+            lat: number | null;
+            lng: number | null;
+            code: string;
+            location: string;
+            openTime: string;
+            cutoffTime: string;
+            capacityTons: number;
+            managerName: string | null;
+            managerPhone: string | null;
+        };
         items: {
             id: string;
-            name: string;
-            unit: string;
-            bulkDiscountPercent: number | null;
-            productId: string;
             bulkSavings: number | null;
+            name: string;
             orderId: string;
+            productId: string;
+            unit: string;
             qty: number;
             price: number;
             effectivePrice: number | null;
             totalPrice: number | null;
             isBulkApplied: boolean;
+            bulkDiscountPercent: number | null;
         }[];
         id: string;
         uuid: string;
-        status: string;
-        createdAt: Date;
-        updatedAt: Date;
-        warehouseId: string | null;
-        societyId: string | null;
-        societyName: string | null;
-        paymentMethod: string;
         userId: string;
         userName: string;
         userPhone: string;
+        societyId: string | null;
+        societyName: string | null;
         flatNo: string | null;
+        warehouseId: string | null;
         warehouseCode: string | null;
         orderType: string;
         subtotal: number;
@@ -140,6 +136,8 @@ export declare class PaymentsService {
         totalAmount: number;
         deliveryDate: string;
         deliverySlot: string;
+        status: string;
+        paymentMethod: string;
         paymentStatus: string;
         codCollectedAmount: number | null;
         codCollectedAt: Date | null;
@@ -165,6 +163,8 @@ export declare class PaymentsService {
         cancelledReason: string | null;
         cancelledAt: Date | null;
         orderPlacedAt: Date;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     createOrderDynamicQr(orderId: string): Promise<{
         orderId: string;
@@ -233,37 +233,37 @@ export declare class PaymentsService {
         history: {
             id: string;
             uuid: string;
+            userId: string;
             createdAt: Date;
             type: string;
-            description: string | null;
-            userId: string;
             orderId: string | null;
             coins: number;
             rupeeValue: number;
+            description: string | null;
         }[];
     }>;
     getOrCreateDeliverySettings(): Promise<{
         id: string;
         updatedAt: Date;
+        updatedBy: string | null;
         baseFee: number;
         freeDeliveryThreshold: number;
         enableFreeDelivery: boolean;
-        updatedBy: string | null;
     }>;
     getDeliverySettings(): Promise<{
         id: string;
         updatedAt: Date;
+        updatedBy: string | null;
         baseFee: number;
         freeDeliveryThreshold: number;
         enableFreeDelivery: boolean;
-        updatedBy: string | null;
     }>;
     updateDeliverySettings(dto: any, user: any): Promise<{
         id: string;
         updatedAt: Date;
+        updatedBy: string | null;
         baseFee: number;
         freeDeliveryThreshold: number;
         enableFreeDelivery: boolean;
-        updatedBy: string | null;
     }>;
 }

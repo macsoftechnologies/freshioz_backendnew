@@ -461,6 +461,17 @@ let OrdersService = class OrdersService {
             if (!existing) {
                 throw new common_1.NotFoundException(`Order #${idOrUuid} not found`);
             }
+            if (existing.status === 'DELIVERED') {
+                const isOnlyCashSettlement = dto.codSettledToHub !== undefined &&
+                    !dto.status &&
+                    !dto.reason &&
+                    !dto.cancelledReason &&
+                    !dto.deliveryPartnerId &&
+                    !dto.deliveryPartnerName;
+                if (!isOnlyCashSettlement) {
+                    throw new common_1.BadRequestException('Order has already been delivered and verified. Delivered orders cannot be modified, cancelled, or re-assigned.');
+                }
+            }
             if (existing.status === 'CANCELLED') {
                 throw new common_1.BadRequestException('Cannot update status of an order that has already been cancelled.');
             }

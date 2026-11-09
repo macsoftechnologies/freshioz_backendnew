@@ -818,9 +818,9 @@ export class OrdersService {
         throw new ForbiddenException('Access denied. You can only cancel your own orders.');
       }
 
-      // Customer can only cancel before dispatch/packing
-      if (isCustomer && existing.status !== 'CONFIRMED') {
-        throw new BadRequestException(`Order cannot be cancelled by resident because it is already in '${existing.status}' status.`);
+      // Customer can cancel before packing (CONFIRMED), or at doorstep (OUT_FOR_DELIVERY) for produce inspection / quality return
+      if (isCustomer && existing.status !== 'CONFIRMED' && existing.status !== 'OUT_FOR_DELIVERY') {
+        throw new BadRequestException(`Order cannot be cancelled by resident while packed at hub.`);
       }
 
       // Check allowed statuses for cancellation - Delivered orders can NEVER be cancelled

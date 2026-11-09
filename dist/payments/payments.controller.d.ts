@@ -92,8 +92,8 @@ export declare class PaymentsController {
         history: {
             id: string;
             uuid: string;
-            createdAt: Date;
             userId: string;
+            createdAt: Date;
             type: string;
             orderId: string | null;
             coins: number;
@@ -117,31 +117,14 @@ export declare class PaymentsController {
     verifyPayment(body: VerifyRazorpayPaymentDto): Promise<{
         orderPlacedAtFormatted: string;
         createdAtFormatted: string;
-        warehouse: {
-            id: string;
-            updatedAt: Date;
-            name: string;
-            uuid: string;
-            status: string;
-            createdAt: Date;
-            lat: number | null;
-            lng: number | null;
-            code: string;
-            location: string;
-            openTime: string;
-            cutoffTime: string;
-            capacityTons: number;
-            managerName: string | null;
-            managerPhone: string | null;
-        };
         society: {
             id: string;
-            updatedAt: Date;
-            name: string;
             uuid: string;
+            warehouseId: string | null;
             status: string;
             createdAt: Date;
-            warehouseId: string | null;
+            updatedAt: Date;
+            name: string;
             type: string;
             address: string;
             imageUrl: string | null;
@@ -165,29 +148,46 @@ export declare class PaymentsController {
             salesRepName: string | null;
             salesRepPhone: string | null;
         };
+        warehouse: {
+            id: string;
+            uuid: string;
+            status: string;
+            createdAt: Date;
+            updatedAt: Date;
+            name: string;
+            lat: number | null;
+            lng: number | null;
+            code: string;
+            location: string;
+            openTime: string;
+            cutoffTime: string;
+            capacityTons: number;
+            managerName: string | null;
+            managerPhone: string | null;
+        };
         items: {
             id: string;
-            name: string;
-            unit: string;
             bulkSavings: number | null;
+            name: string;
+            orderId: string;
+            productId: string;
+            unit: string;
             qty: number;
             price: number;
             effectivePrice: number | null;
             totalPrice: number | null;
             isBulkApplied: boolean;
             bulkDiscountPercent: number | null;
-            productId: string;
-            orderId: string;
         }[];
         id: string;
-        updatedAt: Date;
-        razorpayOrderId: string | null;
-        razorpayPaymentId: string | null;
         uuid: string;
+        userId: string;
         userName: string;
         userPhone: string;
+        societyId: string | null;
         societyName: string | null;
         flatNo: string | null;
+        warehouseId: string | null;
         warehouseCode: string | null;
         orderType: string;
         subtotal: number;
@@ -207,6 +207,8 @@ export declare class PaymentsController {
         codSettledAt: Date | null;
         codSettledBy: string | null;
         codReceivedMode: string | null;
+        razorpayOrderId: string | null;
+        razorpayPaymentId: string | null;
         societyCommissionEarned: number;
         freshCoinsUsed: number;
         freshCoinsDiscount: number;
@@ -223,9 +225,7 @@ export declare class PaymentsController {
         cancelledAt: Date | null;
         orderPlacedAt: Date;
         createdAt: Date;
-        userId: string;
-        societyId: string | null;
-        warehouseId: string | null;
+        updatedAt: Date;
     }>;
     generateOrderDynamicQr(id: string): Promise<{
         orderId: string;
@@ -255,8 +255,8 @@ export declare class PaymentsController {
     }>;
     listDriverPayouts(req: any): Promise<{
         id: string;
-        createdAt: Date;
         warehouseId: string | null;
+        createdAt: Date;
         driverId: string;
         driverName: string;
         driverPhone: string | null;
@@ -271,8 +271,8 @@ export declare class PaymentsController {
     }[]>;
     createDriverPayout(req: any, body: any): Promise<{
         id: string;
-        createdAt: Date;
         warehouseId: string | null;
+        createdAt: Date;
         driverId: string;
         driverName: string;
         driverPhone: string | null;

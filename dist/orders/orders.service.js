@@ -715,8 +715,8 @@ let OrdersService = class OrdersService {
             if (isCustomer && existing.userPhone !== user.phone && existing.userId !== user.id) {
                 throw new common_1.ForbiddenException('Access denied. You can only cancel your own orders.');
             }
-            if (isCustomer && existing.status !== 'CONFIRMED') {
-                throw new common_1.BadRequestException(`Order cannot be cancelled by resident because it is already in '${existing.status}' status.`);
+            if (isCustomer && existing.status !== 'CONFIRMED' && existing.status !== 'OUT_FOR_DELIVERY') {
+                throw new common_1.BadRequestException(`Order cannot be cancelled by resident while packed at hub.`);
             }
             if (existing.status === 'CANCELLED') {
                 throw new common_1.BadRequestException('Order is already cancelled.');

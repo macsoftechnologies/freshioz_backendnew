@@ -33,7 +33,7 @@ async function bootstrap() {
         origin: (origin, callback) => {
             if (!origin ||
                 allowedOrigins.includes(origin) ||
-                /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin) ||
+                /^http:\/\/(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+)(:\d+)?$/.test(origin) ||
                 /^https:\/\/([a-zA-Z0-9-]+\.)?freshioz(z)?\.com$/.test(origin)) {
                 callback(null, true);
             }

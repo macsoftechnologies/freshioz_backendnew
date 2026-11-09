@@ -73,9 +73,9 @@ export declare class CatalogService {
         categories: {
             id: string;
             name: string;
+            description: string;
             slug: string;
             icon: string;
-            description: string;
             sortOrder: number;
         }[];
         units: {
@@ -97,6 +97,7 @@ export declare class CatalogService {
             name: string;
             status: string;
             desc: string;
+            tags: string[];
             kannadaName: string;
             categoryId: string;
             retailUnit: string;
@@ -104,32 +105,31 @@ export declare class CatalogService {
             shelfLife: string;
             image: string;
             badge: string;
-            tags: string[];
             inStock: boolean;
         }[];
         societies: {
             id: string;
             name: string;
-            lat: number;
-            lng: number;
             status: string;
+            warehouseId: string;
             type: string;
             address: string;
             imageUrl: string;
-            warehouseId: string;
+            lat: number;
+            lng: number;
             deliveryMode: string;
         }[];
         warehouses: {
             slots: any[];
             id: string;
-            code: string;
             name: string;
-            location: string;
+            status: string;
             lat: number;
             lng: number;
+            code: string;
+            location: string;
             openTime: string;
             cutoffTime: string;
-            status: string;
         }[];
         deliveryConfig: DeliveryConfig;
         activeDeliveryDate: string;

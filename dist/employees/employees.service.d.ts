@@ -8,11 +8,11 @@ export declare class EmployeesService {
         assignedWarehouseName: any;
         assignedLocationName: any;
         id: string;
-        uuid: string;
+        updatedAt: Date;
         name: string;
+        uuid: string;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
         phone: string;
         email: string;
         roles: string[];
@@ -22,18 +22,18 @@ export declare class EmployeesService {
     findOne(idOrUuid: string): Promise<{
         assignedWarehouse: {
             id: string;
+            name: string;
             uuid: string;
             code: string;
-            name: string;
         };
         assignedWarehouseName: string;
         assignedLocationName: string;
         id: string;
-        uuid: string;
+        updatedAt: Date;
         name: string;
+        uuid: string;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
         phone: string;
         email: string;
         roles: string[];
@@ -42,11 +42,11 @@ export declare class EmployeesService {
     }>;
     create(body: any): Promise<{
         id: string;
-        uuid: string;
+        updatedAt: Date;
         name: string;
+        uuid: string;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
         phone: string;
         email: string;
         roles: string[];
@@ -55,11 +55,11 @@ export declare class EmployeesService {
     }>;
     update(id: string, data: any): Promise<{
         id: string;
-        uuid: string;
+        updatedAt: Date;
         name: string;
+        uuid: string;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
         phone: string;
         email: string;
         roles: string[];

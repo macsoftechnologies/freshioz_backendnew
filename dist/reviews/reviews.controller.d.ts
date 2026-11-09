@@ -4,16 +4,16 @@ export declare class ReviewsController {
     constructor(reviewsService: ReviewsService);
     createReview(req: any, body: CreateReviewDto): Promise<{
         id: string;
+        updatedAt: Date;
         uuid: string;
-        userId: string;
         userName: string;
         userPhone: string;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
+        userId: string;
         type: string;
-        orderId: string | null;
         productId: string | null;
+        orderId: string | null;
         productName: string | null;
         rating: number;
         comment: string | null;
@@ -23,16 +23,16 @@ export declare class ReviewsController {
     }>;
     updateReview(req: any, id: string, body: UpdateReviewDto): Promise<{
         id: string;
+        updatedAt: Date;
         uuid: string;
-        userId: string;
         userName: string;
         userPhone: string;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
+        userId: string;
         type: string;
-        orderId: string | null;
         productId: string | null;
+        orderId: string | null;
         productName: string | null;
         rating: number;
         comment: string | null;
@@ -42,16 +42,16 @@ export declare class ReviewsController {
     }>;
     getMyReviews(req: any): Promise<{
         id: string;
+        updatedAt: Date;
         uuid: string;
-        userId: string;
         userName: string;
         userPhone: string;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
+        userId: string;
         type: string;
-        orderId: string | null;
         productId: string | null;
+        orderId: string | null;
         productName: string | null;
         rating: number;
         comment: string | null;
@@ -80,16 +80,16 @@ export declare class ReviewsController {
     }[]>;
     getAdminReviews(type?: string, status?: string, flagged?: string): Promise<{
         id: string;
+        updatedAt: Date;
         uuid: string;
-        userId: string;
         userName: string;
         userPhone: string;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
+        userId: string;
         type: string;
-        orderId: string | null;
         productId: string | null;
+        orderId: string | null;
         productName: string | null;
         rating: number;
         comment: string | null;
@@ -102,16 +102,16 @@ export declare class ReviewsController {
         flagged?: boolean;
     }): Promise<{
         id: string;
+        updatedAt: Date;
         uuid: string;
-        userId: string;
         userName: string;
         userPhone: string;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
+        userId: string;
         type: string;
-        orderId: string | null;
         productId: string | null;
+        orderId: string | null;
         productName: string | null;
         rating: number;
         comment: string | null;

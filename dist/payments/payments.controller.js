@@ -65,6 +65,12 @@ let PaymentsController = class PaymentsController {
     async getOrderDynamicQr(id) {
         return this.paymentsService.createOrderDynamicQr(id);
     }
+    async listDriverPayouts(req) {
+        return this.paymentsService.listDriverPayouts(req.query, req.user);
+    }
+    async createDriverPayout(req, body) {
+        return this.paymentsService.createDriverPayout(body, req.user);
+    }
     async handleWebhook(body, signature) {
         return this.paymentsService.handleWebhook(body, signature || '');
     }
@@ -200,6 +206,28 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], PaymentsController.prototype, "getOrderDynamicQr", null);
+__decorate([
+    (0, swagger_1.ApiBearerAuth)('JWT-auth'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Get)('driver-payouts'),
+    (0, swagger_1.ApiOperation)({ summary: 'List driver payout logs (Drivers get their own; Managers get warehouse/all)' }),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], PaymentsController.prototype, "listDriverPayouts", null);
+__decorate([
+    (0, swagger_1.ApiBearerAuth)('JWT-auth'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('SUPER_ADMIN', 'WAREHOUSE_MANAGER'),
+    (0, common_1.Post)('driver-payouts'),
+    (0, swagger_1.ApiOperation)({ summary: 'Record settlement payout to delivery driver (Manager only)' }),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], PaymentsController.prototype, "createDriverPayout", null);
 __decorate([
     (0, common_1.Post)('razorpay/webhook'),
     (0, swagger_1.ApiOperation)({ summary: 'Asynchronous webhook receiver for Razorpay payment notifications' }),

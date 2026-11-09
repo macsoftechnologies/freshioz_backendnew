@@ -5,10 +5,10 @@ export declare class ProductsService {
     findAll(): Promise<({
         category: {
             id: string;
-            status: string;
-            createdAt: Date;
             updatedAt: Date;
             name: string;
+            status: string;
+            createdAt: Date;
             description: string | null;
             slug: string;
             icon: string;
@@ -16,13 +16,14 @@ export declare class ProductsService {
         };
     } & {
         id: string;
+        updatedAt: Date;
+        name: string;
         uuid: string;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
-        desc: string | null;
-        name: string;
         bulkDiscountPercent: number;
+        desc: string | null;
+        tags: string[];
         kannadaName: string | null;
         categoryId: string;
         retailUnit: string;
@@ -33,17 +34,16 @@ export declare class ProductsService {
         shelfLife: string | null;
         image: string;
         badge: string | null;
-        tags: string[];
         gstPercent: number;
         inStock: boolean;
     })[]>;
     findOne(idOrUuid: string): Promise<{
         category: {
             id: string;
-            status: string;
-            createdAt: Date;
             updatedAt: Date;
             name: string;
+            status: string;
+            createdAt: Date;
             description: string | null;
             slug: string;
             icon: string;
@@ -51,13 +51,14 @@ export declare class ProductsService {
         };
     } & {
         id: string;
+        updatedAt: Date;
+        name: string;
         uuid: string;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
-        desc: string | null;
-        name: string;
         bulkDiscountPercent: number;
+        desc: string | null;
+        tags: string[];
         kannadaName: string | null;
         categoryId: string;
         retailUnit: string;
@@ -68,17 +69,16 @@ export declare class ProductsService {
         shelfLife: string | null;
         image: string;
         badge: string | null;
-        tags: string[];
         gstPercent: number;
         inStock: boolean;
     }>;
     create(body: any): Promise<{
         category: {
             id: string;
-            status: string;
-            createdAt: Date;
             updatedAt: Date;
             name: string;
+            status: string;
+            createdAt: Date;
             description: string | null;
             slug: string;
             icon: string;
@@ -86,13 +86,14 @@ export declare class ProductsService {
         };
     } & {
         id: string;
+        updatedAt: Date;
+        name: string;
         uuid: string;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
-        desc: string | null;
-        name: string;
         bulkDiscountPercent: number;
+        desc: string | null;
+        tags: string[];
         kannadaName: string | null;
         categoryId: string;
         retailUnit: string;
@@ -103,17 +104,16 @@ export declare class ProductsService {
         shelfLife: string | null;
         image: string;
         badge: string | null;
-        tags: string[];
         gstPercent: number;
         inStock: boolean;
     }>;
     update(idOrUuid: string, data: any): Promise<{
         category: {
             id: string;
-            status: string;
-            createdAt: Date;
             updatedAt: Date;
             name: string;
+            status: string;
+            createdAt: Date;
             description: string | null;
             slug: string;
             icon: string;
@@ -121,13 +121,14 @@ export declare class ProductsService {
         };
     } & {
         id: string;
+        updatedAt: Date;
+        name: string;
         uuid: string;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
-        desc: string | null;
-        name: string;
         bulkDiscountPercent: number;
+        desc: string | null;
+        tags: string[];
         kannadaName: string | null;
         categoryId: string;
         retailUnit: string;
@@ -138,19 +139,19 @@ export declare class ProductsService {
         shelfLife: string | null;
         image: string;
         badge: string | null;
-        tags: string[];
         gstPercent: number;
         inStock: boolean;
     }>;
     delete(idOrUuid: string): Promise<{
         id: string;
+        updatedAt: Date;
+        name: string;
         uuid: string;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
-        desc: string | null;
-        name: string;
         bulkDiscountPercent: number;
+        desc: string | null;
+        tags: string[];
         kannadaName: string | null;
         categoryId: string;
         retailUnit: string;
@@ -161,7 +162,6 @@ export declare class ProductsService {
         shelfLife: string | null;
         image: string;
         badge: string | null;
-        tags: string[];
         gstPercent: number;
         inStock: boolean;
     }>;

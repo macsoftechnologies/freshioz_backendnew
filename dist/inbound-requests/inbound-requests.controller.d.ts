@@ -12,11 +12,11 @@ export declare class InboundRequestsController {
             createdDateIST: string;
             createdTimeIST: string;
             id: string;
+            updatedAt: Date;
             uuid: string;
             societyName: string;
             status: string;
             createdAt: Date;
-            updatedAt: Date;
             address: string | null;
             contactName: string;
             contactPhone: string;
@@ -33,11 +33,11 @@ export declare class InboundRequestsController {
         createdDateIST: string;
         createdTimeIST: string;
         id: string;
+        updatedAt: Date;
         uuid: string;
         societyName: string;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
         address: string | null;
         contactName: string;
         contactPhone: string;
@@ -49,11 +49,11 @@ export declare class InboundRequestsController {
         createdDateIST: string;
         createdTimeIST: string;
         id: string;
+        updatedAt: Date;
         uuid: string;
         societyName: string;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
         address: string | null;
         contactName: string;
         contactPhone: string;

@@ -125,6 +125,26 @@ export class PaymentsController {
     return this.paymentsService.createOrderDynamicQr(id);
   }
 
+  // ==========================================
+  // DRIVER / DELIVERY PARTNER PAYOUTS
+  // ==========================================
+  @ApiBearerAuth('JWT-auth')
+  @UseGuards(JwtAuthGuard)
+  @Get('driver-payouts')
+  @ApiOperation({ summary: 'List driver payout logs (Drivers get their own; Managers get warehouse/all)' })
+  async listDriverPayouts(@Req() req: any) {
+    return this.paymentsService.listDriverPayouts(req.query, req.user);
+  }
+
+  @ApiBearerAuth('JWT-auth')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'WAREHOUSE_MANAGER')
+  @Post('driver-payouts')
+  @ApiOperation({ summary: 'Record settlement payout to delivery driver (Manager only)' })
+  async createDriverPayout(@Req() req: any, @Body() body: any) {
+    return this.paymentsService.createDriverPayout(body, req.user);
+  }
+
   @Post('razorpay/webhook')
   @ApiOperation({ summary: 'Asynchronous webhook receiver for Razorpay payment notifications' })
   async handleWebhook(

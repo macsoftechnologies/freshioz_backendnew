@@ -56,14 +56,31 @@ export declare class PaymentsService {
     verifyAndCreateOrder(dto: VerifyRazorpayPaymentDto): Promise<{
         orderPlacedAtFormatted: string;
         createdAtFormatted: string;
-        society: {
+        warehouse: {
             id: string;
-            uuid: string;
-            warehouseId: string | null;
-            status: string;
-            createdAt: Date;
             updatedAt: Date;
             name: string;
+            uuid: string;
+            status: string;
+            createdAt: Date;
+            lat: number | null;
+            lng: number | null;
+            code: string;
+            location: string;
+            openTime: string;
+            cutoffTime: string;
+            capacityTons: number;
+            managerName: string | null;
+            managerPhone: string | null;
+        };
+        society: {
+            id: string;
+            updatedAt: Date;
+            name: string;
+            uuid: string;
+            status: string;
+            createdAt: Date;
+            warehouseId: string | null;
             type: string;
             address: string;
             imageUrl: string | null;
@@ -87,46 +104,29 @@ export declare class PaymentsService {
             salesRepName: string | null;
             salesRepPhone: string | null;
         };
-        warehouse: {
-            id: string;
-            uuid: string;
-            status: string;
-            createdAt: Date;
-            updatedAt: Date;
-            name: string;
-            lat: number | null;
-            lng: number | null;
-            code: string;
-            location: string;
-            openTime: string;
-            cutoffTime: string;
-            capacityTons: number;
-            managerName: string | null;
-            managerPhone: string | null;
-        };
         items: {
             id: string;
-            bulkSavings: number | null;
             name: string;
-            orderId: string;
-            productId: string;
             unit: string;
+            bulkSavings: number | null;
             qty: number;
             price: number;
             effectivePrice: number | null;
             totalPrice: number | null;
             isBulkApplied: boolean;
             bulkDiscountPercent: number | null;
+            productId: string;
+            orderId: string;
         }[];
         id: string;
+        updatedAt: Date;
+        razorpayOrderId: string | null;
+        razorpayPaymentId: string | null;
         uuid: string;
-        userId: string;
         userName: string;
         userPhone: string;
-        societyId: string | null;
         societyName: string | null;
         flatNo: string | null;
-        warehouseId: string | null;
         warehouseCode: string | null;
         orderType: string;
         subtotal: number;
@@ -146,8 +146,6 @@ export declare class PaymentsService {
         codSettledAt: Date | null;
         codSettledBy: string | null;
         codReceivedMode: string | null;
-        razorpayOrderId: string | null;
-        razorpayPaymentId: string | null;
         societyCommissionEarned: number;
         freshCoinsUsed: number;
         freshCoinsDiscount: number;
@@ -164,7 +162,9 @@ export declare class PaymentsService {
         cancelledAt: Date | null;
         orderPlacedAt: Date;
         createdAt: Date;
-        updatedAt: Date;
+        userId: string;
+        societyId: string | null;
+        warehouseId: string | null;
     }>;
     createOrderDynamicQr(orderId: string): Promise<{
         orderId: string;
@@ -233,8 +233,8 @@ export declare class PaymentsService {
         history: {
             id: string;
             uuid: string;
-            userId: string;
             createdAt: Date;
+            userId: string;
             type: string;
             orderId: string | null;
             coins: number;
@@ -266,4 +266,52 @@ export declare class PaymentsService {
         freeDeliveryThreshold: number;
         enableFreeDelivery: boolean;
     }>;
+    createDriverPayout(data: {
+        driverId: string;
+        driverName: string;
+        driverPhone?: string;
+        warehouseId?: string;
+        warehouseName?: string;
+        amount: number;
+        paymentMode?: string;
+        completedStopsCount?: number;
+        coveredOrderIds?: string[];
+        notes?: string;
+    }, user: any): Promise<{
+        id: string;
+        createdAt: Date;
+        warehouseId: string | null;
+        driverId: string;
+        driverName: string;
+        driverPhone: string | null;
+        warehouseName: string | null;
+        amount: number;
+        paymentMode: string;
+        completedStopsCount: number;
+        coveredOrderIds: string[];
+        paidBy: string | null;
+        paidById: string | null;
+        notes: string | null;
+    }>;
+    listDriverPayouts(query: {
+        driverId?: string;
+        driverPhone?: string;
+        driverName?: string;
+        warehouseId?: string;
+    }, user?: any): Promise<{
+        id: string;
+        createdAt: Date;
+        warehouseId: string | null;
+        driverId: string;
+        driverName: string;
+        driverPhone: string | null;
+        warehouseName: string | null;
+        amount: number;
+        paymentMode: string;
+        completedStopsCount: number;
+        coveredOrderIds: string[];
+        paidBy: string | null;
+        paidById: string | null;
+        notes: string | null;
+    }[]>;
 }

@@ -9,11 +9,11 @@ export declare class EmployeesController {
         assignedWarehouseName: any;
         assignedLocationName: any;
         id: string;
-        uuid: string;
+        updatedAt: Date;
         name: string;
+        uuid: string;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
         phone: string;
         email: string;
         roles: string[];
@@ -23,18 +23,18 @@ export declare class EmployeesController {
     findOne(id: string): Promise<{
         assignedWarehouse: {
             id: string;
+            name: string;
             uuid: string;
             code: string;
-            name: string;
         };
         assignedWarehouseName: string;
         assignedLocationName: string;
         id: string;
-        uuid: string;
+        updatedAt: Date;
         name: string;
+        uuid: string;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
         phone: string;
         email: string;
         roles: string[];
@@ -43,11 +43,11 @@ export declare class EmployeesController {
     }>;
     create(body: CreateEmployeeDto): Promise<{
         id: string;
-        uuid: string;
+        updatedAt: Date;
         name: string;
+        uuid: string;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
         phone: string;
         email: string;
         roles: string[];
@@ -56,11 +56,11 @@ export declare class EmployeesController {
     }>;
     updateWithParam(id: string, body: any): Promise<{
         id: string;
-        uuid: string;
+        updatedAt: Date;
         name: string;
+        uuid: string;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
         phone: string;
         email: string;
         roles: string[];
@@ -69,11 +69,11 @@ export declare class EmployeesController {
     }>;
     update(body: UpdateEmployeeDto): Promise<{
         id: string;
-        uuid: string;
+        updatedAt: Date;
         name: string;
+        uuid: string;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
         phone: string;
         email: string;
         roles: string[];

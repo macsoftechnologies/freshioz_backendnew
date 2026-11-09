@@ -313,6 +313,27 @@ model SocietyPayout {
   @@map("society_payouts")
 }
 
+model DriverPayout {
+  id                  String   @id @default(uuid())
+  driverId            String
+  driverName          String
+  driverPhone         String?
+  warehouseId         String?  @default("ALL")
+  warehouseName       String?
+  amount              Float
+  paymentMode         String   @default("CASH")
+  completedStopsCount Int      @default(0)
+  coveredOrderIds     String[]
+  paidBy              String?
+  paidById            String?
+  notes               String?
+  createdAt           DateTime @default(now())
+
+  @@index([driverId])
+  @@index([warehouseId])
+  @@map("driver_payouts")
+}
+
 // ----------------------------------------------------
 // 8. ONBOARDING LEADS & PROCUREMENT
 // ----------------------------------------------------

@@ -15,16 +15,16 @@ export declare class ReviewsService {
     constructor(prisma: PrismaService);
     createReview(user: any, dto: CreateReviewDto): Promise<{
         id: string;
+        updatedAt: Date;
         uuid: string;
-        userId: string;
         userName: string;
         userPhone: string;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
+        userId: string;
         type: string;
-        orderId: string | null;
         productId: string | null;
+        orderId: string | null;
         productName: string | null;
         rating: number;
         comment: string | null;
@@ -34,16 +34,16 @@ export declare class ReviewsService {
     }>;
     updateReview(id: string, user: any, dto: UpdateReviewDto): Promise<{
         id: string;
+        updatedAt: Date;
         uuid: string;
-        userId: string;
         userName: string;
         userPhone: string;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
+        userId: string;
         type: string;
-        orderId: string | null;
         productId: string | null;
+        orderId: string | null;
         productName: string | null;
         rating: number;
         comment: string | null;
@@ -72,16 +72,16 @@ export declare class ReviewsService {
     }[]>;
     getCustomerReviews(user: any): Promise<{
         id: string;
+        updatedAt: Date;
         uuid: string;
-        userId: string;
         userName: string;
         userPhone: string;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
+        userId: string;
         type: string;
-        orderId: string | null;
         productId: string | null;
+        orderId: string | null;
         productName: string | null;
         rating: number;
         comment: string | null;
@@ -95,16 +95,16 @@ export declare class ReviewsService {
         flagged?: string;
     }): Promise<{
         id: string;
+        updatedAt: Date;
         uuid: string;
-        userId: string;
         userName: string;
         userPhone: string;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
+        userId: string;
         type: string;
-        orderId: string | null;
         productId: string | null;
+        orderId: string | null;
         productName: string | null;
         rating: number;
         comment: string | null;
@@ -114,16 +114,16 @@ export declare class ReviewsService {
     }[]>;
     moderateReview(id: string, staffUser: any, status: 'APPROVED' | 'HIDDEN', flagged?: boolean): Promise<{
         id: string;
+        updatedAt: Date;
         uuid: string;
-        userId: string;
         userName: string;
         userPhone: string;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
+        userId: string;
         type: string;
-        orderId: string | null;
         productId: string | null;
+        orderId: string | null;
         productName: string | null;
         rating: number;
         comment: string | null;

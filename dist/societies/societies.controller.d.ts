@@ -10,11 +10,11 @@ export declare class SocietiesController {
         secretaryPhone: string;
         warehouse: {
             id: string;
+            updatedAt: Date;
+            name: string;
             uuid: string;
             status: string;
             createdAt: Date;
-            updatedAt: Date;
-            name: string;
             lat: number | null;
             lng: number | null;
             code: string;
@@ -26,12 +26,12 @@ export declare class SocietiesController {
             managerPhone: string | null;
         };
         id: string;
-        uuid: string;
-        warehouseId: string | null;
-        status: string;
-        createdAt: Date;
         updatedAt: Date;
         name: string;
+        uuid: string;
+        status: string;
+        createdAt: Date;
+        warehouseId: string | null;
         type: string;
         address: string;
         imageUrl: string | null;
@@ -66,13 +66,13 @@ export declare class SocietiesController {
         };
     } & {
         id: string;
-        societyId: string;
         status: string;
         paymentMethod: string;
         createdAt: Date;
+        societyId: string;
         amount: number;
-        transactionRef: string;
         notes: string | null;
+        transactionRef: string;
         authorizedBy: string | null;
     })[]>;
     approvePayout(req: any, id: string, body?: {
@@ -80,12 +80,12 @@ export declare class SocietiesController {
     }): Promise<{
         society: {
             id: string;
-            uuid: string;
-            warehouseId: string | null;
-            status: string;
-            createdAt: Date;
             updatedAt: Date;
             name: string;
+            uuid: string;
+            status: string;
+            createdAt: Date;
+            warehouseId: string | null;
             type: string;
             address: string;
             imageUrl: string | null;
@@ -111,13 +111,13 @@ export declare class SocietiesController {
         };
     } & {
         id: string;
-        societyId: string;
         status: string;
         paymentMethod: string;
         createdAt: Date;
+        societyId: string;
         amount: number;
-        transactionRef: string;
         notes: string | null;
+        transactionRef: string;
         authorizedBy: string | null;
     }>;
     rejectPayout(req: any, id: string, body?: {
@@ -125,12 +125,12 @@ export declare class SocietiesController {
     }): Promise<{
         society: {
             id: string;
-            uuid: string;
-            warehouseId: string | null;
-            status: string;
-            createdAt: Date;
             updatedAt: Date;
             name: string;
+            uuid: string;
+            status: string;
+            createdAt: Date;
+            warehouseId: string | null;
             type: string;
             address: string;
             imageUrl: string | null;
@@ -156,13 +156,13 @@ export declare class SocietiesController {
         };
     } & {
         id: string;
-        societyId: string;
         status: string;
         paymentMethod: string;
         createdAt: Date;
+        societyId: string;
         amount: number;
-        transactionRef: string;
         notes: string | null;
+        transactionRef: string;
         authorizedBy: string | null;
     }>;
     findOne(id: string): Promise<{
@@ -171,11 +171,11 @@ export declare class SocietiesController {
         secretaryPhone: string;
         warehouse: {
             id: string;
+            updatedAt: Date;
+            name: string;
             uuid: string;
             status: string;
             createdAt: Date;
-            updatedAt: Date;
-            name: string;
             lat: number | null;
             lng: number | null;
             code: string;
@@ -187,12 +187,12 @@ export declare class SocietiesController {
             managerPhone: string | null;
         };
         id: string;
-        uuid: string;
-        warehouseId: string | null;
-        status: string;
-        createdAt: Date;
         updatedAt: Date;
         name: string;
+        uuid: string;
+        status: string;
+        createdAt: Date;
+        warehouseId: string | null;
         type: string;
         address: string;
         imageUrl: string | null;
@@ -216,11 +216,11 @@ export declare class SocietiesController {
     create(body: CreateSocietyDto): Promise<{
         warehouse: {
             id: string;
+            updatedAt: Date;
+            name: string;
             uuid: string;
             status: string;
             createdAt: Date;
-            updatedAt: Date;
-            name: string;
             lat: number | null;
             lng: number | null;
             code: string;
@@ -233,12 +233,12 @@ export declare class SocietiesController {
         };
     } & {
         id: string;
-        uuid: string;
-        warehouseId: string | null;
-        status: string;
-        createdAt: Date;
         updatedAt: Date;
         name: string;
+        uuid: string;
+        status: string;
+        createdAt: Date;
+        warehouseId: string | null;
         type: string;
         address: string;
         imageUrl: string | null;
@@ -265,11 +265,11 @@ export declare class SocietiesController {
     updateWithParam(req: any, id: string, body: UpdateSocietyDto): Promise<{
         warehouse: {
             id: string;
+            updatedAt: Date;
+            name: string;
             uuid: string;
             status: string;
             createdAt: Date;
-            updatedAt: Date;
-            name: string;
             lat: number | null;
             lng: number | null;
             code: string;
@@ -282,12 +282,12 @@ export declare class SocietiesController {
         };
     } & {
         id: string;
-        uuid: string;
-        warehouseId: string | null;
-        status: string;
-        createdAt: Date;
         updatedAt: Date;
         name: string;
+        uuid: string;
+        status: string;
+        createdAt: Date;
+        warehouseId: string | null;
         type: string;
         address: string;
         imageUrl: string | null;
@@ -314,11 +314,11 @@ export declare class SocietiesController {
     update(req: any, body: UpdateSocietyDto): Promise<{
         warehouse: {
             id: string;
+            updatedAt: Date;
+            name: string;
             uuid: string;
             status: string;
             createdAt: Date;
-            updatedAt: Date;
-            name: string;
             lat: number | null;
             lng: number | null;
             code: string;
@@ -331,12 +331,12 @@ export declare class SocietiesController {
         };
     } & {
         id: string;
-        uuid: string;
-        warehouseId: string | null;
-        status: string;
-        createdAt: Date;
         updatedAt: Date;
         name: string;
+        uuid: string;
+        status: string;
+        createdAt: Date;
+        warehouseId: string | null;
         type: string;
         address: string;
         imageUrl: string | null;
@@ -364,13 +364,13 @@ export declare class SocietiesController {
         amount: number;
     }): Promise<{
         id: string;
-        societyId: string;
         status: string;
         paymentMethod: string;
         createdAt: Date;
+        societyId: string;
         amount: number;
-        transactionRef: string;
         notes: string | null;
+        transactionRef: string;
         authorizedBy: string | null;
     }>;
 }

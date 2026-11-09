@@ -4,12 +4,12 @@ export declare class CustomerDiscountsController {
     constructor(discountsService: CustomerDiscountsService);
     createDiscount(req: any, body: CreateCustomerDiscountDto): Promise<{
         id: string;
+        updatedAt: Date;
         uuid: string;
-        userId: string;
         userName: string | null;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
+        userId: string;
         code: string;
         orderId: string | null;
         discountType: string;
@@ -27,12 +27,12 @@ export declare class CustomerDiscountsController {
     }>;
     getAdminDiscounts(status?: string, userId?: string): Promise<{
         id: string;
+        updatedAt: Date;
         uuid: string;
-        userId: string;
         userName: string | null;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
+        userId: string;
         code: string;
         orderId: string | null;
         discountType: string;
@@ -50,12 +50,12 @@ export declare class CustomerDiscountsController {
     }[]>;
     revokeDiscount(req: any, id: string): Promise<{
         id: string;
+        updatedAt: Date;
         uuid: string;
-        userId: string;
         userName: string | null;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
+        userId: string;
         code: string;
         orderId: string | null;
         discountType: string;
@@ -73,12 +73,12 @@ export declare class CustomerDiscountsController {
     }>;
     getMyDiscounts(req: any): Promise<{
         id: string;
+        updatedAt: Date;
         uuid: string;
-        userId: string;
         userName: string | null;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
+        userId: string;
         code: string;
         orderId: string | null;
         discountType: string;

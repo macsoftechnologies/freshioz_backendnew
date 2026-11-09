@@ -407,6 +407,52 @@ let PaymentsService = PaymentsService_1 = class PaymentsService {
             },
         });
     }
+    async createDriverPayout(data, user) {
+        const payout = await this.prisma.driverPayout.create({
+            data: {
+                driverId: data.driverId,
+                driverName: data.driverName,
+                driverPhone: data.driverPhone || '',
+                warehouseId: data.warehouseId || 'ALL',
+                warehouseName: data.warehouseName || 'Central Hub',
+                amount: Number(data.amount) || 0,
+                paymentMode: data.paymentMode || 'CASH',
+                completedStopsCount: Number(data.completedStopsCount) || (data.coveredOrderIds?.length || 0),
+                coveredOrderIds: Array.isArray(data.coveredOrderIds) ? data.coveredOrderIds : [],
+                paidBy: user?.name || user?.email || 'Hub Manager',
+                paidById: user?.id || '',
+                notes: data.notes || '',
+            }
+        });
+        return payout;
+    }
+    async listDriverPayouts(query, user) {
+        const isSuperAdmin = user?.roles?.includes('SUPER_ADMIN') || user?.role === 'SUPER_ADMIN';
+        const isDeliveryExecutive = user?.roles?.includes('DELIVERY_EXECUTIVE') || user?.role === 'DELIVERY_EXECUTIVE';
+        const where = {};
+        if (isDeliveryExecutive && !isSuperAdmin) {
+            const riderPhoneClean = (user?.phone || '').replace(/\D/g, '').slice(-10);
+            const riderOr = [];
+            if (user?.id)
+                riderOr.push({ driverId: user.id });
+            if (riderPhoneClean)
+                riderOr.push({ driverPhone: { contains: riderPhoneClean } });
+            if (user?.name)
+                riderOr.push({ driverName: user.name });
+            where.OR = riderOr;
+        }
+        else {
+            if (query?.driverId)
+                where.driverId = query.driverId;
+            if (query?.warehouseId && query.warehouseId !== 'ALL')
+                where.warehouseId = query.warehouseId;
+        }
+        return this.prisma.driverPayout.findMany({
+            where,
+            orderBy: { createdAt: 'desc' },
+            take: 200,
+        });
+    }
 };
 exports.PaymentsService = PaymentsService;
 exports.PaymentsService = PaymentsService = PaymentsService_1 = __decorate([

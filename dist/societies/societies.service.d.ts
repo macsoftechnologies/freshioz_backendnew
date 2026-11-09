@@ -8,11 +8,11 @@ export declare class SocietiesService {
         secretaryPhone: string;
         warehouse: {
             id: string;
+            updatedAt: Date;
+            name: string;
             uuid: string;
             status: string;
             createdAt: Date;
-            updatedAt: Date;
-            name: string;
             lat: number | null;
             lng: number | null;
             code: string;
@@ -24,12 +24,12 @@ export declare class SocietiesService {
             managerPhone: string | null;
         };
         id: string;
-        uuid: string;
-        warehouseId: string | null;
-        status: string;
-        createdAt: Date;
         updatedAt: Date;
         name: string;
+        uuid: string;
+        status: string;
+        createdAt: Date;
+        warehouseId: string | null;
         type: string;
         address: string;
         imageUrl: string | null;
@@ -56,11 +56,11 @@ export declare class SocietiesService {
         secretaryPhone: string;
         warehouse: {
             id: string;
+            updatedAt: Date;
+            name: string;
             uuid: string;
             status: string;
             createdAt: Date;
-            updatedAt: Date;
-            name: string;
             lat: number | null;
             lng: number | null;
             code: string;
@@ -72,12 +72,12 @@ export declare class SocietiesService {
             managerPhone: string | null;
         };
         id: string;
-        uuid: string;
-        warehouseId: string | null;
-        status: string;
-        createdAt: Date;
         updatedAt: Date;
         name: string;
+        uuid: string;
+        status: string;
+        createdAt: Date;
+        warehouseId: string | null;
         type: string;
         address: string;
         imageUrl: string | null;
@@ -100,13 +100,13 @@ export declare class SocietiesService {
     }>;
     requestPayout(societyId: string, amount: number): Promise<{
         id: string;
-        societyId: string;
         status: string;
         paymentMethod: string;
         createdAt: Date;
+        societyId: string;
         amount: number;
-        transactionRef: string;
         notes: string | null;
+        transactionRef: string;
         authorizedBy: string | null;
     }>;
     listPayouts(query?: {
@@ -126,24 +126,24 @@ export declare class SocietiesService {
         };
     } & {
         id: string;
-        societyId: string;
         status: string;
         paymentMethod: string;
         createdAt: Date;
+        societyId: string;
         amount: number;
-        transactionRef: string;
         notes: string | null;
+        transactionRef: string;
         authorizedBy: string | null;
     })[]>;
     approvePayout(payoutId: string, adminUser: any, bankUtr?: string): Promise<{
         society: {
             id: string;
-            uuid: string;
-            warehouseId: string | null;
-            status: string;
-            createdAt: Date;
             updatedAt: Date;
             name: string;
+            uuid: string;
+            status: string;
+            createdAt: Date;
+            warehouseId: string | null;
             type: string;
             address: string;
             imageUrl: string | null;
@@ -169,24 +169,24 @@ export declare class SocietiesService {
         };
     } & {
         id: string;
-        societyId: string;
         status: string;
         paymentMethod: string;
         createdAt: Date;
+        societyId: string;
         amount: number;
-        transactionRef: string;
         notes: string | null;
+        transactionRef: string;
         authorizedBy: string | null;
     }>;
     rejectPayout(payoutId: string, adminUser: any, reason?: string): Promise<{
         society: {
             id: string;
-            uuid: string;
-            warehouseId: string | null;
-            status: string;
-            createdAt: Date;
             updatedAt: Date;
             name: string;
+            uuid: string;
+            status: string;
+            createdAt: Date;
+            warehouseId: string | null;
             type: string;
             address: string;
             imageUrl: string | null;
@@ -212,23 +212,23 @@ export declare class SocietiesService {
         };
     } & {
         id: string;
-        societyId: string;
         status: string;
         paymentMethod: string;
         createdAt: Date;
+        societyId: string;
         amount: number;
-        transactionRef: string;
         notes: string | null;
+        transactionRef: string;
         authorizedBy: string | null;
     }>;
     create(body: any): Promise<{
         warehouse: {
             id: string;
+            updatedAt: Date;
+            name: string;
             uuid: string;
             status: string;
             createdAt: Date;
-            updatedAt: Date;
-            name: string;
             lat: number | null;
             lng: number | null;
             code: string;
@@ -241,12 +241,12 @@ export declare class SocietiesService {
         };
     } & {
         id: string;
-        uuid: string;
-        warehouseId: string | null;
-        status: string;
-        createdAt: Date;
         updatedAt: Date;
         name: string;
+        uuid: string;
+        status: string;
+        createdAt: Date;
+        warehouseId: string | null;
         type: string;
         address: string;
         imageUrl: string | null;
@@ -273,11 +273,11 @@ export declare class SocietiesService {
     update(idOrUuid: string, data: any, currentUser?: any): Promise<{
         warehouse: {
             id: string;
+            updatedAt: Date;
+            name: string;
             uuid: string;
             status: string;
             createdAt: Date;
-            updatedAt: Date;
-            name: string;
             lat: number | null;
             lng: number | null;
             code: string;
@@ -290,12 +290,12 @@ export declare class SocietiesService {
         };
     } & {
         id: string;
-        uuid: string;
-        warehouseId: string | null;
-        status: string;
-        createdAt: Date;
         updatedAt: Date;
         name: string;
+        uuid: string;
+        status: string;
+        createdAt: Date;
+        warehouseId: string | null;
         type: string;
         address: string;
         imageUrl: string | null;

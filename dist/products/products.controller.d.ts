@@ -7,10 +7,10 @@ export declare class ProductsController {
     findAll(): Promise<({
         category: {
             id: string;
-            status: string;
-            createdAt: Date;
             updatedAt: Date;
             name: string;
+            status: string;
+            createdAt: Date;
             description: string | null;
             slug: string;
             icon: string;
@@ -18,13 +18,14 @@ export declare class ProductsController {
         };
     } & {
         id: string;
+        updatedAt: Date;
+        name: string;
         uuid: string;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
-        desc: string | null;
-        name: string;
         bulkDiscountPercent: number;
+        desc: string | null;
+        tags: string[];
         kannadaName: string | null;
         categoryId: string;
         retailUnit: string;
@@ -35,17 +36,16 @@ export declare class ProductsController {
         shelfLife: string | null;
         image: string;
         badge: string | null;
-        tags: string[];
         gstPercent: number;
         inStock: boolean;
     })[]>;
     findOne(id: string): Promise<{
         category: {
             id: string;
-            status: string;
-            createdAt: Date;
             updatedAt: Date;
             name: string;
+            status: string;
+            createdAt: Date;
             description: string | null;
             slug: string;
             icon: string;
@@ -53,13 +53,14 @@ export declare class ProductsController {
         };
     } & {
         id: string;
+        updatedAt: Date;
+        name: string;
         uuid: string;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
-        desc: string | null;
-        name: string;
         bulkDiscountPercent: number;
+        desc: string | null;
+        tags: string[];
         kannadaName: string | null;
         categoryId: string;
         retailUnit: string;
@@ -70,17 +71,16 @@ export declare class ProductsController {
         shelfLife: string | null;
         image: string;
         badge: string | null;
-        tags: string[];
         gstPercent: number;
         inStock: boolean;
     }>;
     create(body: CreateProductDto): Promise<{
         category: {
             id: string;
-            status: string;
-            createdAt: Date;
             updatedAt: Date;
             name: string;
+            status: string;
+            createdAt: Date;
             description: string | null;
             slug: string;
             icon: string;
@@ -88,13 +88,14 @@ export declare class ProductsController {
         };
     } & {
         id: string;
+        updatedAt: Date;
+        name: string;
         uuid: string;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
-        desc: string | null;
-        name: string;
         bulkDiscountPercent: number;
+        desc: string | null;
+        tags: string[];
         kannadaName: string | null;
         categoryId: string;
         retailUnit: string;
@@ -105,17 +106,16 @@ export declare class ProductsController {
         shelfLife: string | null;
         image: string;
         badge: string | null;
-        tags: string[];
         gstPercent: number;
         inStock: boolean;
     }>;
     updateWithParam(id: string, body: UpdateProductDto): Promise<{
         category: {
             id: string;
-            status: string;
-            createdAt: Date;
             updatedAt: Date;
             name: string;
+            status: string;
+            createdAt: Date;
             description: string | null;
             slug: string;
             icon: string;
@@ -123,13 +123,14 @@ export declare class ProductsController {
         };
     } & {
         id: string;
+        updatedAt: Date;
+        name: string;
         uuid: string;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
-        desc: string | null;
-        name: string;
         bulkDiscountPercent: number;
+        desc: string | null;
+        tags: string[];
         kannadaName: string | null;
         categoryId: string;
         retailUnit: string;
@@ -140,17 +141,16 @@ export declare class ProductsController {
         shelfLife: string | null;
         image: string;
         badge: string | null;
-        tags: string[];
         gstPercent: number;
         inStock: boolean;
     }>;
     update(body: UpdateProductDto): Promise<{
         category: {
             id: string;
-            status: string;
-            createdAt: Date;
             updatedAt: Date;
             name: string;
+            status: string;
+            createdAt: Date;
             description: string | null;
             slug: string;
             icon: string;
@@ -158,13 +158,14 @@ export declare class ProductsController {
         };
     } & {
         id: string;
+        updatedAt: Date;
+        name: string;
         uuid: string;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
-        desc: string | null;
-        name: string;
         bulkDiscountPercent: number;
+        desc: string | null;
+        tags: string[];
         kannadaName: string | null;
         categoryId: string;
         retailUnit: string;
@@ -175,19 +176,19 @@ export declare class ProductsController {
         shelfLife: string | null;
         image: string;
         badge: string | null;
-        tags: string[];
         gstPercent: number;
         inStock: boolean;
     }>;
     delete(id: string): Promise<{
         id: string;
+        updatedAt: Date;
+        name: string;
         uuid: string;
         status: string;
         createdAt: Date;
-        updatedAt: Date;
-        desc: string | null;
-        name: string;
         bulkDiscountPercent: number;
+        desc: string | null;
+        tags: string[];
         kannadaName: string | null;
         categoryId: string;
         retailUnit: string;
@@ -198,7 +199,6 @@ export declare class ProductsController {
         shelfLife: string | null;
         image: string;
         badge: string | null;
-        tags: string[];
         gstPercent: number;
         inStock: boolean;
     }>;

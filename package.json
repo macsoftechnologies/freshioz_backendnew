@@ -13,7 +13,7 @@
     "db:seed": "node prisma/seed.js",
     "db:export-master": "node scripts/export-master-data.js",
     "db:sync-master": "node scripts/import-master-data.js",
-    "clean-db": "node prisma/clean-db.js",
+    "clean-db": "node prisma/clean-operational-data.js",
     "reset-admin": "node scripts/reset-admin-password.js"
   },
   "dependencies": {

@@ -54,10 +54,14 @@ let InventoryService = class InventoryService {
         }));
     }
     async adjustStock(dto) {
+        const wh = await this.prisma.warehouse.findFirst({
+            where: { OR: [{ id: dto.warehouseId }, { code: dto.warehouseId }, { uuid: dto.warehouseId }] }
+        });
+        const effectiveWarehouseId = wh ? wh.id : dto.warehouseId;
         const existing = await this.prisma.warehouseInventory.findUnique({
             where: {
                 warehouseId_productId: {
-                    warehouseId: dto.warehouseId,
+                    warehouseId: effectiveWarehouseId,
                     productId: dto.productId,
                 },
             },
@@ -74,7 +78,7 @@ let InventoryService = class InventoryService {
         const updated = await this.prisma.warehouseInventory.upsert({
             where: {
                 warehouseId_productId: {
-                    warehouseId: dto.warehouseId,
+                    warehouseId: effectiveWarehouseId,
                     productId: dto.productId,
                 },
             },
@@ -82,7 +86,7 @@ let InventoryService = class InventoryService {
                 currentQty: newQty,
             },
             create: {
-                warehouseId: dto.warehouseId,
+                warehouseId: effectiveWarehouseId,
                 productId: dto.productId,
                 currentQty: newQty,
                 reservedQty: 0,

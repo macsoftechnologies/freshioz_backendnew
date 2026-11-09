@@ -47,8 +47,16 @@ export class OrdersController {
     const isSuperAdmin = user?.roles?.includes('SUPER_ADMIN') || user?.role === 'SUPER_ADMIN';
     const isDeliveryExecutive = user?.roles?.includes('DELIVERY_EXECUTIVE') || user?.role === 'DELIVERY_EXECUTIVE';
 
-    if (isDeliveryExecutive) {
-      return this.ordersService.findAll({ status, societyId, phone, warehouseId: warehouseId || undefined, deliveryPartnerId: user?.id, deliveryPartnerPhone: user?.phone });
+    if (isDeliveryExecutive && !isSuperAdmin) {
+      return this.ordersService.findAll({
+        status,
+        societyId,
+        phone,
+        warehouseId: warehouseId || undefined,
+        deliveryPartnerId: user?.id,
+        deliveryPartnerPhone: user?.phone,
+        deliveryPartnerName: user?.name
+      });
     }
 
     // 4. Warehouse & Hub Staff: scope to assigned warehouse if configured

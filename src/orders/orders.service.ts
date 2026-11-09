@@ -8,13 +8,13 @@ import { toISTFullString } from '../common/date-utils';
 export class OrdersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(query?: { status?: string; societyId?: string; phone?: string; warehouseId?: string; deliveryPartnerId?: string; deliveryPartnerPhone?: string }) {
+  async findAll(query?: { status?: string; societyId?: string; phone?: string; warehouseId?: string; deliveryPartnerId?: string; deliveryPartnerPhone?: string; deliveryPartnerName?: string }) {
     const where: any = {};
     const andClauses: any[] = [];
 
     if (query?.status) where.status = query.status;
     if (query?.societyId) where.societyId = query.societyId;
-    if (query?.deliveryPartnerId || query?.deliveryPartnerPhone) {
+    if (query?.deliveryPartnerId || query?.deliveryPartnerPhone || query?.deliveryPartnerName) {
       const cleanRiderPhone = query.deliveryPartnerPhone ? query.deliveryPartnerPhone.replace(/\D/g, '').slice(-10) : '';
       const riderOr: any[] = [];
       if (query.deliveryPartnerId) {
@@ -23,11 +23,13 @@ export class OrdersService {
       if (cleanRiderPhone) {
         riderOr.push({ deliveryPartnerPhone: { contains: cleanRiderPhone } });
       }
-      // Also include active dispatched orders waiting for rider pickup
-      riderOr.push({ status: 'OUT_FOR_DELIVERY' });
-      riderOr.push({ status: 'PACKED' });
+      if (query.deliveryPartnerName) {
+        riderOr.push({ deliveryPartnerName: query.deliveryPartnerName });
+      }
 
-      andClauses.push({ OR: riderOr });
+      if (riderOr.length > 0) {
+        andClauses.push({ OR: riderOr });
+      }
     }
     if (query?.warehouseId && query.warehouseId !== 'ALL') {
       const wh = await this.prisma.warehouse.findFirst({

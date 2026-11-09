@@ -11,6 +11,7 @@ export declare class OrdersService {
         warehouseId?: string;
         deliveryPartnerId?: string;
         deliveryPartnerPhone?: string;
+        deliveryPartnerName?: string;
     }): Promise<{
         orderPlacedAtFormatted: string;
         createdAtFormatted: string;

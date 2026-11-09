@@ -24,7 +24,7 @@ let OrdersService = class OrdersService {
             where.status = query.status;
         if (query?.societyId)
             where.societyId = query.societyId;
-        if (query?.deliveryPartnerId || query?.deliveryPartnerPhone) {
+        if (query?.deliveryPartnerId || query?.deliveryPartnerPhone || query?.deliveryPartnerName) {
             const cleanRiderPhone = query.deliveryPartnerPhone ? query.deliveryPartnerPhone.replace(/\D/g, '').slice(-10) : '';
             const riderOr = [];
             if (query.deliveryPartnerId) {
@@ -33,9 +33,12 @@ let OrdersService = class OrdersService {
             if (cleanRiderPhone) {
                 riderOr.push({ deliveryPartnerPhone: { contains: cleanRiderPhone } });
             }
-            riderOr.push({ status: 'OUT_FOR_DELIVERY' });
-            riderOr.push({ status: 'PACKED' });
-            andClauses.push({ OR: riderOr });
+            if (query.deliveryPartnerName) {
+                riderOr.push({ deliveryPartnerName: query.deliveryPartnerName });
+            }
+            if (riderOr.length > 0) {
+                andClauses.push({ OR: riderOr });
+            }
         }
         if (query?.warehouseId && query.warehouseId !== 'ALL') {
             const wh = await this.prisma.warehouse.findFirst({

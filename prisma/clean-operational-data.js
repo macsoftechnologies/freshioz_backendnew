@@ -23,7 +23,9 @@ async function cleanOperationalData() {
     'society_payouts',
     'procurement_bills',
     'inbound_leads',
-    'users'
+    'users',
+    'societies',
+    'warehouse_inventory'
   ];
 
   for (const table of tables) {
@@ -86,30 +88,15 @@ async function cleanOperationalData() {
     console.log('✓ Cleaned InboundLeads');
   } catch (e) {}
 
-  // 2. Reset Warehouse Inventory with fresh available stock for all products
-  console.log('\n📦 Resetting Warehouse Inventory to pristine stock...');
+  try {
+    await prisma.society.deleteMany({});
+    console.log('✓ Cleaned Apartment Societies');
+  } catch (e) {}
+
   try {
     await prisma.warehouseInventory.deleteMany({});
-    const warehouses = await prisma.warehouse.findMany();
-    const products = await prisma.product.findMany();
-
-    for (const wh of warehouses) {
-      for (const prod of products) {
-        await prisma.warehouseInventory.create({
-          data: {
-            warehouseId: wh.id,
-            productId: prod.id,
-            currentQty: 100, // 100 units/kg in stock ready for new orders
-            reservedQty: 0,
-            unit: prod.retailUnit || 'kg'
-          }
-        });
-      }
-      console.log(`✓ Initialized 100 units/kg fresh inventory for Warehouse: ${wh.name} (${wh.id})`);
-    }
-  } catch (err) {
-    console.error('Inventory init error:', err?.message);
-  }
+    console.log('✓ Cleaned Warehouse Inventory');
+  } catch (e) {}
 
   // 3. Verify counts
   console.log('\n====================================================');
@@ -133,13 +120,13 @@ async function cleanOperationalData() {
   console.log(`Master Units:              ${unitCount} (Preserved)`);
   console.log(`Master Categories:         ${catCount} (Preserved)`);
   console.log(`Hub Warehouses:            ${whCount} (Preserved)`);
-  console.log(`Apartment Societies:       ${socCount} (Preserved)`);
-  console.log(`Warehouse Inventory Rows:  ${invCount} (Reset with 100 units each)`);
+  console.log(`Apartment Societies:       ${socCount} (CLEAN SLATE: 0)`);
+  console.log(`Warehouse Inventory Rows:  ${invCount} (CLEAN SLATE: 0)`);
   console.log(`Orders:                    ${orderCount} (CLEAN SLATE: 0)`);
   console.log(`Driver Payouts:            ${payoutCount} (CLEAN SLATE: 0)`);
   console.log(`Customer Accounts:         ${userCount} (CLEAN SLATE: 0)`);
   console.log('====================================================');
-  console.log('🎉 Database is completely clean and ready for fresh end-to-end testing!');
+  console.log('🎉 Requested entities wiped! Clean slate ready.');
   console.log('====================================================');
 
   await prisma.$disconnect();
@@ -151,3 +138,4 @@ cleanOperationalData().catch(async (e) => {
   await prisma.$disconnect();
   process.exit(1);
 });
+

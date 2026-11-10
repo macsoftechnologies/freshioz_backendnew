@@ -551,13 +551,34 @@ export class PaymentsService {
 
     const where: any = {};
     if (isDeliveryExecutive && !isSuperAdmin) {
-      // Driver can ONLY see their own payouts
+      // Driver can ONLY see their own payouts (supports ID, UUID, Phone, Case-Insensitive Name, and Username matching)
       const riderPhoneClean = (user?.phone || '').replace(/\D/g, '').slice(-10);
       const riderOr: any[] = [];
       if (user?.id) riderOr.push({ driverId: user.id });
+      if (user?.uuid) riderOr.push({ driverId: user.uuid });
       if (riderPhoneClean) riderOr.push({ driverPhone: { contains: riderPhoneClean } });
-      if (user?.name) riderOr.push({ driverName: user.name });
-      where.OR = riderOr;
+      if (user?.name) {
+        riderOr.push({ driverName: { equals: user.name.trim(), mode: 'insensitive' } });
+        riderOr.push({ driverName: { contains: user.name.trim(), mode: 'insensitive' } });
+      }
+      if (user?.email) {
+        const uPrefix = user.email.split('@')[0].trim();
+        if (uPrefix && uPrefix.length >= 3) {
+          riderOr.push({ driverName: { contains: uPrefix, mode: 'insensitive' } });
+          riderOr.push({ driverId: { contains: uPrefix, mode: 'insensitive' } });
+        }
+      }
+      if (query?.driverId) riderOr.push({ driverId: query.driverId });
+      if (query?.driverPhone) {
+        const qp = query.driverPhone.replace(/\D/g, '').slice(-10);
+        if (qp) riderOr.push({ driverPhone: { contains: qp } });
+      }
+      if (query?.driverName) {
+        riderOr.push({ driverName: { contains: query.driverName.trim(), mode: 'insensitive' } });
+      }
+      if (riderOr.length > 0) {
+        where.OR = riderOr;
+      }
     } else {
       if (query?.driverId) where.driverId = query.driverId;
       if (query?.warehouseId && query.warehouseId !== 'ALL') where.warehouseId = query.warehouseId;

@@ -15,7 +15,8 @@
     "db:sync-master": "node scripts/import-master-data.js",
     "clean-db": "node prisma/clean-operational-data.js",
     "clean-prod": "node scripts/clean-for-production.js",
-    "reset-admin": "node scripts/reset-admin-password.js"
+    "reset-admin": "node scripts/reset-admin-password.js",
+    "seed-societies": "node scripts/seed-vizag-societies.js"
   },
   "dependencies": {
     "@nestjs/common": "^12.1.3",

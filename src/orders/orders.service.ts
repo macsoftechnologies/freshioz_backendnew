@@ -556,10 +556,14 @@ export class OrdersService {
       }
 
       if (existing.status === 'CANCELLED') {
-        throw new BadRequestException('Cannot update status of an order that has already been cancelled.');
+        const isAuditUpdate = Boolean(dto.cancelledReason && !dto.status);
+        if (!isAuditUpdate) {
+          throw new BadRequestException('Cannot update status of an order that has already been cancelled.');
+        }
       }
 
       const updateData: any = {};
+      if (dto.cancelledReason) updateData.cancelledReason = dto.cancelledReason;
       if (dto.status) updateData.status = dto.status;
       if (dto.paymentStatus) updateData.paymentStatus = dto.paymentStatus;
       if (dto.codCollectedAmount !== undefined) updateData.codCollectedAmount = dto.codCollectedAmount;

@@ -7,15 +7,16 @@ async function cleanOperationalData() {
   console.log('PRESERVING STRICTLY:');
   console.log('  ✓ Employees (Staff & Delivery Executives)');
   console.log('  ✓ Products (Produce Catalog)');
-  console.log('  ✓ Users (Customer Accounts)');
-  console.log('  ✓ Categories');
-  console.log('  ✓ Units');
+  console.log('  ✓ Master Units');
+  console.log('  ✓ Master Categories');
+  console.log('  ✓ Hub Warehouses');
   console.log('CLEANING EVERYTHING ELSE:');
   console.log('  • Orders & Items');
-  console.log('  • Warehouses & Inventories');
+  console.log('  • Warehouse Inventory (Reset stock to 0)');
   console.log('  • Societies & Payouts');
   console.log('  • Mandi Vendors & Bills');
   console.log('  • Pricing Histories & Ledgers');
+  console.log('  • Customer Accounts & Discounts');
   console.log('====================================================\n');
 
   // 1. Dissociate users from societies before wiping societies
@@ -40,8 +41,8 @@ async function cleanOperationalData() {
     'warehouse_inventory',
     'daily_price_histories',
     'vendors',
-    'societies',
-    'warehouses'
+    'users',
+    'societies'
   ];
 
   for (const table of tables) {
@@ -67,7 +68,7 @@ async function cleanOperationalData() {
   try { await prisma.dailyPriceHistory.deleteMany({}); } catch (e) {}
   try { await prisma.vendor.deleteMany({}); } catch (e) {}
   try { await prisma.society.deleteMany({}); } catch (e) {}
-  try { await prisma.warehouse.deleteMany({}); } catch (e) {}
+  try { await prisma.user.deleteMany({}); } catch (e) {}
 
   // 3. Verify counts
   console.log('\n====================================================');
@@ -88,10 +89,10 @@ async function cleanOperationalData() {
 
   console.log(`Employees (Staff):         ${empCount} (Preserved)`);
   console.log(`Produce Items:             ${prodCount} (Preserved)`);
-  console.log(`Customer Accounts:         ${userCount} (Preserved)`);
   console.log(`Master Units:              ${unitCount} (Preserved)`);
   console.log(`Master Categories:         ${catCount} (Preserved)`);
-  console.log(`Hub Warehouses:            ${whCount} (CLEAN SLATE: 0)`);
+  console.log(`Hub Warehouses:            ${whCount} (Preserved)`);
+  console.log(`Customer Accounts:         ${userCount} (CLEAN SLATE: 0)`);
   console.log(`Apartment Societies:       ${socCount} (CLEAN SLATE: 0)`);
   console.log(`Warehouse Inventory Rows:  ${invCount} (CLEAN SLATE: 0)`);
   console.log(`Orders:                    ${orderCount} (CLEAN SLATE: 0)`);

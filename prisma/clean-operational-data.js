@@ -27,34 +27,56 @@ async function cleanOperationalData() {
     console.warn('  User disassociation warning:', e.message);
   }
 
-  // 2. Truncate / Delete Transactional & Order tables
-  const tables = [
-    'reviews',
-    'order_items',
-    'fresh_coins_ledgers',
-    'customer_discounts',
-    'orders',
-    'driver_payouts',
-    'society_payouts',
-    'procurement_bills',
-    'inbound_leads',
-    'warehouse_inventory',
-    'daily_price_histories',
-    'vendors',
-    'users',
-    'societies'
-  ];
+  // 2. Truncate / Delete Transactional & Order tables in one CASCADE statement
+  try {
+    await prisma.$executeRawUnsafe(`
+      TRUNCATE TABLE 
+        "order_items", 
+        "orders", 
+        "reviews", 
+        "fresh_coins_ledgers", 
+        "customer_discounts", 
+        "driver_payouts", 
+        "society_payouts", 
+        "procurement_bills", 
+        "inbound_leads", 
+        "warehouse_inventory", 
+        "daily_price_history", 
+        "vendors", 
+        "users", 
+        "societies" 
+      CASCADE;
+    `);
+    console.log('✓ Successfully truncated all operational test tables with CASCADE');
+  } catch (err) {
+    console.warn('Single statement CASCADE truncate failed, trying table-by-table fallback:', err.message);
+    const tables = [
+      'reviews',
+      'order_items',
+      'fresh_coins_ledgers',
+      'customer_discounts',
+      'orders',
+      'driver_payouts',
+      'society_payouts',
+      'procurement_bills',
+      'inbound_leads',
+      'warehouse_inventory',
+      'daily_price_history',
+      'daily_price_histories',
+      'vendors',
+      'users',
+      'societies'
+    ];
 
-  for (const table of tables) {
-    try {
-      await prisma.$executeRawUnsafe(`TRUNCATE TABLE "${table}" CASCADE;`);
-      console.log(`✓ Truncated: "${table}"`);
-    } catch (err) {
-      // Fallback to Prisma deleteMany if table or constraint differs
+    for (const table of tables) {
+      try {
+        await prisma.$executeRawUnsafe(`TRUNCATE TABLE "${table}" CASCADE;`);
+        console.log(`✓ Truncated: "${table}"`);
+      } catch (e) {}
     }
   }
 
-  // Sequential delete fallback
+  // Sequential delete fallback with Prisma ORM
   try { await prisma.review.deleteMany({}); } catch (e) {}
   try { await prisma.orderItem.deleteMany({}); } catch (e) {}
   try { await prisma.freshCoinsLedger.deleteMany({}); } catch (e) {}

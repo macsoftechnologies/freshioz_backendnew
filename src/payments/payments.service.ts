@@ -17,7 +17,7 @@ export class PaymentsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly ordersService: OrdersService,
-  ) {}
+  ) { }
 
   /**
    * Ensure default settings record exists in database
@@ -253,8 +253,8 @@ export class PaymentsService {
       key_secret: keySecret,
     });
 
-    const amountToRefund = refundAmountInRupees !== undefined 
-      ? Math.round(Number(refundAmountInRupees) * 100) 
+    const amountToRefund = refundAmountInRupees !== undefined
+      ? Math.round(Number(refundAmountInRupees) * 100)
       : Math.round(Number(order.totalAmount || 0) * 100);
 
     if (amountToRefund <= 0) {
@@ -266,7 +266,7 @@ export class PaymentsService {
 
       const refund = await razorpay.payments.refund(paymentId, {
         amount: amountToRefund,
-        speed: 'optimum',
+        speed: 'normal',
         notes: {
           orderId: order.id,
           reason: reason || 'Order Cancellation Refund',
@@ -281,8 +281,8 @@ export class PaymentsService {
         where: { id: orderId },
         data: {
           paymentStatus: 'REFUNDED',
-          cancelledReason: order.cancelledReason 
-            ? `${order.cancelledReason} [REFUND_ID:${refund.id}]` 
+          cancelledReason: order.cancelledReason
+            ? `${order.cancelledReason} [REFUND_ID:${refund.id}]`
             : `Refunded via Razorpay (${refund.id})`,
         },
       });

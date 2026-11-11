@@ -199,7 +199,7 @@ let PaymentsService = PaymentsService_1 = class PaymentsService {
             this.logger.log(`Initiating Razorpay refund of ₹${amountToRefund / 100} for Payment ${paymentId} (Order #${orderId})`);
             const refund = await razorpay.payments.refund(paymentId, {
                 amount: amountToRefund,
-                speed: 'optimum',
+                speed: 'normal',
                 notes: {
                     orderId: order.id,
                     reason: reason || 'Order Cancellation Refund',

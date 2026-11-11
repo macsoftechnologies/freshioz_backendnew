@@ -6,7 +6,7 @@ import { toISTFullString } from '../common/date-utils';
 
 @Injectable()
 export class OrdersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async findAll(query?: { status?: string; societyId?: string; phone?: string; warehouseId?: string; deliveryPartnerId?: string; deliveryPartnerPhone?: string; deliveryPartnerName?: string }) {
     const where: any = {};
@@ -287,7 +287,7 @@ export class OrdersService {
       let deliverySetting: any = null;
       try {
         deliverySetting = await tx.deliverySetting.findUnique({ where: { id: 'DELIVERY_CONFIG' } });
-      } catch (e) {}
+      } catch (e) { }
 
       const baseFee = deliverySetting ? deliverySetting.baseFee : 25;
       const freeThreshold = deliverySetting ? deliverySetting.freeDeliveryThreshold : 299;
@@ -820,7 +820,7 @@ export class OrdersService {
                   ? `${result.cancelledReason} [REFUND_ID:${refund.id}]`
                   : `Refunded via Razorpay (${refund.id})`,
               },
-            }).catch(() => {});
+            }).catch(() => { });
           }
         }).catch((err) => {
           console.error('Auto Razorpay refund background error:', err);
@@ -840,7 +840,7 @@ export class OrdersService {
                   ? `${result.cancelledReason} [REFUND_ID:${refund.id}]`
                   : `Partial Refund via Razorpay (${refund.id})`,
               },
-            }).catch(() => {});
+            }).catch(() => { });
           }
         }).catch((err) => {
           console.error('Auto Razorpay partial refund background error:', err);
@@ -1003,7 +1003,7 @@ export class OrdersService {
                   ? `${result.cancelledReason} [REFUND_ID:${refund.id}]`
                   : `Refunded via Razorpay (${refund.id})`,
               },
-            }).catch(() => {});
+            }).catch(() => { });
           }
         }).catch((err) => {
           console.error('Auto Razorpay refund background error:', err);
@@ -1044,7 +1044,7 @@ export class OrdersService {
 
       const refund = await rzp.payments.refund(paymentId.trim(), {
         amount: amountInPaise,
-        speed: 'optimum',
+        speed: 'normal',
         notes: {
           orderId,
           reason: reason || 'Customer Order Cancellation',

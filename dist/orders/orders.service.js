@@ -899,7 +899,7 @@ let OrdersService = class OrdersService {
             const amountInPaise = Math.round(Number(amountInRupees) * 100);
             const refund = await rzp.payments.refund(paymentId.trim(), {
                 amount: amountInPaise,
-                speed: 'optimum',
+                speed: 'normal',
                 notes: {
                     orderId,
                     reason: reason || 'Customer Order Cancellation',

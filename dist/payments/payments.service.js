@@ -252,36 +252,69 @@ let PaymentsService = PaymentsService_1 = class PaymentsService {
                     key_id: keyId.trim(),
                     key_secret: keySecret.trim(),
                 });
-                const rzpQr = await razorpay.qrCode.create({
-                    type: 'upi_qr',
-                    name: `Freshioz #${order.id.slice(-6).toUpperCase()}`,
-                    usage: 'single_use',
-                    fixed_amount: true,
-                    payment_amount: amountInPaise,
-                    description: `Fresh Produce Order #${order.id}`,
-                    notes: {
-                        orderId: order.id,
-                        societyName: order.society?.name || 'Freshioz Society',
-                        flatNo: order.flatNo || '',
-                    },
-                });
-                if (rzpQr && (rzpQr.image_url || rzpQr.id)) {
-                    qrId = rzpQr.id;
-                    imageUrl = rzpQr.image_url || null;
-                    paymentUrl = rzpQr.payment_url || null;
-                    gatewaySource = 'RAZORPAY_DYNAMIC_QR';
+                const cleanPhone = (order.userPhone || '').replace(/\D/g, '').slice(-10);
+                const validPhone = cleanPhone.length === 10 ? `+91${cleanPhone}` : undefined;
+                try {
+                    const paymentLink = await razorpay.paymentLink.create({
+                        amount: amountInPaise,
+                        currency: 'INR',
+                        accept_partial: false,
+                        description: `Freshioz Produce Order #${order.id}`,
+                        customer: {
+                            name: order.userName || 'Resident',
+                            contact: validPhone,
+                        },
+                        notify: {
+                            sms: false,
+                            email: false,
+                        },
+                        reminder_enable: false,
+                        notes: {
+                            orderId: order.id,
+                            societyName: order.society?.name || 'Freshioz Society',
+                            flatNo: order.flatNo || '',
+                            doorstepPayment: 'true',
+                        },
+                    });
+                    if (paymentLink && paymentLink.short_url) {
+                        qrId = paymentLink.id;
+                        paymentUrl = paymentLink.short_url;
+                        imageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=280x280&margin=10&data=${encodeURIComponent(paymentLink.short_url)}`;
+                        gatewaySource = 'RAZORPAY_DYNAMIC_LINK';
+                    }
+                }
+                catch (linkErr) {
+                    this.logger.warn(`Razorpay paymentLink attempt failed, trying qrCode: ${linkErr?.message || linkErr}`);
+                    const rzpQr = await razorpay.qrCode.create({
+                        type: 'upi_qr',
+                        name: `Freshioz #${order.id.slice(-6).toUpperCase()}`,
+                        usage: 'single_use',
+                        fixed_amount: true,
+                        payment_amount: amountInPaise,
+                        description: `Fresh Produce Order #${order.id}`,
+                        notes: {
+                            orderId: order.id,
+                            societyName: order.society?.name || 'Freshioz Society',
+                            flatNo: order.flatNo || '',
+                        },
+                    });
+                    if (rzpQr && (rzpQr.image_url || rzpQr.id)) {
+                        qrId = rzpQr.id;
+                        imageUrl = rzpQr.image_url || null;
+                        paymentUrl = rzpQr.payment_url || null;
+                        gatewaySource = 'RAZORPAY_DYNAMIC_QR';
+                    }
                 }
             }
         }
         catch (err) {
-            this.logger.warn(`Razorpay QR Code API attempt failed, falling back to direct NPCI UPI QR: ${err?.message || err}`);
+            this.logger.warn(`Razorpay dynamic QR creation failed: ${err?.message || err}`);
         }
-        const upiId = 'freshioz@icici';
         const payeeName = 'Freshioz Produce';
         const transactionNote = `Freshioz Order ${order.id.slice(-6).toUpperCase()}`;
-        const standardUpiString = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(payeeName)}&am=${amountInRupees}&cu=INR&tn=${encodeURIComponent(transactionNote)}`;
+        const standardUpiString = `upi://pay?pn=${encodeURIComponent(payeeName)}&am=${amountInRupees}&cu=INR&tn=${encodeURIComponent(transactionNote)}`;
         if (!imageUrl) {
-            imageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=280x280&margin=10&data=${encodeURIComponent(standardUpiString)}`;
+            imageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=280x280&margin=10&data=${encodeURIComponent(paymentUrl || standardUpiString)}`;
         }
         return {
             orderId: order.id,
@@ -292,6 +325,7 @@ let PaymentsService = PaymentsService_1 = class PaymentsService {
             paymentUrl: paymentUrl || standardUpiString,
             upiString: standardUpiString,
             gatewaySource,
+            payeeInfo: gatewaySource.startsWith('RAZORPAY') ? 'Razorpay Auto-Settlement • Any UPI App' : 'Scan with Any UPI App',
             societyName: order.society?.name || 'Society Drop Desk',
             flatNo: order.flatNo || '',
             paymentStatus: order.paymentStatus,
@@ -317,12 +351,13 @@ let PaymentsService = PaymentsService_1 = class PaymentsService {
             }
         }
         const event = body?.event;
-        if (event === 'payment.captured' || event === 'order.paid' || event === 'qr_code.credited') {
+        if (event === 'payment.captured' || event === 'order.paid' || event === 'qr_code.credited' || event === 'payment_link.paid') {
             const payment = body?.payload?.payment?.entity;
             const qrEntity = body?.payload?.qr_code?.entity;
+            const linkEntity = body?.payload?.payment_link?.entity;
             const rzpOrderId = payment?.order_id;
             const rzpPaymentId = payment?.id;
-            const targetOrderId = payment?.notes?.orderId || qrEntity?.notes?.orderId;
+            const targetOrderId = payment?.notes?.orderId || qrEntity?.notes?.orderId || linkEntity?.notes?.orderId;
             if (targetOrderId) {
                 const existingOrder = await this.prisma.order.findUnique({
                     where: { id: targetOrderId },

@@ -81,6 +81,11 @@ export class UpdateOrderStatusDto {
   @IsOptional()
   @IsString()
   dispatchedBy?: string;
+
+  @ApiPropertyOptional({ example: 85.5 })
+  @IsOptional()
+  @IsNumber()
+  refundAmount?: number;
 }
 
 

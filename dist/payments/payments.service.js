@@ -173,6 +173,61 @@ let PaymentsService = PaymentsService_1 = class PaymentsService {
         };
         return this.ordersService.create(enrichedPayload);
     }
+    async processOrderRefund(orderId, refundAmountInRupees, reason) {
+        const order = await this.prisma.order.findUnique({
+            where: { id: orderId },
+        });
+        if (!order) {
+            throw new common_1.NotFoundException(`Order #${orderId} not found`);
+        }
+        const paymentId = order.razorpayPaymentId;
+        if (!paymentId) {
+            throw new common_1.BadRequestException(`Order #${orderId} has no linked Razorpay Payment ID. Cannot refund via gateway.`);
+        }
+        const { keyId, keySecret } = await this.getActiveCredentials();
+        const razorpay = new Razorpay({
+            key_id: keyId,
+            key_secret: keySecret,
+        });
+        const amountToRefund = refundAmountInRupees !== undefined
+            ? Math.round(Number(refundAmountInRupees) * 100)
+            : Math.round(Number(order.totalAmount || 0) * 100);
+        if (amountToRefund <= 0) {
+            throw new common_1.BadRequestException('Refund amount must be greater than zero.');
+        }
+        try {
+            this.logger.log(`Initiating Razorpay refund of ₹${amountToRefund / 100} for Payment ${paymentId} (Order #${orderId})`);
+            const refund = await razorpay.payments.refund(paymentId, {
+                amount: amountToRefund,
+                speed: 'optimum',
+                notes: {
+                    orderId: order.id,
+                    reason: reason || 'Order Cancellation Refund',
+                    refundedAt: new Date().toISOString(),
+                },
+            });
+            this.logger.log(`Razorpay refund successful! Refund ID: ${refund.id}`);
+            await this.prisma.order.update({
+                where: { id: orderId },
+                data: {
+                    paymentStatus: 'REFUNDED',
+                    cancelledReason: order.cancelledReason
+                        ? `${order.cancelledReason} [REFUND_ID:${refund.id}]`
+                        : `Refunded via Razorpay (${refund.id})`,
+                },
+            });
+            return {
+                success: true,
+                refundId: refund.id,
+                amount: amountToRefund / 100,
+                status: refund.status,
+            };
+        }
+        catch (err) {
+            this.logger.error(`Razorpay refund failed for Order #${orderId}: ${err?.error?.description || err?.message || err}`);
+            throw new common_1.BadRequestException(err?.error?.description || err?.message || 'Razorpay gateway refund failed.');
+        }
+    }
     async createOrderDynamicQr(orderId) {
         const order = await this.prisma.order.findUnique({
             where: { id: orderId },
@@ -435,11 +490,34 @@ let PaymentsService = PaymentsService_1 = class PaymentsService {
             const riderOr = [];
             if (user?.id)
                 riderOr.push({ driverId: user.id });
+            if (user?.uuid)
+                riderOr.push({ driverId: user.uuid });
             if (riderPhoneClean)
                 riderOr.push({ driverPhone: { contains: riderPhoneClean } });
-            if (user?.name)
-                riderOr.push({ driverName: user.name });
-            where.OR = riderOr;
+            if (user?.name) {
+                riderOr.push({ driverName: { equals: user.name.trim(), mode: 'insensitive' } });
+                riderOr.push({ driverName: { contains: user.name.trim(), mode: 'insensitive' } });
+            }
+            if (user?.email) {
+                const uPrefix = user.email.split('@')[0].trim();
+                if (uPrefix && uPrefix.length >= 3) {
+                    riderOr.push({ driverName: { contains: uPrefix, mode: 'insensitive' } });
+                    riderOr.push({ driverId: { contains: uPrefix, mode: 'insensitive' } });
+                }
+            }
+            if (query?.driverId)
+                riderOr.push({ driverId: query.driverId });
+            if (query?.driverPhone) {
+                const qp = query.driverPhone.replace(/\D/g, '').slice(-10);
+                if (qp)
+                    riderOr.push({ driverPhone: { contains: qp } });
+            }
+            if (query?.driverName) {
+                riderOr.push({ driverName: { contains: query.driverName.trim(), mode: 'insensitive' } });
+            }
+            if (riderOr.length > 0) {
+                where.OR = riderOr;
+            }
         }
         else {
             if (query?.driverId)

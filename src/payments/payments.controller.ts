@@ -125,6 +125,18 @@ export class PaymentsController {
     return this.paymentsService.createOrderDynamicQr(id);
   }
 
+  @ApiBearerAuth('JWT-auth')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN', 'WAREHOUSE_MANAGER')
+  @Post('orders/:id/refund')
+  @ApiOperation({ summary: 'Initiate Razorpay gateway refund for an online paid order (Admin / Manager)' })
+  async refundOrder(
+    @Param('id') id: string,
+    @Body() body?: { amount?: number; reason?: string },
+  ) {
+    return this.paymentsService.processOrderRefund(id, body?.amount, body?.reason);
+  }
+
   // ==========================================
   // DRIVER / DELIVERY PARTNER PAYOUTS
   // ==========================================

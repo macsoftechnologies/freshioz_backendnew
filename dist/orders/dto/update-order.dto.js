@@ -111,4 +111,10 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateOrderStatusDto.prototype, "dispatchedBy", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 85.5 }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], UpdateOrderStatusDto.prototype, "refundAmount", void 0);
 //# sourceMappingURL=update-order.dto.js.map

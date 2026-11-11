@@ -166,6 +166,12 @@ export declare class PaymentsService {
         createdAt: Date;
         updatedAt: Date;
     }>;
+    processOrderRefund(orderId: string, refundAmountInRupees?: number, reason?: string): Promise<{
+        success: boolean;
+        refundId: any;
+        amount: number;
+        status: any;
+    }>;
     createOrderDynamicQr(orderId: string): Promise<{
         orderId: string;
         amount: number;

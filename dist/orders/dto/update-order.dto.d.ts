@@ -15,4 +15,5 @@ export declare class UpdateOrderStatusDto {
     deliveryPartnerPhone?: string;
     vehicleNumber?: string;
     dispatchedBy?: string;
+    refundAmount?: number;
 }

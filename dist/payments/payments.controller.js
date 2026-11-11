@@ -65,6 +65,9 @@ let PaymentsController = class PaymentsController {
     async getOrderDynamicQr(id) {
         return this.paymentsService.createOrderDynamicQr(id);
     }
+    async refundOrder(id, body) {
+        return this.paymentsService.processOrderRefund(id, body?.amount, body?.reason);
+    }
     async listDriverPayouts(req) {
         return this.paymentsService.listDriverPayouts(req.query, req.user);
     }
@@ -206,6 +209,18 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], PaymentsController.prototype, "getOrderDynamicQr", null);
+__decorate([
+    (0, swagger_1.ApiBearerAuth)('JWT-auth'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('SUPER_ADMIN', 'WAREHOUSE_MANAGER'),
+    (0, common_1.Post)('orders/:id/refund'),
+    (0, swagger_1.ApiOperation)({ summary: 'Initiate Razorpay gateway refund for an online paid order (Admin / Manager)' }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], PaymentsController.prototype, "refundOrder", null);
 __decorate([
     (0, swagger_1.ApiBearerAuth)('JWT-auth'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),

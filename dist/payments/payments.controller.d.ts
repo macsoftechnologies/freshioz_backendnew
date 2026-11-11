@@ -253,6 +253,15 @@ export declare class PaymentsController {
         flatNo: string;
         paymentStatus: string;
     }>;
+    refundOrder(id: string, body?: {
+        amount?: number;
+        reason?: string;
+    }): Promise<{
+        success: boolean;
+        refundId: any;
+        amount: number;
+        status: any;
+    }>;
     listDriverPayouts(req: any): Promise<{
         id: string;
         warehouseId: string | null;

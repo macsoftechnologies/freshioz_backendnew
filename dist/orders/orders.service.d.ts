@@ -543,6 +543,7 @@ export declare class OrdersService {
         createdAt: Date;
         updatedAt: Date;
     }>;
+    triggerGatewayRefund(paymentId: string, amountInRupees: number, orderId: string, reason?: string): Promise<any>;
     settleCod(idOrUuid: string, manager: any): Promise<{
         orderPlacedAtFormatted: string;
         createdAtFormatted: string;

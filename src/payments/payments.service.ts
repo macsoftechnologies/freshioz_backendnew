@@ -231,6 +231,77 @@ export class PaymentsService {
   }
 
   /**
+   * Automated Gateway Refund: Process refund for a paid order via Razorpay API
+   */
+  async processOrderRefund(orderId: string, refundAmountInRupees?: number, reason?: string) {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+    });
+
+    if (!order) {
+      throw new NotFoundException(`Order #${orderId} not found`);
+    }
+
+    const paymentId = order.razorpayPaymentId;
+    if (!paymentId) {
+      throw new BadRequestException(`Order #${orderId} has no linked Razorpay Payment ID. Cannot refund via gateway.`);
+    }
+
+    const { keyId, keySecret } = await this.getActiveCredentials();
+    const razorpay = new Razorpay({
+      key_id: keyId,
+      key_secret: keySecret,
+    });
+
+    const amountToRefund = refundAmountInRupees !== undefined 
+      ? Math.round(Number(refundAmountInRupees) * 100) 
+      : Math.round(Number(order.totalAmount || 0) * 100);
+
+    if (amountToRefund <= 0) {
+      throw new BadRequestException('Refund amount must be greater than zero.');
+    }
+
+    try {
+      this.logger.log(`Initiating Razorpay refund of ₹${amountToRefund / 100} for Payment ${paymentId} (Order #${orderId})`);
+
+      const refund = await razorpay.payments.refund(paymentId, {
+        amount: amountToRefund,
+        speed: 'optimum',
+        notes: {
+          orderId: order.id,
+          reason: reason || 'Order Cancellation Refund',
+          refundedAt: new Date().toISOString(),
+        },
+      });
+
+      this.logger.log(`Razorpay refund successful! Refund ID: ${refund.id}`);
+
+      // Save refund details to order
+      await this.prisma.order.update({
+        where: { id: orderId },
+        data: {
+          paymentStatus: 'REFUNDED',
+          cancelledReason: order.cancelledReason 
+            ? `${order.cancelledReason} [REFUND_ID:${refund.id}]` 
+            : `Refunded via Razorpay (${refund.id})`,
+        },
+      });
+
+      return {
+        success: true,
+        refundId: refund.id,
+        amount: amountToRefund / 100,
+        status: refund.status,
+      };
+    } catch (err: any) {
+      this.logger.error(`Razorpay refund failed for Order #${orderId}: ${err?.error?.description || err?.message || err}`);
+      throw new BadRequestException(
+        err?.error?.description || err?.message || 'Razorpay gateway refund failed.',
+      );
+    }
+  }
+
+  /**
    * Field Delivery: Generate dynamic UPI/Razorpay QR code for doorstep COD collection
    */
   async createOrderDynamicQr(orderId: string) {

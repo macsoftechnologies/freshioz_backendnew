@@ -528,7 +528,7 @@ export class OrdersService {
   }
 
   async updateStatus(idOrUuid: string, dto: UpdateOrderStatusDto) {
-    return this.prisma.$transaction(async (tx) => {
+    const result = await this.prisma.$transaction(async (tx) => {
       const existing = await tx.order.findFirst({
         where: {
           OR: [{ id: idOrUuid }, { uuid: idOrUuid }],
@@ -801,10 +801,58 @@ export class OrdersService {
         createdAtFormatted: toISTFullString(updated.createdAt),
       };
     });
+
+    // Auto-trigger Razorpay Gateway Refund if order was cancelled or partially delivered by staff
+    if (result && result.razorpayPaymentId) {
+      if (result.status === 'CANCELLED' && result.paymentStatus === 'REFUNDED') {
+        const staffReason = dto.reason || dto.cancelledReason || 'Order Cancelled by Hub Lead';
+        this.triggerGatewayRefund(
+          result.razorpayPaymentId,
+          result.totalAmount,
+          result.id,
+          staffReason
+        ).then(async (refund) => {
+          if (refund && refund.id) {
+            await this.prisma.order.update({
+              where: { id: result.id },
+              data: {
+                cancelledReason: result.cancelledReason
+                  ? `${result.cancelledReason} [REFUND_ID:${refund.id}]`
+                  : `Refunded via Razorpay (${refund.id})`,
+              },
+            }).catch(() => {});
+          }
+        }).catch((err) => {
+          console.error('Auto Razorpay refund background error:', err);
+        });
+      } else if (result.status === 'PARTIALLY_DELIVERED' && dto.refundAmount && Number(dto.refundAmount) > 0) {
+        this.triggerGatewayRefund(
+          result.razorpayPaymentId,
+          Number(dto.refundAmount),
+          result.id,
+          'Doorstep Partial Return Refund'
+        ).then(async (refund) => {
+          if (refund && refund.id) {
+            await this.prisma.order.update({
+              where: { id: result.id },
+              data: {
+                cancelledReason: result.cancelledReason
+                  ? `${result.cancelledReason} [REFUND_ID:${refund.id}]`
+                  : `Partial Refund via Razorpay (${refund.id})`,
+              },
+            }).catch(() => {});
+          }
+        }).catch((err) => {
+          console.error('Auto Razorpay partial refund background error:', err);
+        });
+      }
+    }
+
+    return result;
   }
 
   async cancelOrder(idOrUuid: string, user: any, reason?: string) {
-    return this.prisma.$transaction(async (tx) => {
+    const result = await this.prisma.$transaction(async (tx) => {
       const existing = await tx.order.findFirst({
         where: {
           OR: [{ id: idOrUuid }, { uuid: idOrUuid }],
@@ -937,6 +985,79 @@ export class OrdersService {
         createdAtFormatted: toISTFullString(updated.createdAt),
       };
     });
+
+    // Auto-trigger Razorpay Gateway Refund if order was cancelled by customer
+    if (result && result.razorpayPaymentId) {
+      if (result.status === 'CANCELLED' && result.paymentStatus === 'REFUNDED') {
+        this.triggerGatewayRefund(
+          result.razorpayPaymentId,
+          result.totalAmount,
+          result.id,
+          reason || 'Customer Cancelled Order'
+        ).then(async (refund) => {
+          if (refund && refund.id) {
+            await this.prisma.order.update({
+              where: { id: result.id },
+              data: {
+                cancelledReason: result.cancelledReason
+                  ? `${result.cancelledReason} [REFUND_ID:${refund.id}]`
+                  : `Refunded via Razorpay (${refund.id})`,
+              },
+            }).catch(() => {});
+          }
+        }).catch((err) => {
+          console.error('Auto Razorpay refund background error:', err);
+        });
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * Automated Gateway Refund Helper via Razorpay API
+   */
+  async triggerGatewayRefund(paymentId: string, amountInRupees: number, orderId: string, reason?: string) {
+    if (!paymentId || !amountInRupees || amountInRupees <= 0) return null;
+
+    try {
+      const setting = await this.prisma.paymentSetting.findUnique({ where: { id: 'GATEWAY_CONFIG' } });
+      if (!setting || !setting.razorpayEnabled) {
+        return null;
+      }
+
+      const isLive = setting.activeMode === 'LIVE';
+      const keyId = isLive ? setting.liveKeyId : setting.testKeyId;
+      const keySecret = isLive ? setting.liveKeySecret : setting.testKeySecret;
+
+      if (!keyId || !keySecret) {
+        return null;
+      }
+
+      const Razorpay = require('razorpay');
+      const rzp = new Razorpay({
+        key_id: keyId.trim(),
+        key_secret: keySecret.trim(),
+      });
+
+      const amountInPaise = Math.round(Number(amountInRupees) * 100);
+
+      const refund = await rzp.payments.refund(paymentId.trim(), {
+        amount: amountInPaise,
+        speed: 'optimum',
+        notes: {
+          orderId,
+          reason: reason || 'Customer Order Cancellation',
+          triggeredAt: new Date().toISOString(),
+        },
+      });
+
+      console.log(`[RAZORPAY_REFUND_SUCCESS] Order #${orderId} - Refund ID: ${refund?.id} for ₹${amountInRupees}`);
+      return refund;
+    } catch (err: any) {
+      console.error(`[RAZORPAY_REFUND_ERROR] Order #${orderId} - Payment ${paymentId}:`, err?.error?.description || err?.message || err);
+      return null;
+    }
   }
 
   async settleCod(idOrUuid: string, manager: any) {
